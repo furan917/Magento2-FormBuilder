@@ -1,0 +1,73 @@
+<?php
+declare(strict_types=1);
+
+use Furan\FormBuilder\Block\Thread\View;
+use Magento\Framework\Escaper;
+
+/** @var View $block */
+/** @var Escaper $escaper */
+$view = $block->getView();
+?>
+<link rel="stylesheet" href="<?= $escaper->escapeUrl($block->getViewFileUrl('Furan_FormBuilder::css/account.css')) ?>">
+<?php if ($view === null): ?>
+    <div class="ffb-account ffb-account-submission ffb-thread ffb-thread-unavailable">
+        <h2 class="ffb-account-submission-title"><?= $escaper->escapeHtml(__('This link is not available')) ?></h2>
+        <p><?= $escaper->escapeHtml(__('The link may have expired or been replaced by a newer one. Links in our emails work for 30 days. Please use the link in our most recent email, or contact us again.')) ?></p>
+    </div>
+<?php else: ?>
+    <div class="ffb-account ffb-account-submission ffb-thread">
+        <h2 class="ffb-account-submission-title"><?= $escaper->escapeHtml($view['title']) ?></h2>
+        <dl class="ffb-account-submission-meta">
+            <dt><?= $escaper->escapeHtml(__('Submitted')) ?></dt>
+            <dd><?= $escaper->escapeHtml($block->formatDate($view['created_at'], \IntlDateFormatter::MEDIUM, true)) ?></dd>
+            <dt><?= $escaper->escapeHtml(__('Status')) ?></dt>
+            <dd><span class="ffb-account-status ffb-account-status-<?= (int)$view['status'] ?>"><?= $escaper->escapeHtml($view['status_label']) ?></span></dd>
+        </dl>
+        <div class="ffb-account-thread" id="ffb-thread">
+            <h3 class="ffb-account-thread-title"><?= $escaper->escapeHtml(__('Conversation')) ?></h3>
+            <?php if ($view['earlier'] || $view['before'] !== null): ?>
+                <p class="ffb-account-thread-paging">
+                    <?php if ($view['earlier'] && $view['thread']): ?>
+                        <span><?= $escaper->escapeHtml(__('Showing %1 messages. Earlier messages are hidden.', count($view['thread']))) ?></span>
+                        <a href="<?= $escaper->escapeUrl($block->getEarlierUrl((int)$view['thread'][0]['message_id'])) ?>"><?= $escaper->escapeHtml(__('Show earlier messages')) ?></a>
+                    <?php endif; ?>
+                    <?php if ($view['before'] !== null): ?>
+                        <a href="<?= $escaper->escapeUrl($block->getLatestUrl()) ?>"><?= $escaper->escapeHtml(__('Show latest messages')) ?></a>
+                    <?php endif; ?>
+                </p>
+            <?php endif; ?>
+            <?php foreach ($view['thread'] as $message): ?>
+                <?php $isCustomer = $message['author'] === 'customer'; ?>
+                <div class="ffb-account-message ffb-account-message-<?= $isCustomer ? 'customer' : 'store' ?>">
+                    <p class="ffb-account-message-meta">
+                        <strong><?= $escaper->escapeHtml($message['author_name']) ?></strong>
+                        <?= $escaper->escapeHtml($block->formatDate($message['created_at'], \IntlDateFormatter::MEDIUM, true)) ?>
+                    </p>
+                    <?php // phpcs:ignore Magento2.Security.LanguageConstruct -- MessageRenderer escapes everything it outputs ?>
+                    <div class="ffb-account-message-body"><?= /* @noEscape */ $block->renderMessage($message) ?></div>
+                </div>
+            <?php endforeach; ?>
+            <?php if ($view['closed']): ?>
+                <p class="ffb-account-note"><?= $escaper->escapeHtml(__('This conversation is closed. To ask something new, please contact us again.')) ?></p>
+            <?php elseif ($view['can_reply']): ?>
+                <form class="ffb-account-reply" method="post" action="<?= $escaper->escapeUrl($block->getReplyUrl()) ?>" data-ffb-reply>
+                    <?= $block->getBlockHtml('formkey') ?>
+                    <label for="ffb-thread-reply-body"><?= $escaper->escapeHtml(__('Your reply')) ?></label>
+                    <textarea id="ffb-thread-reply-body" name="body" rows="5" minlength="1" maxlength="10000" data-ffb-max="5000" required data-ffb-reply-body aria-describedby="ffb-thread-reply-count"></textarea>
+                    <p class="ffb-account-reply-count" id="ffb-thread-reply-count" data-ffb-reply-count data-ffb-left="<?= $escaper->escapeHtmlAttr(__('%1 characters left')) ?>" hidden></p>
+                    <p class="ffb-account-sr-only" data-ffb-reply-live aria-live="polite"></p>
+                    <button type="submit" class="action primary"><span><?= $escaper->escapeHtml(__('Send reply')) ?></span></button>
+                </form>
+            <?php elseif ($view['reply_state'] === 'full'): ?>
+                <p class="ffb-account-note"><?= $escaper->escapeHtml(__('This conversation has reached its message limit. To ask something new, please contact us again.')) ?></p>
+            <?php elseif ($view['reply_state'] === 'off'): ?>
+                <p class="ffb-account-note"><?= $escaper->escapeHtml(__('Replies are closed for this form.')) ?></p>
+            <?php else: ?>
+                <p class="ffb-account-note"><?= $escaper->escapeHtml(__('Replies cannot be sent while you are logged in as this customer.')) ?></p>
+            <?php endif; ?>
+        </div>
+    </div>
+<?php endif; ?>
+<?php if ($view !== null && $view['can_reply']): ?>
+    <script src="<?= $escaper->escapeUrl($block->getViewFileUrl('Furan_FormBuilder::js/ffb-reply.js')) ?>" defer></script>
+<?php endif; ?>

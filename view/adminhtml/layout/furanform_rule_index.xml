@@ -1,0 +1,12 @@
+<?xml version="1.0"?>
+<page xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:View/Layout/etc/page_configuration.xsd">
+    <head>
+        <css src="Furan_FormBuilder::css/rules.css"/>
+        <script src="Furan_FormBuilder::js/rules-index.js" defer="defer"/>
+    </head>
+    <body>
+        <referenceContainer name="content">
+            <block class="Furan\FormBuilder\Block\Adminhtml\Rule\Index" name="furan_formbuilder_rule_index" template="Furan_FormBuilder::rule/index.phtml"/>
+        </referenceContainer>
+    </body>
+</page>

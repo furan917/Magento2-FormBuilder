@@ -1,0 +1,30 @@
+<!--@subject {{var subject}} @-->
+<!--@vars {
+"var subject":"Subject",
+"var body_html|raw":"Reply Text (pre-rendered safe HTML)",
+"var reply_url":"Reply Page URL",
+"var reply_note":"Set when replies to this email are not read",
+"var reply_by_email":"Set when replies on the website are off and replies to this email are read"
+} @-->
+
+{{template config_path="design/email/header_template"}}
+
+{{var body_html|raw}}
+
+{{depend reply_url}}
+<table cellpadding="0" cellspacing="0" border="0" style="margin:24px 0">
+    <tr>
+        <td style="border-radius:4px;background:#1979c3">
+            <a href="{{var reply_url}}" style="display:inline-block;padding:10px 20px;color:#ffffff;font-weight:bold;text-decoration:none">{{trans "Reply on our website"}}</a>
+        </td>
+    </tr>
+</table>
+{{/depend}}
+{{depend reply_by_email}}
+<p style="color:#666666;font-size:12px">{{trans "To reply, simply answer this email."}}</p>
+{{/depend}}
+{{depend reply_note}}
+<p style="color:#666666;font-size:12px">{{trans "Replies to this email are not read."}}</p>
+{{/depend}}
+
+{{template config_path="design/email/footer_template"}}

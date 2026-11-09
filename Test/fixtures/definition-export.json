@@ -1,0 +1,14 @@
+{
+  "stores": { "admin": 0, "default": 1, "fr": 2 },
+  "definition": {
+    "identifier": "contact",
+    "title": "Contact",
+    "is_active": true,
+    "store_codes": ["admin", "fr"],
+    "schema": { "version": 1, "pages": [{ "id": "p_1", "items": [] }] },
+    "settings": { "submit_label": "Go" },
+    "translations": { "fr": { "form": { "submit_label": { "t": "Envoyer", "s": "Go" } } } }
+  },
+  "store_ids": [0, 2],
+  "unknown": { "store_codes": ["fr", "xx"], "error": "Store view xx does not exist." }
+}

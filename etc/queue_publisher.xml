@@ -1,0 +1,9 @@
+<?xml version="1.0"?>
+<!-- No connection attribute: AMQP when configured in env.php, otherwise the MySQL queue. -->
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework-message-queue:etc/publisher.xsd">
+    <publisher topic="furan_formbuilder.mail" queue="furan_formbuilder.mail"/>
+    <publisher topic="furan_formbuilder.export" queue="furan_formbuilder.export"/>
+    <publisher topic="furan_formbuilder.action" queue="furan_formbuilder.action"/>
+    <publisher topic="furan_formbuilder.webhook" queue="furan_formbuilder.webhook"/>
+    <publisher topic="furan_formbuilder.privacy" queue="furan_formbuilder.privacy"/>
+</config>

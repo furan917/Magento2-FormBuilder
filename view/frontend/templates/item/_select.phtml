@@ -1,0 +1,22 @@
+<?php
+/** @var \Magento\Framework\View\Element\Template $block */
+/** @var \Magento\Framework\Escaper $escaper */
+$form = $block->getData('parent_block');
+extract($form->getItemContext((array)$block->getData('item'), $escaper), EXTR_SKIP);
+/** @var bool $multiple */
+/** @var array $options */
+$default = (string)($item['default'] ?? '');
+?>
+<?= /* @noEscape */ $form->renderPartial($block, 'item/_open.phtml', ['group' => false]) ?>
+    <select<?= /* @noEscape */ $attrs(array_replace($base, ['name' => $base['name'] . ($multiple ? '[]' : '')]) + [
+        'multiple' => $multiple,
+        'autocomplete' => $item['autocomplete'] ?? '',
+    ]) ?>>
+<?php if (!$multiple): ?>
+        <option value=""><?= $escaper->escapeHtml((string)($settings['empty_label'] ?? '') !== '' ? $settings['empty_label'] : __('Please select')) ?></option>
+<?php endif; ?>
+<?php foreach ($options as $option): ?>
+        <option<?= /* @noEscape */ $attrs(['value' => (string)($option['value'] ?? ''), 'selected' => $default !== '' && (string)($option['value'] ?? '') === $default]) ?>><?= $escaper->escapeHtml((string)($option['label'] ?? '')) ?></option>
+<?php endforeach; ?>
+    </select>
+<?= /* @noEscape */ $form->renderPartial($block, 'item/_close.phtml', ['group' => false]) ?>

@@ -1,0 +1,27 @@
+<?php
+/** @var \Magento\Framework\View\Element\Template $block */
+/** @var \Magento\Framework\Escaper $escaper */
+$form = $block->getData('parent_block');
+extract($form->getItemContext((array)$block->getData('item'), $escaper), EXTR_SKIP);
+$details = trim((string)($settings['details'] ?? ''));
+$detailsId = $controlId . '-details';
+$privacyUrl = trim((string)($settings['privacy_url'] ?? ''));
+$privacyLabel = trim((string)($settings['privacy_label'] ?? '')) !== '' ? trim((string)$settings['privacy_label']) : __('Privacy policy');
+$describedBy = ($details !== '' ? $detailsId . ' ' : '') . $describedBy;
+// Same rules as the normaliser: a single-slash relative path, or an http(s) URL on this store's host.
+$privacyHost = strtolower((string)parse_url($privacyUrl, PHP_URL_HOST));
+$safePrivacyUrl = preg_match('~^/(?![/\\\\])[^\s\\\\]*$~D', $privacyUrl) === 1
+    || (preg_match('~^https?://[^\s\\\\@]+$~iD', $privacyUrl) === 1
+        && $privacyHost !== ''
+        && $privacyHost === strtolower((string)parse_url($form->getBaseUrl(), PHP_URL_HOST)));
+?>
+<div<?= /* @noEscape */ $attrs(['class' => $wrapperClass . ($cssClass !== '' ? ' ' . $cssClass : '')]) ?><?= /* @noEscape */ $dataAttrs ?>>
+    <input<?= /* @noEscape */ $attrs(array_replace($base, ['class' => 'ffb-choice', 'aria-describedby' => $describedBy]) + ['type' => 'checkbox', 'value' => 'yes']) ?>>
+    <label class="ffb-label" for="<?= $escaper->escapeHtmlAttr($controlId) ?>"><?= /* @noEscape */ $labelHtml ?></label>
+<?php if ($details !== ''): ?>
+    <small class="ffb-consent-details" id="<?= $escaper->escapeHtmlAttr($detailsId) ?>"><?= $escaper->escapeHtml($details) ?></small>
+<?php endif; ?>
+<?php if ($safePrivacyUrl): ?>
+    <a class="ffb-consent-link" href="<?= $escaper->escapeUrl($privacyUrl) ?>" target="_blank" rel="noopener noreferrer"><?= $escaper->escapeHtml($privacyLabel) ?></a>
+<?php endif; ?>
+<?= /* @noEscape */ $form->renderPartial($block, 'item/_close.phtml', ['group' => false]) ?>

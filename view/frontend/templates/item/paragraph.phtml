@@ -1,0 +1,12 @@
+<?php
+/** @var \Magento\Framework\DataObject $block */
+/** @var \Magento\Framework\Escaper $escaper */
+$item = $block->getData('item');
+$width = in_array($item['width'] ?? '', ['full', 'two_thirds', 'half', 'third'], true) ? $item['width'] : 'full';
+?>
+<?php $paragraphs = preg_split('/\R{2,}/', trim((string)($item['text'] ?? ''))) ?: []; ?>
+<div class="ffb-item ffb-content ffb-content-paragraph ffb-w-<?= $escaper->escapeHtmlAttr($width) ?>" data-ffb-item="<?= $escaper->escapeHtmlAttr($item['id'] ?? '') ?>">
+<?php foreach ($paragraphs as $paragraph): ?>
+    <p class="ffb-paragraph"><?= /* @noEscape */ nl2br($escaper->escapeHtml($paragraph), false) ?></p>
+<?php endforeach; ?>
+</div>

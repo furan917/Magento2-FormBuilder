@@ -1,0 +1,706 @@
+[
+ {
+  "rule": "min_length",
+  "ruleValue": 2,
+  "value": "ab",
+  "values": {},
+  "expected": true
+ },
+ {
+  "rule": "min_length",
+  "ruleValue": 2,
+  "value": "a",
+  "values": {},
+  "expected": false
+ },
+ {
+  "rule": "min_length",
+  "ruleValue": 2,
+  "value": "Zoë",
+  "values": {},
+  "expected": true
+ },
+ {
+  "rule": "min_length",
+  "ruleValue": 2,
+  "value": "😀😀",
+  "values": {},
+  "expected": true
+ },
+ {
+  "rule": "min_length",
+  "ruleValue": 2,
+  "value": "😀",
+  "values": {},
+  "expected": false
+ },
+ {
+  "rule": "min_length",
+  "ruleValue": 3,
+  "value": "Zoë",
+  "values": {},
+  "expected": true
+ },
+ {
+  "rule": "max_length",
+  "ruleValue": 3,
+  "value": "abc",
+  "values": {},
+  "expected": true
+ },
+ {
+  "rule": "max_length",
+  "ruleValue": 3,
+  "value": "abcd",
+  "values": {},
+  "expected": false
+ },
+ {
+  "rule": "max_length",
+  "ruleValue": 3,
+  "value": "Zoë!",
+  "values": {},
+  "expected": false
+ },
+ {
+  "rule": "max_length",
+  "ruleValue": 3,
+  "value": "😀😀😀",
+  "values": {},
+  "expected": true
+ },
+ {
+  "rule": "max_length",
+  "ruleValue": 3,
+  "value": "😀😀😀😀",
+  "values": {},
+  "expected": false
+ },
+ {
+  "rule": "pattern",
+  "ruleValue": "[a-c]{3}",
+  "value": "abc",
+  "values": {},
+  "expected": true
+ },
+ {
+  "rule": "pattern",
+  "ruleValue": "[a-c]{3}",
+  "value": "abcd",
+  "values": {},
+  "expected": false
+ },
+ {
+  "rule": "pattern",
+  "ruleValue": "[a-c]{3}",
+  "value": "abc\n",
+  "values": {},
+  "expected": false
+ },
+ {
+  "rule": "pattern",
+  "ruleValue": "[a-c]{3}",
+  "value": "ABC",
+  "values": {},
+  "expected": false
+ },
+ {
+  "rule": "pattern",
+  "ruleValue": "[a-c]{3}",
+  "value": "é",
+  "values": {},
+  "expected": false
+ },
+ {
+  "rule": "pattern",
+  "ruleValue": "\\d+",
+  "value": "123",
+  "values": {},
+  "expected": true
+ },
+ {
+  "rule": "pattern",
+  "ruleValue": "\\d+",
+  "value": "12\n",
+  "values": {},
+  "expected": false
+ },
+ {
+  "rule": "pattern",
+  "ruleValue": "a|b",
+  "value": "ab",
+  "values": {},
+  "expected": false
+ },
+ {
+  "rule": "alpha",
+  "ruleValue": null,
+  "value": "Zoë",
+  "values": {},
+  "expected": true
+ },
+ {
+  "rule": "alpha",
+  "ruleValue": null,
+  "value": "O'Neil-Smith",
+  "values": {},
+  "expected": true
+ },
+ {
+  "rule": "alpha",
+  "ruleValue": null,
+  "value": "Anna Marie",
+  "values": {},
+  "expected": true
+ },
+ {
+  "rule": "alpha",
+  "ruleValue": null,
+  "value": "abc1",
+  "values": {},
+  "expected": false
+ },
+ {
+  "rule": "alpha",
+  "ruleValue": null,
+  "value": "😀",
+  "values": {},
+  "expected": false
+ },
+ {
+  "rule": "alpha",
+  "ruleValue": null,
+  "value": "a b",
+  "values": {},
+  "expected": false
+ },
+ {
+  "rule": "alphanumeric",
+  "ruleValue": null,
+  "value": "abc123",
+  "values": {},
+  "expected": true
+ },
+ {
+  "rule": "alphanumeric",
+  "ruleValue": null,
+  "value": "Zoë 9",
+  "values": {},
+  "expected": true
+ },
+ {
+  "rule": "alphanumeric",
+  "ruleValue": null,
+  "value": "ab-c",
+  "values": {},
+  "expected": false
+ },
+ {
+  "rule": "alphanumeric",
+  "ruleValue": null,
+  "value": "a_b",
+  "values": {},
+  "expected": false
+ },
+ {
+  "rule": "alphanumeric",
+  "ruleValue": null,
+  "value": "😀",
+  "values": {},
+  "expected": false
+ },
+ {
+  "rule": "alphanumeric",
+  "ruleValue": null,
+  "value": "a b",
+  "values": {},
+  "expected": false
+ },
+ {
+  "rule": "numeric",
+  "ruleValue": null,
+  "value": "12",
+  "values": {},
+  "expected": true
+ },
+ {
+  "rule": "numeric",
+  "ruleValue": null,
+  "value": "-1.5",
+  "values": {},
+  "expected": true
+ },
+ {
+  "rule": "numeric",
+  "ruleValue": null,
+  "value": "1.",
+  "values": {},
+  "expected": false
+ },
+ {
+  "rule": "numeric",
+  "ruleValue": null,
+  "value": ".5",
+  "values": {},
+  "expected": false
+ },
+ {
+  "rule": "numeric",
+  "ruleValue": null,
+  "value": "1e5",
+  "values": {},
+  "expected": false
+ },
+ {
+  "rule": "numeric",
+  "ruleValue": null,
+  "value": "1,5",
+  "values": {},
+  "expected": false
+ },
+ {
+  "rule": "numeric",
+  "ruleValue": null,
+  "value": "12\n",
+  "values": {},
+  "expected": false
+ },
+ {
+  "rule": "integer",
+  "ruleValue": null,
+  "value": "12",
+  "values": {},
+  "expected": true
+ },
+ {
+  "rule": "integer",
+  "ruleValue": null,
+  "value": "-3",
+  "values": {},
+  "expected": true
+ },
+ {
+  "rule": "integer",
+  "ruleValue": null,
+  "value": "1.5",
+  "values": {},
+  "expected": false
+ },
+ {
+  "rule": "integer",
+  "ruleValue": null,
+  "value": "abc",
+  "values": {},
+  "expected": false
+ },
+ {
+  "rule": "integer",
+  "ruleValue": null,
+  "value": "12\n",
+  "values": {},
+  "expected": false
+ },
+ {
+  "rule": "email",
+  "ruleValue": null,
+  "value": "a@b.co",
+  "values": {},
+  "expected": true
+ },
+ {
+  "rule": "email",
+  "ruleValue": null,
+  "value": "a@b",
+  "values": {},
+  "expected": false
+ },
+ {
+  "rule": "email",
+  "ruleValue": null,
+  "value": "a b@c.de",
+  "values": {},
+  "expected": false
+ },
+ {
+  "rule": "email",
+  "ruleValue": null,
+  "value": "a@b.c\n",
+  "values": {},
+  "expected": false
+ },
+ {
+  "rule": "email",
+  "ruleValue": null,
+  "value": "a b@c.de",
+  "values": {},
+  "expected": true
+ },
+ {
+  "rule": "email",
+  "ruleValue": null,
+  "value": "a@b c.de",
+  "values": {},
+  "expected": false
+ },
+ {
+  "rule": "email",
+  "ruleValue": null,
+  "value": "@b.co",
+  "values": {},
+  "expected": false
+ },
+ {
+  "rule": "email",
+  "ruleValue": null,
+  "value": "-oQ/tmp/x@example.com",
+  "values": {},
+  "expected": false
+ },
+ {
+  "rule": "email",
+  "ruleValue": null,
+  "value": "-a@b.co",
+  "values": {},
+  "expected": false
+ },
+ {
+  "rule": "email",
+  "ruleValue": null,
+  "value": "a-b@c.co",
+  "values": {},
+  "expected": true
+ },
+ {
+  "rule": "email",
+  "ruleValue": null,
+  "value": "_info@b.co",
+  "values": {},
+  "expected": true
+ },
+ {
+  "rule": "url",
+  "ruleValue": null,
+  "value": "http://example.com",
+  "values": {},
+  "expected": true
+ },
+ {
+  "rule": "url",
+  "ruleValue": null,
+  "value": "HTTPS://Example.com/x?y=1",
+  "values": {},
+  "expected": true
+ },
+ {
+  "rule": "url",
+  "ruleValue": null,
+  "value": "ftp://example.com",
+  "values": {},
+  "expected": false
+ },
+ {
+  "rule": "url",
+  "ruleValue": null,
+  "value": "http://",
+  "values": {},
+  "expected": false
+ },
+ {
+  "rule": "url",
+  "ruleValue": null,
+  "value": "http://a b.com",
+  "values": {},
+  "expected": false
+ },
+ {
+  "rule": "url",
+  "ruleValue": null,
+  "value": "https://a.com\n",
+  "values": {},
+  "expected": false
+ },
+ {
+  "rule": "url",
+  "ruleValue": null,
+  "value": "javascript:alert(1)",
+  "values": {},
+  "expected": false
+ },
+ {
+  "rule": "url",
+  "ruleValue": null,
+  "value": "https:// a.com",
+  "values": {},
+  "expected": true
+ },
+ {
+  "rule": "phone",
+  "ruleValue": null,
+  "value": "+44 1234 567890",
+  "values": {},
+  "expected": true
+ },
+ {
+  "rule": "phone",
+  "ruleValue": null,
+  "value": "(020) 7946-0958",
+  "values": {},
+  "expected": true
+ },
+ {
+  "rule": "phone",
+  "ruleValue": null,
+  "value": "12345",
+  "values": {},
+  "expected": false
+ },
+ {
+  "rule": "phone",
+  "ruleValue": null,
+  "value": "abc12345",
+  "values": {},
+  "expected": false
+ },
+ {
+  "rule": "phone",
+  "ruleValue": null,
+  "value": "123 456",
+  "values": {},
+  "expected": false
+ },
+ {
+  "rule": "phone",
+  "ruleValue": null,
+  "value": "0123456789012345678901",
+  "values": {},
+  "expected": false
+ },
+ {
+  "rule": "phone",
+  "ruleValue": null,
+  "value": "123456\n",
+  "values": {},
+  "expected": true
+ },
+ {
+  "rule": "min",
+  "ruleValue": 5,
+  "value": "5",
+  "values": {},
+  "expected": true
+ },
+ {
+  "rule": "min",
+  "ruleValue": 5,
+  "value": "4.9",
+  "values": {},
+  "expected": false
+ },
+ {
+  "rule": "min",
+  "ruleValue": 5,
+  "value": "-3",
+  "values": {},
+  "expected": false
+ },
+ {
+  "rule": "min",
+  "ruleValue": 5,
+  "value": "10",
+  "values": {},
+  "expected": true
+ },
+ {
+  "rule": "min",
+  "ruleValue": 0,
+  "value": "abc",
+  "values": {},
+  "expected": false
+ },
+ {
+  "rule": "max",
+  "ruleValue": 5,
+  "value": "5",
+  "values": {},
+  "expected": true
+ },
+ {
+  "rule": "max",
+  "ruleValue": 5,
+  "value": "5.1",
+  "values": {},
+  "expected": false
+ },
+ {
+  "rule": "max",
+  "ruleValue": 5,
+  "value": "-3",
+  "values": {},
+  "expected": true
+ },
+ {
+  "rule": "max",
+  "ruleValue": 5,
+  "value": "1e3",
+  "values": {},
+  "expected": false
+ },
+ {
+  "rule": "min_date",
+  "ruleValue": "2024-05-01",
+  "value": "2024-05-01",
+  "values": {},
+  "expected": true
+ },
+ {
+  "rule": "min_date",
+  "ruleValue": "2024-05-01",
+  "value": "2024-04-30",
+  "values": {},
+  "expected": false
+ },
+ {
+  "rule": "min_date",
+  "ruleValue": "2024-05-01",
+  "value": "2024-05-01T08:00",
+  "values": {},
+  "expected": true
+ },
+ {
+  "rule": "min_date",
+  "ruleValue": "2024-05-01",
+  "value": "nope",
+  "values": {},
+  "expected": false
+ },
+ {
+  "rule": "max_date",
+  "ruleValue": "2024-05-01",
+  "value": "2024-05-01",
+  "values": {},
+  "expected": true
+ },
+ {
+  "rule": "max_date",
+  "ruleValue": "2024-05-01",
+  "value": "2024-05-02",
+  "values": {},
+  "expected": false
+ },
+ {
+  "rule": "max_date",
+  "ruleValue": "2024-05-01",
+  "value": "2024-05-01T23:59",
+  "values": {},
+  "expected": true
+ },
+ {
+  "rule": "max_date",
+  "ruleValue": "2024-05-01",
+  "value": "nope",
+  "values": {},
+  "expected": false
+ },
+ {
+  "rule": "matches",
+  "ruleValue": "pw",
+  "value": "abc",
+  "values": {
+   "pw": "abc"
+  },
+  "expected": true
+ },
+ {
+  "rule": "matches",
+  "ruleValue": "pw",
+  "value": "abc",
+  "values": {
+   "pw": "ABC"
+  },
+  "expected": false
+ },
+ {
+  "rule": "matches",
+  "ruleValue": "pw",
+  "value": "abc",
+  "values": {},
+  "expected": false
+ },
+ {
+  "rule": "matches",
+  "ruleValue": "pw",
+  "value": "abc ",
+  "values": {
+   "pw": "abc"
+  },
+  "expected": false
+ },
+ {
+  "rule": "min_selected",
+  "ruleValue": 2,
+  "value": [
+   "a",
+   "b"
+  ],
+  "values": {},
+  "expected": true
+ },
+ {
+  "rule": "min_selected",
+  "ruleValue": 2,
+  "value": [
+   "a"
+  ],
+  "values": {},
+  "expected": false
+ },
+ {
+  "rule": "min_selected",
+  "ruleValue": 2,
+  "value": "a",
+  "values": {},
+  "expected": false
+ },
+ {
+  "rule": "min_selected",
+  "ruleValue": 2,
+  "value": [],
+  "values": {},
+  "expected": false
+ },
+ {
+  "rule": "max_selected",
+  "ruleValue": 2,
+  "value": [
+   "a",
+   "b"
+  ],
+  "values": {},
+  "expected": true
+ },
+ {
+  "rule": "max_selected",
+  "ruleValue": 2,
+  "value": [
+   "a",
+   "b",
+   "c"
+  ],
+  "values": {},
+  "expected": false
+ },
+ {
+  "rule": "max_selected",
+  "ruleValue": 2,
+  "value": "a",
+  "values": {},
+  "expected": true
+ },
+ {
+  "rule": "max_selected",
+  "ruleValue": 2,
+  "value": [],
+  "values": {},
+  "expected": true
+ }
+]

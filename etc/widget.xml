@@ -1,0 +1,12 @@
+<?xml version="1.0"?>
+<widgets xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Widget:etc/widget.xsd">
+    <widget id="furan_formbuilder_form" class="Furan\FormBuilder\Block\Widget\Form" is_email_compatible="false">
+        <label translate="true">Form Builder Form</label>
+        <description translate="true">Embed a form built with Form Builder</description>
+        <parameters>
+            <parameter name="form_id" xsi:type="select" visible="true" required="true" source_model="Furan\FormBuilder\Model\Source\Form">
+                <label translate="true">Form</label>
+            </parameter>
+        </parameters>
+    </widget>
+</widgets>

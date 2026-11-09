@@ -1,0 +1,23 @@
+<?php
+/** @var \Magento\Framework\View\Element\Template $block */
+/** @var \Magento\Framework\Escaper $escaper */
+$form = $block->getData('parent_block');
+extract($form->getItemContext((array)$block->getData('item'), $escaper), EXTR_SKIP);
+$max = min(10, max(3, (int)($settings['max'] ?? 5)));
+$default = (string)($item['default'] ?? '');
+?>
+<?= /* @noEscape */ $form->renderPartial($block, 'item/_open.phtml', ['group' => true]) ?>
+    <div class="ffb-rating" role="radiogroup">
+<?php for ($i = 1; $i <= $max; $i++): ?>
+        <label class="ffb-option"><input<?= /* @noEscape */ $attrs([
+            'class' => 'ffb-choice',
+            'type' => 'radio',
+            'id' => $controlId . '-' . ($i - 1),
+            'name' => $base['name'],
+            'value' => (string)$i,
+            'required' => $required,
+            'checked' => $default === (string)$i,
+        ]) ?>><span><?= (int)$i ?></span></label>
+<?php endfor; ?>
+    </div>
+<?= /* @noEscape */ $form->renderPartial($block, 'item/_close.phtml', ['group' => true]) ?>

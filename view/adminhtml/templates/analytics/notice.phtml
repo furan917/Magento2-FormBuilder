@@ -1,0 +1,15 @@
+<?php
+/** @var \Furan\FormBuilder\Block\Adminhtml\Analytics $block */
+/** @var \Magento\Framework\Escaper $escaper */
+?>
+<?php foreach ($block->getNotices() as $notice): ?>
+    <div class="message message-notice ffb-admin-notice"><div><?= $escaper->escapeHtml($notice) ?></div></div>
+<?php endforeach; ?>
+<?php if ($block->getQueuedNotice()): ?>
+    <div class="message message-notice ffb-admin-notice"><div><?= $escaper->escapeHtml($block->getQueuedNotice()) ?></div></div>
+<?php elseif ($block->canQueueRebuild()): ?>
+    <form class="ffb-admin-rebuild" method="post" action="<?= $escaper->escapeUrl($block->getQueueRebuildUrl()) ?>">
+        <input type="hidden" name="form_key" value="<?= $escaper->escapeHtmlAttr($block->getFormKey()) ?>">
+        <button type="submit" class="action-default"><?= $escaper->escapeHtml(__('Rebuild now')) ?></button>
+    </form>
+<?php endif; ?>

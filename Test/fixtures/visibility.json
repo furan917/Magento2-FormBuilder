@@ -1,0 +1,1023 @@
+[
+  {
+    "name": "null condition is visible",
+    "schema": {
+      "version": 1,
+      "pages": [
+        {
+          "id": "p_aaaa",
+          "title": "p_aaaa",
+          "condition": null,
+          "items": [
+            {
+              "id": "f_aaaa",
+              "kind": "field",
+              "type": "text",
+              "name": "a",
+              "label": "a",
+              "condition": null
+            }
+          ]
+        }
+      ]
+    },
+    "values": {},
+    "expected": {
+      "p_aaaa": true,
+      "f_aaaa": true
+    }
+  },
+  {
+    "name": "empty rules is visible",
+    "schema": {
+      "version": 1,
+      "pages": [
+        {
+          "id": "p_aaaa",
+          "title": "p_aaaa",
+          "condition": null,
+          "items": [
+            {
+              "id": "f_aaaa",
+              "kind": "field",
+              "type": "text",
+              "name": "a",
+              "label": "a",
+              "condition": {
+                "actions": [
+                  {
+                    "action": "show"
+                  }
+                ],
+                "match": "all",
+                "rules": []
+              }
+            }
+          ]
+        }
+      ]
+    },
+    "values": {},
+    "expected": {
+      "p_aaaa": true,
+      "f_aaaa": true
+    }
+  },
+  {
+    "name": "show when matched, hidden otherwise",
+    "schema": {
+      "version": 1,
+      "pages": [
+        {
+          "id": "p_aaaa",
+          "title": "p_aaaa",
+          "condition": null,
+          "items": [
+            {
+              "id": "f_aaaa",
+              "kind": "field",
+              "type": "text",
+              "name": "a",
+              "label": "a",
+              "condition": null
+            },
+            {
+              "id": "f_bbbb",
+              "kind": "field",
+              "type": "text",
+              "name": "b",
+              "label": "b",
+              "condition": {
+                "actions": [
+                  {
+                    "action": "show"
+                  }
+                ],
+                "match": "all",
+                "rules": [
+                  {
+                    "field": "a",
+                    "operator": "equals",
+                    "value": "x"
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    "values": {
+      "a": "y",
+      "b": "z"
+    },
+    "expected": {
+      "p_aaaa": true,
+      "f_aaaa": true,
+      "f_bbbb": false
+    }
+  },
+  {
+    "name": "hide action when matched",
+    "schema": {
+      "version": 1,
+      "pages": [
+        {
+          "id": "p_aaaa",
+          "title": "p_aaaa",
+          "condition": null,
+          "items": [
+            {
+              "id": "f_aaaa",
+              "kind": "field",
+              "type": "text",
+              "name": "a",
+              "label": "a",
+              "condition": null
+            },
+            {
+              "id": "f_bbbb",
+              "kind": "field",
+              "type": "text",
+              "name": "b",
+              "label": "b",
+              "condition": {
+                "actions": [
+                  {
+                    "action": "hide"
+                  }
+                ],
+                "match": "all",
+                "rules": [
+                  {
+                    "field": "a",
+                    "operator": "equals",
+                    "value": "x"
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    "values": {
+      "a": "x"
+    },
+    "expected": {
+      "p_aaaa": true,
+      "f_aaaa": true,
+      "f_bbbb": false
+    }
+  },
+  {
+    "name": "hidden page cascades to fields and sections",
+    "schema": {
+      "version": 1,
+      "pages": [
+        {
+          "id": "p_aaaa",
+          "title": "p_aaaa",
+          "condition": null,
+          "items": [
+            {
+              "id": "f_aaaa",
+              "kind": "field",
+              "type": "text",
+              "name": "a",
+              "label": "a",
+              "condition": null
+            }
+          ]
+        },
+        {
+          "id": "p_bbbb",
+          "title": "p_bbbb",
+          "condition": {
+            "actions": [
+              {
+                "action": "show"
+              }
+            ],
+            "match": "all",
+            "rules": [
+              {
+                "field": "a",
+                "operator": "equals",
+                "value": "go"
+              }
+            ]
+          },
+          "items": [
+            {
+              "id": "f_bbbb",
+              "kind": "field",
+              "type": "text",
+              "name": "b",
+              "label": "b",
+              "condition": null
+            },
+            {
+              "id": "s_aaaa",
+              "kind": "section",
+              "title": "s_aaaa",
+              "description": "",
+              "condition": null,
+              "items": [
+                {
+                  "id": "f_cccc",
+                  "kind": "field",
+                  "type": "text",
+                  "name": "c",
+                  "label": "c",
+                  "condition": null
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "values": {
+      "a": "no"
+    },
+    "expected": {
+      "p_aaaa": true,
+      "f_aaaa": true,
+      "p_bbbb": false,
+      "f_bbbb": false,
+      "s_aaaa": false,
+      "f_cccc": false
+    }
+  },
+  {
+    "name": "hidden section cascades to its fields only",
+    "schema": {
+      "version": 1,
+      "pages": [
+        {
+          "id": "p_aaaa",
+          "title": "p_aaaa",
+          "condition": null,
+          "items": [
+            {
+              "id": "f_aaaa",
+              "kind": "field",
+              "type": "text",
+              "name": "a",
+              "label": "a",
+              "condition": null
+            },
+            {
+              "id": "s_aaaa",
+              "kind": "section",
+              "title": "s_aaaa",
+              "description": "",
+              "condition": {
+                "actions": [
+                  {
+                    "action": "show"
+                  }
+                ],
+                "match": "all",
+                "rules": [
+                  {
+                    "field": "a",
+                    "operator": "equals",
+                    "value": "go"
+                  }
+                ]
+              },
+              "items": [
+                {
+                  "id": "f_bbbb",
+                  "kind": "field",
+                  "type": "text",
+                  "name": "b",
+                  "label": "b",
+                  "condition": null
+                },
+                {
+                  "id": "c_aaaa",
+                  "kind": "content",
+                  "type": "divider",
+                  "width": "full",
+                  "condition": null
+                }
+              ]
+            },
+            {
+              "id": "f_cccc",
+              "kind": "field",
+              "type": "text",
+              "name": "c",
+              "label": "c",
+              "condition": null
+            }
+          ]
+        }
+      ]
+    },
+    "values": {
+      "a": "no"
+    },
+    "expected": {
+      "p_aaaa": true,
+      "f_aaaa": true,
+      "s_aaaa": false,
+      "f_bbbb": false,
+      "c_aaaa": false,
+      "f_cccc": true
+    }
+  },
+  {
+    "name": "hidden field value counts as empty for later conditions",
+    "schema": {
+      "version": 1,
+      "pages": [
+        {
+          "id": "p_aaaa",
+          "title": "p_aaaa",
+          "condition": null,
+          "items": [
+            {
+              "id": "f_aaaa",
+              "kind": "field",
+              "type": "text",
+              "name": "a",
+              "label": "a",
+              "condition": null
+            },
+            {
+              "id": "f_bbbb",
+              "kind": "field",
+              "type": "text",
+              "name": "b",
+              "label": "b",
+              "condition": {
+                "actions": [
+                  {
+                    "action": "show"
+                  }
+                ],
+                "match": "all",
+                "rules": [
+                  {
+                    "field": "a",
+                    "operator": "equals",
+                    "value": "x"
+                  }
+                ]
+              }
+            },
+            {
+              "id": "f_cccc",
+              "kind": "field",
+              "type": "text",
+              "name": "c",
+              "label": "c",
+              "condition": {
+                "actions": [
+                  {
+                    "action": "show"
+                  }
+                ],
+                "match": "all",
+                "rules": [
+                  {
+                    "field": "b",
+                    "operator": "equals",
+                    "value": "secret"
+                  }
+                ]
+              }
+            },
+            {
+              "id": "f_dddd",
+              "kind": "field",
+              "type": "text",
+              "name": "d",
+              "label": "d",
+              "condition": {
+                "actions": [
+                  {
+                    "action": "show"
+                  }
+                ],
+                "match": "all",
+                "rules": [
+                  {
+                    "field": "b",
+                    "operator": "is_empty",
+                    "value": ""
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    "values": {
+      "a": "y",
+      "b": "secret"
+    },
+    "expected": {
+      "p_aaaa": true,
+      "f_aaaa": true,
+      "f_bbbb": false,
+      "f_cccc": false,
+      "f_dddd": true
+    }
+  },
+  {
+    "name": "visible field value is used by later conditions",
+    "schema": {
+      "version": 1,
+      "pages": [
+        {
+          "id": "p_aaaa",
+          "title": "p_aaaa",
+          "condition": null,
+          "items": [
+            {
+              "id": "f_aaaa",
+              "kind": "field",
+              "type": "text",
+              "name": "a",
+              "label": "a",
+              "condition": null
+            },
+            {
+              "id": "f_bbbb",
+              "kind": "field",
+              "type": "text",
+              "name": "b",
+              "label": "b",
+              "condition": {
+                "actions": [
+                  {
+                    "action": "show"
+                  }
+                ],
+                "match": "all",
+                "rules": [
+                  {
+                    "field": "a",
+                    "operator": "equals",
+                    "value": "x"
+                  }
+                ]
+              }
+            },
+            {
+              "id": "f_cccc",
+              "kind": "field",
+              "type": "text",
+              "name": "c",
+              "label": "c",
+              "condition": {
+                "actions": [
+                  {
+                    "action": "show"
+                  }
+                ],
+                "match": "all",
+                "rules": [
+                  {
+                    "field": "b",
+                    "operator": "equals",
+                    "value": "secret"
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    "values": {
+      "a": "x",
+      "b": "secret"
+    },
+    "expected": {
+      "p_aaaa": true,
+      "f_aaaa": true,
+      "f_bbbb": true,
+      "f_cccc": true
+    }
+  },
+  {
+    "name": "all requires every rule",
+    "schema": {
+      "version": 1,
+      "pages": [
+        {
+          "id": "p_aaaa",
+          "title": "p_aaaa",
+          "condition": null,
+          "items": [
+            {
+              "id": "f_aaaa",
+              "kind": "field",
+              "type": "text",
+              "name": "a",
+              "label": "a",
+              "condition": null
+            },
+            {
+              "id": "f_bbbb",
+              "kind": "field",
+              "type": "text",
+              "name": "b",
+              "label": "b",
+              "condition": null
+            },
+            {
+              "id": "f_cccc",
+              "kind": "field",
+              "type": "text",
+              "name": "c",
+              "label": "c",
+              "condition": {
+                "actions": [
+                  {
+                    "action": "show"
+                  }
+                ],
+                "match": "all",
+                "rules": [
+                  {
+                    "field": "a",
+                    "operator": "equals",
+                    "value": "1"
+                  },
+                  {
+                    "field": "b",
+                    "operator": "equals",
+                    "value": "2"
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    "values": {
+      "a": "1",
+      "b": "3"
+    },
+    "expected": {
+      "p_aaaa": true,
+      "f_aaaa": true,
+      "f_bbbb": true,
+      "f_cccc": false
+    }
+  },
+  {
+    "name": "any requires one rule",
+    "schema": {
+      "version": 1,
+      "pages": [
+        {
+          "id": "p_aaaa",
+          "title": "p_aaaa",
+          "condition": null,
+          "items": [
+            {
+              "id": "f_aaaa",
+              "kind": "field",
+              "type": "text",
+              "name": "a",
+              "label": "a",
+              "condition": null
+            },
+            {
+              "id": "f_bbbb",
+              "kind": "field",
+              "type": "text",
+              "name": "b",
+              "label": "b",
+              "condition": null
+            },
+            {
+              "id": "f_cccc",
+              "kind": "field",
+              "type": "text",
+              "name": "c",
+              "label": "c",
+              "condition": {
+                "actions": [
+                  {
+                    "action": "show"
+                  }
+                ],
+                "match": "any",
+                "rules": [
+                  {
+                    "field": "a",
+                    "operator": "equals",
+                    "value": "1"
+                  },
+                  {
+                    "field": "b",
+                    "operator": "equals",
+                    "value": "2"
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    "values": {
+      "a": "1",
+      "b": "3"
+    },
+    "expected": {
+      "p_aaaa": true,
+      "f_aaaa": true,
+      "f_bbbb": true,
+      "f_cccc": true
+    }
+  },
+  {
+    "name": "content item and section conditions",
+    "schema": {
+      "version": 1,
+      "pages": [
+        {
+          "id": "p_aaaa",
+          "title": "p_aaaa",
+          "condition": null,
+          "items": [
+            {
+              "id": "f_aaaa",
+              "kind": "field",
+              "type": "text",
+              "name": "a",
+              "label": "a",
+              "condition": null
+            },
+            {
+              "id": "c_aaaa",
+              "kind": "content",
+              "type": "heading",
+              "text": "Hi",
+              "level": 2,
+              "width": "full",
+              "condition": {
+                "actions": [
+                  {
+                    "action": "show"
+                  }
+                ],
+                "match": "all",
+                "rules": [
+                  {
+                    "field": "a",
+                    "operator": "not_empty",
+                    "value": ""
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    "values": {
+      "a": ""
+    },
+    "expected": {
+      "p_aaaa": true,
+      "f_aaaa": true,
+      "c_aaaa": false
+    }
+  },
+  {
+    "name": "checkbox array values",
+    "schema": {
+      "version": 1,
+      "pages": [
+        {
+          "id": "p_aaaa",
+          "title": "p_aaaa",
+          "condition": null,
+          "items": [
+            {
+              "id": "f_aaaa",
+              "kind": "field",
+              "type": "text",
+              "name": "a",
+              "label": "a",
+              "condition": null
+            },
+            {
+              "id": "f_bbbb",
+              "kind": "field",
+              "type": "text",
+              "name": "b",
+              "label": "b",
+              "condition": {
+                "actions": [
+                  {
+                    "action": "show"
+                  }
+                ],
+                "match": "all",
+                "rules": [
+                  {
+                    "field": "a",
+                    "operator": "equals",
+                    "value": "red"
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    "values": {
+      "a": [
+        "blue",
+        "red"
+      ]
+    },
+    "expected": {
+      "p_aaaa": true,
+      "f_aaaa": true,
+      "f_bbbb": true
+    }
+  },
+  {
+    "name": "hidden value_field source counts as empty",
+    "schema": {
+      "version": 1,
+      "pages": [
+        {
+          "id": "p_aaaa",
+          "title": "p",
+          "condition": null,
+          "items": [
+            {
+              "id": "f_aaaa",
+              "kind": "field",
+              "type": "text",
+              "name": "a",
+              "label": "a",
+              "condition": null
+            },
+            {
+              "id": "f_bbbb",
+              "kind": "field",
+              "type": "text",
+              "name": "b",
+              "label": "b",
+              "condition": {
+                "actions": [
+                  {
+                    "action": "show"
+                  }
+                ],
+                "match": "all",
+                "rules": [
+                  {
+                    "field": "a",
+                    "operator": "equals",
+                    "value": "x"
+                  }
+                ]
+              }
+            },
+            {
+              "id": "f_cccc",
+              "kind": "field",
+              "type": "text",
+              "name": "c",
+              "label": "c",
+              "condition": {
+                "actions": [
+                  {
+                    "action": "show"
+                  }
+                ],
+                "match": "all",
+                "rules": [
+                  {
+                    "field": "a",
+                    "operator": "equals",
+                    "value_field": "b"
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    "values": {
+      "a": "y",
+      "b": "y"
+    },
+    "expected": {
+      "p_aaaa": true,
+      "f_aaaa": true,
+      "f_bbbb": false,
+      "f_cccc": false
+    }
+  },
+  {
+    "name": "shown value_field source is compared",
+    "schema": {
+      "version": 1,
+      "pages": [
+        {
+          "id": "p_aaaa",
+          "title": "p",
+          "condition": null,
+          "items": [
+            {
+              "id": "f_aaaa",
+              "kind": "field",
+              "type": "text",
+              "name": "a",
+              "label": "a",
+              "condition": null
+            },
+            {
+              "id": "f_bbbb",
+              "kind": "field",
+              "type": "text",
+              "name": "b",
+              "label": "b",
+              "condition": {
+                "actions": [
+                  {
+                    "action": "show"
+                  }
+                ],
+                "match": "all",
+                "rules": [
+                  {
+                    "field": "a",
+                    "operator": "equals",
+                    "value": "x"
+                  }
+                ]
+              }
+            },
+            {
+              "id": "f_cccc",
+              "kind": "field",
+              "type": "text",
+              "name": "c",
+              "label": "c",
+              "condition": {
+                "actions": [
+                  {
+                    "action": "show"
+                  }
+                ],
+                "match": "all",
+                "rules": [
+                  {
+                    "field": "a",
+                    "operator": "equals",
+                    "value_field": "b"
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    "values": {
+      "a": "x",
+      "b": "x"
+    },
+    "expected": {
+      "p_aaaa": true,
+      "f_aaaa": true,
+      "f_bbbb": true,
+      "f_cccc": true
+    }
+  },
+  {
+    "name": "relative date uses today in the visibility pass",
+    "schema": {
+      "version": 1,
+      "pages": [
+        {
+          "id": "p_aaaa",
+          "title": "p",
+          "condition": null,
+          "items": [
+            {
+              "id": "f_aaaa",
+              "kind": "field",
+              "type": "date",
+              "name": "when",
+              "label": "when",
+              "condition": null,
+              "relative_date": "Y-m-d"
+            },
+            {
+              "id": "f_bbbb",
+              "kind": "field",
+              "type": "text",
+              "name": "b",
+              "label": "b",
+              "condition": {
+                "actions": [
+                  {
+                    "action": "show"
+                  }
+                ],
+                "match": "all",
+                "rules": [
+                  {
+                    "field": "when",
+                    "operator": "greater_than",
+                    "value_date": {
+                      "days": 0
+                    }
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    "values": {
+      "when": "2026-11-08"
+    },
+    "today": "2026-11-07",
+    "expected": {
+      "p_aaaa": true,
+      "f_aaaa": true,
+      "f_bbbb": true
+    }
+  },
+  {
+    "name": "relative date without today hides the item",
+    "schema": {
+      "version": 1,
+      "pages": [
+        {
+          "id": "p_aaaa",
+          "title": "p",
+          "condition": null,
+          "items": [
+            {
+              "id": "f_aaaa",
+              "kind": "field",
+              "type": "date",
+              "name": "when",
+              "label": "when",
+              "condition": null,
+              "relative_date": "Y-m-d"
+            },
+            {
+              "id": "f_bbbb",
+              "kind": "field",
+              "type": "text",
+              "name": "b",
+              "label": "b",
+              "condition": {
+                "actions": [
+                  {
+                    "action": "show"
+                  }
+                ],
+                "match": "all",
+                "rules": [
+                  {
+                    "field": "when",
+                    "operator": "greater_than",
+                    "value_date": {
+                      "days": 0
+                    }
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    "values": {
+      "when": "2026-11-08"
+    },
+    "expected": {
+      "p_aaaa": true,
+      "f_aaaa": true,
+      "f_bbbb": false
+    }
+  }
+]

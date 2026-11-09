@@ -1,0 +1,9 @@
+<?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:Event/etc/events.xsd">
+    <event name="customer_login">
+        <observer name="furan_formbuilder_offer_claim" instance="Furan\FormBuilder\Observer\OfferClaim"/>
+    </event>
+    <event name="controller_action_predispatch_furanform">
+        <observer name="furan_formbuilder_storefront_switch" instance="Furan\FormBuilder\Observer\StorefrontSwitch"/>
+    </event>
+</config>

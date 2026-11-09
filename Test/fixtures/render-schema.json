@@ -1,0 +1,25 @@
+{
+  "version": 1,
+  "pages": [
+    {
+      "id": "p_aaaa01",
+      "title": "Your details",
+      "condition": null,
+      "items": [
+        {"id": "f_name01", "kind": "field", "type": "text", "name": "name", "label": "Name", "placeholder": "Jane Doe", "help": "As on your ID", "default": "", "width": "half", "required": true, "rules": [{"rule": "min_length", "value": 2, "message": ""}], "options": [], "settings": {}, "condition": null, "draft": true, "autocomplete": "name", "css_class": ""},
+        {"id": "f_cont01", "kind": "field", "type": "radio", "name": "contact", "label": "Preferred contact", "placeholder": "", "help": "", "default": "", "width": "half", "required": false, "rules": [], "options": [{"label": "Email", "value": "email"}, {"label": "Phone", "value": "phone"}], "settings": {"layout": "stacked"}, "condition": null, "draft": true, "autocomplete": "", "css_class": ""},
+        {"id": "f_mail01", "kind": "field", "type": "email", "name": "email", "label": "Email address", "placeholder": "", "help": "", "default": "", "width": "full", "required": false, "rules": [], "options": [], "settings": {}, "condition": {"actions": [{"action": "show"}], "match": "all", "rules": [{"field": "contact", "operator": "equals", "value": "email"}]}, "draft": true, "autocomplete": "email", "css_class": ""}
+      ]
+    },
+    {
+      "id": "p_bbbb02",
+      "title": "Your message",
+      "condition": null,
+      "items": [
+        {"id": "f_mess01", "kind": "field", "type": "textarea", "name": "message", "label": "Message", "placeholder": "", "help": "", "default": "", "width": "full", "required": true, "rules": [{"rule": "min_length", "value": 10, "message": ""}], "options": [], "settings": {"rows": 5}, "condition": null, "draft": true, "autocomplete": "", "css_class": ""},
+        {"id": "f_cv0001", "kind": "field", "type": "file", "name": "cv", "label": "CV", "placeholder": "", "help": "", "default": "", "width": "full", "required": false, "rules": [], "options": [], "settings": {"extensions": ["pdf"], "max_size_mb": 2}, "condition": null, "draft": false, "autocomplete": "", "css_class": ""},
+        {"id": "f_src001", "kind": "field", "type": "hidden", "name": "source", "label": "Source", "placeholder": "", "help": "", "default": "", "width": "full", "required": false, "rules": [], "options": [], "settings": {"source": "query", "query_param": "utm"}, "condition": null, "draft": false, "autocomplete": "", "css_class": ""}
+      ]
+    }
+  ]
+}

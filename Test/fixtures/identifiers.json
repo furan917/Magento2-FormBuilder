@@ -1,0 +1,6 @@
+{
+  "validIdentifiers": ["contact", "a", "0", "9-lives", "a-b-c", "contact-us-2", "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"],
+  "invalidIdentifiers": ["", "-contact", "Contact", "contact_us", "contact us", "contact\n", "contact/x", "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"],
+  "validTitles": ["Contact", "  Contact  ", "x"],
+  "invalidTitles": ["", "   "]
+}

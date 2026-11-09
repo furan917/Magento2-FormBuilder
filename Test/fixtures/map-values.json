@@ -1,0 +1,359 @@
+[
+ {
+  "name": "map basic",
+  "field": {
+   "name": "f",
+   "type": "map",
+   "required": false,
+   "rules": [],
+   "options": [],
+   "settings": {}
+  },
+  "raw": {
+   "lat": "51.5074",
+   "lng": "-0.1278",
+   "zoom": "16",
+   "label": "Trafalgar Square"
+  },
+  "normalized": {
+   "lat": "51.507400",
+   "lng": "-0.127800",
+   "zoom": 16,
+   "label": "Trafalgar Square"
+  },
+  "valid": true
+ },
+ {
+  "name": "map rounds",
+  "field": {
+   "name": "f",
+   "type": "map",
+   "required": false,
+   "rules": [],
+   "options": [],
+   "settings": {}
+  },
+  "raw": {
+   "lat": "1.2345678",
+   "lng": "2.3456781"
+  },
+  "normalized": {
+   "lat": "1.234568",
+   "lng": "2.345678",
+   "zoom": null,
+   "label": ""
+  },
+  "valid": true
+ },
+ {
+  "name": "map negative zero",
+  "field": {
+   "name": "f",
+   "type": "map",
+   "required": false,
+   "rules": [],
+   "options": [],
+   "settings": {}
+  },
+  "raw": {
+   "lat": "-0.0000001",
+   "lng": "0"
+  },
+  "normalized": {
+   "lat": "0.000000",
+   "lng": "0.000000",
+   "zoom": null,
+   "label": ""
+  },
+  "valid": true
+ },
+ {
+  "name": "map lng 180",
+  "field": {
+   "name": "f",
+   "type": "map",
+   "required": false,
+   "rules": [],
+   "options": [],
+   "settings": {}
+  },
+  "raw": {
+   "lat": "0",
+   "lng": "180"
+  },
+  "normalized": {
+   "lat": "0.000000",
+   "lng": "180.000000",
+   "zoom": null,
+   "label": ""
+  },
+  "valid": true
+ },
+ {
+  "name": "map lng -180",
+  "field": {
+   "name": "f",
+   "type": "map",
+   "required": false,
+   "rules": [],
+   "options": [],
+   "settings": {}
+  },
+  "raw": {
+   "lat": "0",
+   "lng": "-180"
+  },
+  "normalized": {
+   "lat": "0.000000",
+   "lng": "-180.000000",
+   "zoom": null,
+   "label": ""
+  },
+  "valid": true
+ },
+ {
+  "name": "map lng 540",
+  "field": {
+   "name": "f",
+   "type": "map",
+   "required": false,
+   "rules": [],
+   "options": [],
+   "settings": {}
+  },
+  "raw": {
+   "lat": "0",
+   "lng": "540"
+  },
+  "normalized": {
+   "lat": "0.000000",
+   "lng": "-180.000000",
+   "zoom": null,
+   "label": ""
+  },
+  "valid": true
+ },
+ {
+  "name": "map lng -190",
+  "field": {
+   "name": "f",
+   "type": "map",
+   "required": false,
+   "rules": [],
+   "options": [],
+   "settings": {}
+  },
+  "raw": {
+   "lat": "0",
+   "lng": "-190"
+  },
+  "normalized": {
+   "lat": "0.000000",
+   "lng": "170.000000",
+   "zoom": null,
+   "label": ""
+  },
+  "valid": true
+ },
+ {
+  "name": "map zoom out of range",
+  "field": {
+   "name": "f",
+   "type": "map",
+   "required": false,
+   "rules": [],
+   "options": [],
+   "settings": {}
+  },
+  "raw": {
+   "lat": "1",
+   "lng": "2",
+   "zoom": "23"
+  },
+  "normalized": {
+   "lat": "1.000000",
+   "lng": "2.000000",
+   "zoom": null,
+   "label": ""
+  },
+  "valid": true
+ },
+ {
+  "name": "map zoom not integer",
+  "field": {
+   "name": "f",
+   "type": "map",
+   "required": false,
+   "rules": [],
+   "options": [],
+   "settings": {}
+  },
+  "raw": {
+   "lat": "1",
+   "lng": "2",
+   "zoom": "3.5"
+  },
+  "normalized": {
+   "lat": "1.000000",
+   "lng": "2.000000",
+   "zoom": null,
+   "label": ""
+  },
+  "valid": true
+ },
+ {
+  "name": "map label cleaned",
+  "field": {
+   "name": "f",
+   "type": "map",
+   "required": false,
+   "rules": [],
+   "options": [],
+   "settings": {}
+  },
+  "raw": {
+   "lat": "1",
+   "lng": "2",
+   "label": "  A\nB  "
+  },
+  "normalized": {
+   "lat": "1.000000",
+   "lng": "2.000000",
+   "zoom": null,
+   "label": "A B"
+  },
+  "valid": true
+ },
+ {
+  "name": "map latitude too high",
+  "field": {
+   "name": "f",
+   "type": "map",
+   "required": false,
+   "rules": [],
+   "options": [],
+   "settings": {}
+  },
+  "raw": {
+   "lat": "90.5",
+   "lng": "0"
+  },
+  "normalized": {
+   "lat": "90.500000",
+   "lng": "0.000000",
+   "zoom": null,
+   "label": ""
+  },
+  "valid": false
+ },
+ {
+  "name": "map exponent",
+  "field": {
+   "name": "f",
+   "type": "map",
+   "required": false,
+   "rules": [],
+   "options": [],
+   "settings": {}
+  },
+  "raw": {
+   "lat": "1e5",
+   "lng": "0"
+  },
+  "normalized": {
+   "error": "invalid"
+  },
+  "valid": false
+ },
+ {
+  "name": "map leading dot",
+  "field": {
+   "name": "f",
+   "type": "map",
+   "required": false,
+   "rules": [],
+   "options": [],
+   "settings": {}
+  },
+  "raw": {
+   "lat": ".5",
+   "lng": "0"
+  },
+  "normalized": {
+   "error": "invalid"
+  },
+  "valid": false
+ },
+ {
+  "name": "map text",
+  "field": {
+   "name": "f",
+   "type": "map",
+   "required": false,
+   "rules": [],
+   "options": [],
+   "settings": {}
+  },
+  "raw": {
+   "lat": "abc",
+   "lng": "0"
+  },
+  "normalized": {
+   "error": "invalid"
+  },
+  "valid": false
+ },
+ {
+  "name": "map one coordinate",
+  "field": {
+   "name": "f",
+   "type": "map",
+   "required": false,
+   "rules": [],
+   "options": [],
+   "settings": {}
+  },
+  "raw": {
+   "lat": "1",
+   "lng": ""
+  },
+  "normalized": {
+   "error": "incomplete"
+  },
+  "valid": false
+ },
+ {
+  "name": "map empty optional",
+  "field": {
+   "name": "f",
+   "type": "map",
+   "required": false,
+   "rules": [],
+   "options": [],
+   "settings": {}
+  },
+  "raw": {
+   "lat": "",
+   "lng": ""
+  },
+  "normalized": null,
+  "valid": true
+ },
+ {
+  "name": "map empty required",
+  "field": {
+   "name": "f",
+   "type": "map",
+   "required": true,
+   "rules": [],
+   "options": [],
+   "settings": {}
+  },
+  "raw": {
+   "lat": "",
+   "lng": ""
+  },
+  "normalized": null,
+  "valid": false
+ }
+]

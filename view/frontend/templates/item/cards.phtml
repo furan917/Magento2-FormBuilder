@@ -1,0 +1,23 @@
+<?php
+/** @var \Magento\Framework\View\Element\Template $block */
+/** @var \Magento\Framework\Escaper $escaper */
+$form = $block->getData('parent_block');
+extract($form->getItemContext((array)$block->getData('item'), $escaper), EXTR_SKIP);
+$default = (string)($item['default'] ?? '');
+?>
+<?= /* @noEscape */ $form->renderPartial($block, 'item/_open.phtml', ['group' => true]) ?>
+    <div class="ffb-cards">
+<?php foreach ((array)($item['options'] ?? []) as $index => $option): ?>
+<?php $description = trim((string)($option['description'] ?? '')); ?>
+        <label class="ffb-option ffb-card"><input<?= /* @noEscape */ $attrs([
+            'class' => 'ffb-choice',
+            'type' => 'radio',
+            'id' => $controlId . '-' . $index,
+            'name' => $base['name'],
+            'value' => (string)($option['value'] ?? ''),
+            'required' => $required,
+            'checked' => $default !== '' && (string)($option['value'] ?? '') === $default,
+        ]) ?>><span class="ffb-card-body"><span class="ffb-card-title"><?= $escaper->escapeHtml((string)($option['label'] ?? '')) ?></span><?php if ($description !== ''): ?><span class="ffb-card-description"><?= $escaper->escapeHtml($description) ?></span><?php endif; ?></span></label>
+<?php endforeach; ?>
+    </div>
+<?= /* @noEscape */ $form->renderPartial($block, 'item/_close.phtml', ['group' => true]) ?>

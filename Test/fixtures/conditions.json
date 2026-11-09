@@ -1,0 +1,2839 @@
+[
+  {
+    "name": "equals matches same",
+    "condition": {
+      "actions": [
+        {
+          "action": "show"
+        }
+      ],
+      "match": "all",
+      "rules": [
+        {
+          "field": "a",
+          "operator": "equals",
+          "value": "yes"
+        }
+      ]
+    },
+    "values": {
+      "a": "yes"
+    },
+    "expected": true
+  },
+  {
+    "name": "equals is case-insensitive and trimmed",
+    "condition": {
+      "actions": [
+        {
+          "action": "show"
+        }
+      ],
+      "match": "all",
+      "rules": [
+        {
+          "field": "a",
+          "operator": "equals",
+          "value": " YES "
+        }
+      ]
+    },
+    "values": {
+      "a": "  yEs\t"
+    },
+    "expected": true
+  },
+  {
+    "name": "equals differs",
+    "condition": {
+      "actions": [
+        {
+          "action": "show"
+        }
+      ],
+      "match": "all",
+      "rules": [
+        {
+          "field": "a",
+          "operator": "equals",
+          "value": "yes"
+        }
+      ]
+    },
+    "values": {
+      "a": "no"
+    },
+    "expected": false
+  },
+  {
+    "name": "equals array any element",
+    "condition": {
+      "actions": [
+        {
+          "action": "show"
+        }
+      ],
+      "match": "all",
+      "rules": [
+        {
+          "field": "a",
+          "operator": "equals",
+          "value": "red"
+        }
+      ]
+    },
+    "values": {
+      "a": [
+        "blue",
+        "Red"
+      ]
+    },
+    "expected": true
+  },
+  {
+    "name": "equals nbsp is not trimmed",
+    "condition": {
+      "actions": [
+        {
+          "action": "show"
+        }
+      ],
+      "match": "all",
+      "rules": [
+        {
+          "field": "a",
+          "operator": "equals",
+          "value": "yes"
+        }
+      ]
+    },
+    "values": {
+      "a": "yes "
+    },
+    "expected": false
+  },
+  {
+    "name": "equals unicode lowercase",
+    "condition": {
+      "actions": [
+        {
+          "action": "show"
+        }
+      ],
+      "match": "all",
+      "rules": [
+        {
+          "field": "a",
+          "operator": "equals",
+          "value": "ÉCOLE"
+        }
+      ]
+    },
+    "values": {
+      "a": "école"
+    },
+    "expected": true
+  },
+  {
+    "name": "not_equals differs",
+    "condition": {
+      "actions": [
+        {
+          "action": "show"
+        }
+      ],
+      "match": "all",
+      "rules": [
+        {
+          "field": "a",
+          "operator": "not_equals",
+          "value": "yes"
+        }
+      ]
+    },
+    "values": {
+      "a": "no"
+    },
+    "expected": true
+  },
+  {
+    "name": "not_equals same",
+    "condition": {
+      "actions": [
+        {
+          "action": "show"
+        }
+      ],
+      "match": "all",
+      "rules": [
+        {
+          "field": "a",
+          "operator": "not_equals",
+          "value": "yes"
+        }
+      ]
+    },
+    "values": {
+      "a": "YES"
+    },
+    "expected": false
+  },
+  {
+    "name": "not_equals array negates equals",
+    "condition": {
+      "actions": [
+        {
+          "action": "show"
+        }
+      ],
+      "match": "all",
+      "rules": [
+        {
+          "field": "a",
+          "operator": "not_equals",
+          "value": "red"
+        }
+      ]
+    },
+    "values": {
+      "a": [
+        "blue",
+        "red"
+      ]
+    },
+    "expected": false
+  },
+  {
+    "name": "not_equals array none match",
+    "condition": {
+      "actions": [
+        {
+          "action": "show"
+        }
+      ],
+      "match": "all",
+      "rules": [
+        {
+          "field": "a",
+          "operator": "not_equals",
+          "value": "green"
+        }
+      ]
+    },
+    "values": {
+      "a": [
+        "blue",
+        "red"
+      ]
+    },
+    "expected": true
+  },
+  {
+    "name": "contains substring",
+    "condition": {
+      "actions": [
+        {
+          "action": "show"
+        }
+      ],
+      "match": "all",
+      "rules": [
+        {
+          "field": "a",
+          "operator": "contains",
+          "value": "ell"
+        }
+      ]
+    },
+    "values": {
+      "a": "Hello"
+    },
+    "expected": true
+  },
+  {
+    "name": "contains case-insensitive",
+    "condition": {
+      "actions": [
+        {
+          "action": "show"
+        }
+      ],
+      "match": "all",
+      "rules": [
+        {
+          "field": "a",
+          "operator": "contains",
+          "value": "ELL"
+        }
+      ]
+    },
+    "values": {
+      "a": "hello"
+    },
+    "expected": true
+  },
+  {
+    "name": "contains missing substring",
+    "condition": {
+      "actions": [
+        {
+          "action": "show"
+        }
+      ],
+      "match": "all",
+      "rules": [
+        {
+          "field": "a",
+          "operator": "contains",
+          "value": "xyz"
+        }
+      ]
+    },
+    "values": {
+      "a": "hello"
+    },
+    "expected": false
+  },
+  {
+    "name": "contains array requires element equality",
+    "condition": {
+      "actions": [
+        {
+          "action": "show"
+        }
+      ],
+      "match": "all",
+      "rules": [
+        {
+          "field": "a",
+          "operator": "contains",
+          "value": "re"
+        }
+      ]
+    },
+    "values": {
+      "a": [
+        "red",
+        "blue"
+      ]
+    },
+    "expected": false
+  },
+  {
+    "name": "contains array element equals",
+    "condition": {
+      "actions": [
+        {
+          "action": "show"
+        }
+      ],
+      "match": "all",
+      "rules": [
+        {
+          "field": "a",
+          "operator": "contains",
+          "value": "RED"
+        }
+      ]
+    },
+    "values": {
+      "a": [
+        "red",
+        "blue"
+      ]
+    },
+    "expected": true
+  },
+  {
+    "name": "not_contains absent",
+    "condition": {
+      "actions": [
+        {
+          "action": "show"
+        }
+      ],
+      "match": "all",
+      "rules": [
+        {
+          "field": "a",
+          "operator": "not_contains",
+          "value": "xyz"
+        }
+      ]
+    },
+    "values": {
+      "a": "hello"
+    },
+    "expected": true
+  },
+  {
+    "name": "not_contains present",
+    "condition": {
+      "actions": [
+        {
+          "action": "show"
+        }
+      ],
+      "match": "all",
+      "rules": [
+        {
+          "field": "a",
+          "operator": "not_contains",
+          "value": "ell"
+        }
+      ]
+    },
+    "values": {
+      "a": "hello"
+    },
+    "expected": false
+  },
+  {
+    "name": "not_contains array",
+    "condition": {
+      "actions": [
+        {
+          "action": "show"
+        }
+      ],
+      "match": "all",
+      "rules": [
+        {
+          "field": "a",
+          "operator": "not_contains",
+          "value": "red"
+        }
+      ]
+    },
+    "values": {
+      "a": [
+        "red"
+      ]
+    },
+    "expected": false
+  },
+  {
+    "name": "not_contains array absent",
+    "condition": {
+      "actions": [
+        {
+          "action": "show"
+        }
+      ],
+      "match": "all",
+      "rules": [
+        {
+          "field": "a",
+          "operator": "not_contains",
+          "value": "green"
+        }
+      ]
+    },
+    "values": {
+      "a": [
+        "red"
+      ]
+    },
+    "expected": true
+  },
+  {
+    "name": "starts_with match",
+    "condition": {
+      "actions": [
+        {
+          "action": "show"
+        }
+      ],
+      "match": "all",
+      "rules": [
+        {
+          "field": "a",
+          "operator": "starts_with",
+          "value": "he"
+        }
+      ]
+    },
+    "values": {
+      "a": "Hello"
+    },
+    "expected": true
+  },
+  {
+    "name": "starts_with no match",
+    "condition": {
+      "actions": [
+        {
+          "action": "show"
+        }
+      ],
+      "match": "all",
+      "rules": [
+        {
+          "field": "a",
+          "operator": "starts_with",
+          "value": "lo"
+        }
+      ]
+    },
+    "values": {
+      "a": "Hello"
+    },
+    "expected": false
+  },
+  {
+    "name": "starts_with array",
+    "condition": {
+      "actions": [
+        {
+          "action": "show"
+        }
+      ],
+      "match": "all",
+      "rules": [
+        {
+          "field": "a",
+          "operator": "starts_with",
+          "value": "bl"
+        }
+      ]
+    },
+    "values": {
+      "a": [
+        "red",
+        "blue"
+      ]
+    },
+    "expected": true
+  },
+  {
+    "name": "ends_with match",
+    "condition": {
+      "actions": [
+        {
+          "action": "show"
+        }
+      ],
+      "match": "all",
+      "rules": [
+        {
+          "field": "a",
+          "operator": "ends_with",
+          "value": "LO"
+        }
+      ]
+    },
+    "values": {
+      "a": "hello "
+    },
+    "expected": true
+  },
+  {
+    "name": "ends_with no match",
+    "condition": {
+      "actions": [
+        {
+          "action": "show"
+        }
+      ],
+      "match": "all",
+      "rules": [
+        {
+          "field": "a",
+          "operator": "ends_with",
+          "value": "he"
+        }
+      ]
+    },
+    "values": {
+      "a": "hello"
+    },
+    "expected": false
+  },
+  {
+    "name": "ends_with array",
+    "condition": {
+      "actions": [
+        {
+          "action": "show"
+        }
+      ],
+      "match": "all",
+      "rules": [
+        {
+          "field": "a",
+          "operator": "ends_with",
+          "value": "ed"
+        }
+      ]
+    },
+    "values": {
+      "a": [
+        "red",
+        "blue"
+      ]
+    },
+    "expected": true
+  },
+  {
+    "name": "is_empty missing",
+    "condition": {
+      "actions": [
+        {
+          "action": "show"
+        }
+      ],
+      "match": "all",
+      "rules": [
+        {
+          "field": "a",
+          "operator": "is_empty",
+          "value": ""
+        }
+      ]
+    },
+    "values": {},
+    "expected": true
+  },
+  {
+    "name": "is_empty whitespace",
+    "condition": {
+      "actions": [
+        {
+          "action": "show"
+        }
+      ],
+      "match": "all",
+      "rules": [
+        {
+          "field": "a",
+          "operator": "is_empty",
+          "value": ""
+        }
+      ]
+    },
+    "values": {
+      "a": " \t\n"
+    },
+    "expected": true
+  },
+  {
+    "name": "is_empty empty array",
+    "condition": {
+      "actions": [
+        {
+          "action": "show"
+        }
+      ],
+      "match": "all",
+      "rules": [
+        {
+          "field": "a",
+          "operator": "is_empty",
+          "value": ""
+        }
+      ]
+    },
+    "values": {
+      "a": []
+    },
+    "expected": true
+  },
+  {
+    "name": "is_empty non-empty array",
+    "condition": {
+      "actions": [
+        {
+          "action": "show"
+        }
+      ],
+      "match": "all",
+      "rules": [
+        {
+          "field": "a",
+          "operator": "is_empty",
+          "value": ""
+        }
+      ]
+    },
+    "values": {
+      "a": [
+        "x"
+      ]
+    },
+    "expected": false
+  },
+  {
+    "name": "is_empty nbsp is content",
+    "condition": {
+      "actions": [
+        {
+          "action": "show"
+        }
+      ],
+      "match": "all",
+      "rules": [
+        {
+          "field": "a",
+          "operator": "is_empty",
+          "value": ""
+        }
+      ]
+    },
+    "values": {
+      "a": " "
+    },
+    "expected": false
+  },
+  {
+    "name": "not_empty value",
+    "condition": {
+      "actions": [
+        {
+          "action": "show"
+        }
+      ],
+      "match": "all",
+      "rules": [
+        {
+          "field": "a",
+          "operator": "not_empty",
+          "value": ""
+        }
+      ]
+    },
+    "values": {
+      "a": "x"
+    },
+    "expected": true
+  },
+  {
+    "name": "not_empty missing",
+    "condition": {
+      "actions": [
+        {
+          "action": "show"
+        }
+      ],
+      "match": "all",
+      "rules": [
+        {
+          "field": "a",
+          "operator": "not_empty",
+          "value": ""
+        }
+      ]
+    },
+    "values": {},
+    "expected": false
+  },
+  {
+    "name": "not_empty array",
+    "condition": {
+      "actions": [
+        {
+          "action": "show"
+        }
+      ],
+      "match": "all",
+      "rules": [
+        {
+          "field": "a",
+          "operator": "not_empty",
+          "value": ""
+        }
+      ]
+    },
+    "values": {
+      "a": [
+        "x"
+      ]
+    },
+    "expected": true
+  },
+  {
+    "name": "not_empty empty array",
+    "condition": {
+      "actions": [
+        {
+          "action": "show"
+        }
+      ],
+      "match": "all",
+      "rules": [
+        {
+          "field": "a",
+          "operator": "not_empty",
+          "value": ""
+        }
+      ]
+    },
+    "values": {
+      "a": []
+    },
+    "expected": false
+  },
+  {
+    "name": "greater_than numeric",
+    "condition": {
+      "actions": [
+        {
+          "action": "show"
+        }
+      ],
+      "match": "all",
+      "rules": [
+        {
+          "field": "a",
+          "operator": "greater_than",
+          "value": "5"
+        }
+      ]
+    },
+    "values": {
+      "a": "10"
+    },
+    "expected": true
+  },
+  {
+    "name": "greater_than numeric not string compare",
+    "condition": {
+      "actions": [
+        {
+          "action": "show"
+        }
+      ],
+      "match": "all",
+      "rules": [
+        {
+          "field": "a",
+          "operator": "greater_than",
+          "value": "9"
+        }
+      ]
+    },
+    "values": {
+      "a": "10"
+    },
+    "expected": true
+  },
+  {
+    "name": "greater_than equal is false",
+    "condition": {
+      "actions": [
+        {
+          "action": "show"
+        }
+      ],
+      "match": "all",
+      "rules": [
+        {
+          "field": "a",
+          "operator": "greater_than",
+          "value": "5"
+        }
+      ]
+    },
+    "values": {
+      "a": "5.0"
+    },
+    "expected": false
+  },
+  {
+    "name": "greater_than negative decimal",
+    "condition": {
+      "actions": [
+        {
+          "action": "show"
+        }
+      ],
+      "match": "all",
+      "rules": [
+        {
+          "field": "a",
+          "operator": "greater_than",
+          "value": "-2.5"
+        }
+      ]
+    },
+    "values": {
+      "a": "-2.4"
+    },
+    "expected": true
+  },
+  {
+    "name": "greater_than dates",
+    "condition": {
+      "actions": [
+        {
+          "action": "show"
+        }
+      ],
+      "match": "all",
+      "rules": [
+        {
+          "field": "a",
+          "operator": "greater_than",
+          "value": "2024-01-31"
+        }
+      ]
+    },
+    "values": {
+      "a": "2024-02-01"
+    },
+    "expected": true
+  },
+  {
+    "name": "greater_than non-numeric false",
+    "condition": {
+      "actions": [
+        {
+          "action": "show"
+        }
+      ],
+      "match": "all",
+      "rules": [
+        {
+          "field": "a",
+          "operator": "greater_than",
+          "value": "5"
+        }
+      ]
+    },
+    "values": {
+      "a": "abc"
+    },
+    "expected": false
+  },
+  {
+    "name": "greater_than mixed numeric and date false",
+    "condition": {
+      "actions": [
+        {
+          "action": "show"
+        }
+      ],
+      "match": "all",
+      "rules": [
+        {
+          "field": "a",
+          "operator": "greater_than",
+          "value": "2024-01-01"
+        }
+      ]
+    },
+    "values": {
+      "a": "5"
+    },
+    "expected": false
+  },
+  {
+    "name": "greater_than array any element",
+    "condition": {
+      "actions": [
+        {
+          "action": "show"
+        }
+      ],
+      "match": "all",
+      "rules": [
+        {
+          "field": "a",
+          "operator": "greater_than",
+          "value": "5"
+        }
+      ]
+    },
+    "values": {
+      "a": [
+        "1",
+        "7"
+      ]
+    },
+    "expected": true
+  },
+  {
+    "name": "less_than numeric",
+    "condition": {
+      "actions": [
+        {
+          "action": "show"
+        }
+      ],
+      "match": "all",
+      "rules": [
+        {
+          "field": "a",
+          "operator": "less_than",
+          "value": "10"
+        }
+      ]
+    },
+    "values": {
+      "a": "9"
+    },
+    "expected": true
+  },
+  {
+    "name": "less_than numeric not string compare",
+    "condition": {
+      "actions": [
+        {
+          "action": "show"
+        }
+      ],
+      "match": "all",
+      "rules": [
+        {
+          "field": "a",
+          "operator": "less_than",
+          "value": "10"
+        }
+      ]
+    },
+    "values": {
+      "a": "9.5"
+    },
+    "expected": true
+  },
+  {
+    "name": "less_than false",
+    "condition": {
+      "actions": [
+        {
+          "action": "show"
+        }
+      ],
+      "match": "all",
+      "rules": [
+        {
+          "field": "a",
+          "operator": "less_than",
+          "value": "5"
+        }
+      ]
+    },
+    "values": {
+      "a": "6"
+    },
+    "expected": false
+  },
+  {
+    "name": "less_than dates",
+    "condition": {
+      "actions": [
+        {
+          "action": "show"
+        }
+      ],
+      "match": "all",
+      "rules": [
+        {
+          "field": "a",
+          "operator": "less_than",
+          "value": "2024-02-01"
+        }
+      ]
+    },
+    "values": {
+      "a": "2024-01-31"
+    },
+    "expected": true
+  },
+  {
+    "name": "less_than empty value false",
+    "condition": {
+      "actions": [
+        {
+          "action": "show"
+        }
+      ],
+      "match": "all",
+      "rules": [
+        {
+          "field": "a",
+          "operator": "less_than",
+          "value": "5"
+        }
+      ]
+    },
+    "values": {
+      "a": ""
+    },
+    "expected": false
+  },
+  {
+    "name": "greater_or_equal equal",
+    "condition": {
+      "actions": [
+        {
+          "action": "show"
+        }
+      ],
+      "match": "all",
+      "rules": [
+        {
+          "field": "a",
+          "operator": "greater_or_equal",
+          "value": "5"
+        }
+      ]
+    },
+    "values": {
+      "a": "5"
+    },
+    "expected": true
+  },
+  {
+    "name": "greater_or_equal less",
+    "condition": {
+      "actions": [
+        {
+          "action": "show"
+        }
+      ],
+      "match": "all",
+      "rules": [
+        {
+          "field": "a",
+          "operator": "greater_or_equal",
+          "value": "5"
+        }
+      ]
+    },
+    "values": {
+      "a": "4"
+    },
+    "expected": false
+  },
+  {
+    "name": "greater_or_equal dates equal",
+    "condition": {
+      "actions": [
+        {
+          "action": "show"
+        }
+      ],
+      "match": "all",
+      "rules": [
+        {
+          "field": "a",
+          "operator": "greater_or_equal",
+          "value": "2024-01-01"
+        }
+      ]
+    },
+    "values": {
+      "a": "2024-01-01"
+    },
+    "expected": true
+  },
+  {
+    "name": "greater_or_equal non-numeric",
+    "condition": {
+      "actions": [
+        {
+          "action": "show"
+        }
+      ],
+      "match": "all",
+      "rules": [
+        {
+          "field": "a",
+          "operator": "greater_or_equal",
+          "value": "a"
+        }
+      ]
+    },
+    "values": {
+      "a": "b"
+    },
+    "expected": false
+  },
+  {
+    "name": "less_or_equal equal",
+    "condition": {
+      "actions": [
+        {
+          "action": "show"
+        }
+      ],
+      "match": "all",
+      "rules": [
+        {
+          "field": "a",
+          "operator": "less_or_equal",
+          "value": "5"
+        }
+      ]
+    },
+    "values": {
+      "a": "5"
+    },
+    "expected": true
+  },
+  {
+    "name": "less_or_equal greater",
+    "condition": {
+      "actions": [
+        {
+          "action": "show"
+        }
+      ],
+      "match": "all",
+      "rules": [
+        {
+          "field": "a",
+          "operator": "less_or_equal",
+          "value": "5"
+        }
+      ]
+    },
+    "values": {
+      "a": "6"
+    },
+    "expected": false
+  },
+  {
+    "name": "less_or_equal dates",
+    "condition": {
+      "actions": [
+        {
+          "action": "show"
+        }
+      ],
+      "match": "all",
+      "rules": [
+        {
+          "field": "a",
+          "operator": "less_or_equal",
+          "value": "2024-01-02"
+        }
+      ]
+    },
+    "values": {
+      "a": "2024-01-01"
+    },
+    "expected": true
+  },
+  {
+    "name": "less_or_equal trimmed numerics",
+    "condition": {
+      "actions": [
+        {
+          "action": "show"
+        }
+      ],
+      "match": "all",
+      "rules": [
+        {
+          "field": "a",
+          "operator": "less_or_equal",
+          "value": " 5 "
+        }
+      ]
+    },
+    "values": {
+      "a": " 4 "
+    },
+    "expected": true
+  },
+  {
+    "name": "unknown operator is false",
+    "condition": {
+      "actions": [
+        {
+          "action": "show"
+        }
+      ],
+      "match": "all",
+      "rules": [
+        {
+          "field": "a",
+          "operator": "bogus",
+          "value": "x"
+        }
+      ]
+    },
+    "values": {
+      "a": "x"
+    },
+    "expected": false
+  },
+  {
+    "name": "unknown operator hide action inverts",
+    "condition": {
+      "actions": [
+        {
+          "action": "hide"
+        }
+      ],
+      "match": "all",
+      "rules": [
+        {
+          "field": "a",
+          "operator": "bogus",
+          "value": "x"
+        }
+      ]
+    },
+    "values": {
+      "a": "x"
+    },
+    "expected": true
+  },
+  {
+    "name": "missing field equals empty",
+    "condition": {
+      "actions": [
+        {
+          "action": "show"
+        }
+      ],
+      "match": "all",
+      "rules": [
+        {
+          "field": "a",
+          "operator": "equals",
+          "value": ""
+        }
+      ]
+    },
+    "values": {},
+    "expected": true
+  },
+  {
+    "name": "group any inside all matches via second member",
+    "condition": {
+      "actions": [
+        {
+          "action": "show"
+        }
+      ],
+      "match": "all",
+      "rules": [
+        {
+          "field": "a",
+          "operator": "equals",
+          "value": "1"
+        },
+        {
+          "match": "any",
+          "rules": [
+            {
+              "field": "b",
+              "operator": "equals",
+              "value": "1"
+            },
+            {
+              "field": "c",
+              "operator": "equals",
+              "value": "1"
+            }
+          ]
+        }
+      ]
+    },
+    "values": {
+      "a": "1",
+      "c": "1"
+    },
+    "expected": true
+  },
+  {
+    "name": "group any inside all fails when no member matches",
+    "condition": {
+      "actions": [
+        {
+          "action": "show"
+        }
+      ],
+      "match": "all",
+      "rules": [
+        {
+          "field": "a",
+          "operator": "equals",
+          "value": "1"
+        },
+        {
+          "match": "any",
+          "rules": [
+            {
+              "field": "b",
+              "operator": "equals",
+              "value": "1"
+            },
+            {
+              "field": "c",
+              "operator": "equals",
+              "value": "1"
+            }
+          ]
+        }
+      ]
+    },
+    "values": {
+      "a": "1"
+    },
+    "expected": false
+  },
+  {
+    "name": "group any inside all fails when outer rule fails",
+    "condition": {
+      "actions": [
+        {
+          "action": "show"
+        }
+      ],
+      "match": "all",
+      "rules": [
+        {
+          "field": "a",
+          "operator": "equals",
+          "value": "1"
+        },
+        {
+          "match": "any",
+          "rules": [
+            {
+              "field": "b",
+              "operator": "equals",
+              "value": "1"
+            },
+            {
+              "field": "c",
+              "operator": "equals",
+              "value": "1"
+            }
+          ]
+        }
+      ]
+    },
+    "values": {
+      "a": "2",
+      "b": "1"
+    },
+    "expected": false
+  },
+  {
+    "name": "hide action inverts a group result",
+    "condition": {
+      "actions": [
+        {
+          "action": "hide"
+        }
+      ],
+      "match": "all",
+      "rules": [
+        {
+          "field": "a",
+          "operator": "equals",
+          "value": "1"
+        },
+        {
+          "match": "any",
+          "rules": [
+            {
+              "field": "b",
+              "operator": "equals",
+              "value": "1"
+            },
+            {
+              "field": "c",
+              "operator": "equals",
+              "value": "1"
+            }
+          ]
+        }
+      ]
+    },
+    "values": {
+      "a": "1",
+      "c": "1"
+    },
+    "expected": false
+  },
+  {
+    "name": "all group inside any matches",
+    "condition": {
+      "actions": [
+        {
+          "action": "show"
+        }
+      ],
+      "match": "any",
+      "rules": [
+        {
+          "field": "a",
+          "operator": "equals",
+          "value": "1"
+        },
+        {
+          "match": "all",
+          "rules": [
+            {
+              "field": "b",
+              "operator": "equals",
+              "value": "1"
+            },
+            {
+              "field": "c",
+              "operator": "equals",
+              "value": "1"
+            }
+          ]
+        }
+      ]
+    },
+    "values": {
+      "b": "1",
+      "c": "1"
+    },
+    "expected": true
+  },
+  {
+    "name": "all group inside any needs every member",
+    "condition": {
+      "actions": [
+        {
+          "action": "show"
+        }
+      ],
+      "match": "any",
+      "rules": [
+        {
+          "field": "a",
+          "operator": "equals",
+          "value": "1"
+        },
+        {
+          "match": "all",
+          "rules": [
+            {
+              "field": "b",
+              "operator": "equals",
+              "value": "1"
+            },
+            {
+              "field": "c",
+              "operator": "equals",
+              "value": "1"
+            }
+          ]
+        }
+      ]
+    },
+    "values": {
+      "b": "1"
+    },
+    "expected": false
+  },
+  {
+    "name": "three levels of groups evaluate",
+    "condition": {
+      "actions": [
+        {
+          "action": "show"
+        }
+      ],
+      "match": "all",
+      "rules": [
+        {
+          "match": "all",
+          "rules": [
+            {
+              "match": "all",
+              "rules": [
+                {
+                  "field": "a",
+                  "operator": "equals",
+                  "value": "1"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "values": {
+      "a": "1"
+    },
+    "expected": true
+  },
+  {
+    "name": "four levels of groups never match",
+    "condition": {
+      "actions": [
+        {
+          "action": "show"
+        }
+      ],
+      "match": "all",
+      "rules": [
+        {
+          "match": "all",
+          "rules": [
+            {
+              "match": "all",
+              "rules": [
+                {
+                  "match": "all",
+                  "rules": [
+                    {
+                      "field": "a",
+                      "operator": "equals",
+                      "value": "1"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "values": {
+      "a": "1"
+    },
+    "expected": false
+  },
+  {
+    "name": "empty nested group never matches",
+    "condition": {
+      "actions": [
+        {
+          "action": "show"
+        }
+      ],
+      "match": "any",
+      "rules": [
+        {
+          "match": "all",
+          "rules": []
+        }
+      ]
+    },
+    "values": {
+      "a": "1"
+    },
+    "expected": false
+  },
+  {
+    "name": "value_field equals matches trimmed case-insensitive",
+    "condition": {
+      "actions": [
+        {
+          "action": "show"
+        }
+      ],
+      "match": "all",
+      "rules": [
+        {
+          "field": "a",
+          "operator": "equals",
+          "value_field": "b"
+        }
+      ]
+    },
+    "values": {
+      "a": " A@X.com ",
+      "b": "a@x.COM"
+    },
+    "expected": true
+  },
+  {
+    "name": "value_field equals differs",
+    "condition": {
+      "actions": [
+        {
+          "action": "show"
+        }
+      ],
+      "match": "all",
+      "rules": [
+        {
+          "field": "a",
+          "operator": "equals",
+          "value_field": "b"
+        }
+      ]
+    },
+    "values": {
+      "a": "1",
+      "b": "2"
+    },
+    "expected": false
+  },
+  {
+    "name": "value_field missing counts as empty",
+    "condition": {
+      "actions": [
+        {
+          "action": "show"
+        }
+      ],
+      "match": "all",
+      "rules": [
+        {
+          "field": "a",
+          "operator": "equals",
+          "value_field": "b"
+        }
+      ]
+    },
+    "values": {
+      "a": ""
+    },
+    "expected": true
+  },
+  {
+    "name": "value_field missing differs from an answer",
+    "condition": {
+      "actions": [
+        {
+          "action": "show"
+        }
+      ],
+      "match": "all",
+      "rules": [
+        {
+          "field": "a",
+          "operator": "equals",
+          "value_field": "b"
+        }
+      ]
+    },
+    "values": {
+      "a": "x"
+    },
+    "expected": false
+  },
+  {
+    "name": "value_field numeric greater than",
+    "condition": {
+      "actions": [
+        {
+          "action": "show"
+        }
+      ],
+      "match": "all",
+      "rules": [
+        {
+          "field": "a",
+          "operator": "greater_than",
+          "value_field": "b"
+        }
+      ]
+    },
+    "values": {
+      "a": "10",
+      "b": "9"
+    },
+    "expected": true
+  },
+  {
+    "name": "value_field numeric not greater than",
+    "condition": {
+      "actions": [
+        {
+          "action": "show"
+        }
+      ],
+      "match": "all",
+      "rules": [
+        {
+          "field": "a",
+          "operator": "greater_than",
+          "value_field": "b"
+        }
+      ]
+    },
+    "values": {
+      "a": "9",
+      "b": "10"
+    },
+    "expected": false
+  },
+  {
+    "name": "value_field date less than",
+    "condition": {
+      "actions": [
+        {
+          "action": "show"
+        }
+      ],
+      "match": "all",
+      "rules": [
+        {
+          "field": "a",
+          "operator": "less_than",
+          "value_field": "b"
+        }
+      ]
+    },
+    "values": {
+      "a": "2026-01-02",
+      "b": "2026-01-10"
+    },
+    "expected": true
+  },
+  {
+    "name": "value_field list answer is one entry per line",
+    "condition": {
+      "actions": [
+        {
+          "action": "show"
+        }
+      ],
+      "match": "all",
+      "rules": [
+        {
+          "field": "a",
+          "operator": "is_one_of",
+          "value_field": "b"
+        }
+      ]
+    },
+    "values": {
+      "a": "x",
+      "b": [
+        "w",
+        "X"
+      ]
+    },
+    "expected": true
+  },
+  {
+    "name": "value_field list answer without the value",
+    "condition": {
+      "actions": [
+        {
+          "action": "show"
+        }
+      ],
+      "match": "all",
+      "rules": [
+        {
+          "field": "a",
+          "operator": "is_one_of",
+          "value_field": "b"
+        }
+      ]
+    },
+    "values": {
+      "a": "q",
+      "b": [
+        "w",
+        "X"
+      ]
+    },
+    "expected": false
+  },
+  {
+    "name": "value_date greater than three days ahead matches",
+    "condition": {
+      "actions": [
+        {
+          "action": "show"
+        }
+      ],
+      "match": "all",
+      "rules": [
+        {
+          "field": "d",
+          "operator": "greater_than",
+          "value_date": {
+            "days": 3
+          }
+        }
+      ]
+    },
+    "values": {
+      "d": "2026-11-11"
+    },
+    "fields": {
+      "d": {
+        "type": "date",
+        "relative_date": "Y-m-d"
+      }
+    },
+    "today": "2026-11-07",
+    "expected": true
+  },
+  {
+    "name": "value_date greater than three days ahead needs a later day",
+    "condition": {
+      "actions": [
+        {
+          "action": "show"
+        }
+      ],
+      "match": "all",
+      "rules": [
+        {
+          "field": "d",
+          "operator": "greater_than",
+          "value_date": {
+            "days": 3
+          }
+        }
+      ]
+    },
+    "values": {
+      "d": "2026-11-10"
+    },
+    "fields": {
+      "d": {
+        "type": "date",
+        "relative_date": "Y-m-d"
+      }
+    },
+    "today": "2026-11-07",
+    "expected": false
+  },
+  {
+    "name": "value_date equals a week ago",
+    "condition": {
+      "actions": [
+        {
+          "action": "show"
+        }
+      ],
+      "match": "all",
+      "rules": [
+        {
+          "field": "d",
+          "operator": "equals",
+          "value_date": {
+            "days": -7
+          }
+        }
+      ]
+    },
+    "values": {
+      "d": "2026-10-31"
+    },
+    "fields": {
+      "d": {
+        "type": "date",
+        "relative_date": "Y-m-d"
+      }
+    },
+    "today": "2026-11-07",
+    "expected": true
+  },
+  {
+    "name": "value_date less or equal today",
+    "condition": {
+      "actions": [
+        {
+          "action": "show"
+        }
+      ],
+      "match": "all",
+      "rules": [
+        {
+          "field": "d",
+          "operator": "less_or_equal",
+          "value_date": {
+            "days": 0
+          }
+        }
+      ]
+    },
+    "values": {
+      "d": "2026-11-07"
+    },
+    "fields": {
+      "d": {
+        "type": "date",
+        "relative_date": "Y-m-d"
+      }
+    },
+    "today": "2026-11-07",
+    "expected": true
+  },
+  {
+    "name": "value_date crosses a leap day",
+    "condition": {
+      "actions": [
+        {
+          "action": "show"
+        }
+      ],
+      "match": "all",
+      "rules": [
+        {
+          "field": "d",
+          "operator": "equals",
+          "value_date": {
+            "days": 1
+          }
+        }
+      ]
+    },
+    "values": {
+      "d": "2028-02-29"
+    },
+    "fields": {
+      "d": {
+        "type": "date",
+        "relative_date": "Y-m-d"
+      }
+    },
+    "today": "2028-02-28",
+    "expected": true
+  },
+  {
+    "name": "value_date crosses a year end",
+    "condition": {
+      "actions": [
+        {
+          "action": "show"
+        }
+      ],
+      "match": "all",
+      "rules": [
+        {
+          "field": "d",
+          "operator": "equals",
+          "value_date": {
+            "days": 1
+          }
+        }
+      ]
+    },
+    "values": {
+      "d": "2027-01-01"
+    },
+    "fields": {
+      "d": {
+        "type": "date",
+        "relative_date": "Y-m-d"
+      }
+    },
+    "today": "2026-12-31",
+    "expected": true
+  },
+  {
+    "name": "value_date never matches without today",
+    "condition": {
+      "actions": [
+        {
+          "action": "show"
+        }
+      ],
+      "match": "all",
+      "rules": [
+        {
+          "field": "d",
+          "operator": "equals",
+          "value_date": {
+            "days": 0
+          }
+        }
+      ]
+    },
+    "values": {
+      "d": "2026-11-07"
+    },
+    "fields": {
+      "d": {
+        "type": "date",
+        "relative_date": "Y-m-d"
+      }
+    },
+    "expected": false
+  },
+  {
+    "name": "value_date never matches an invalid today",
+    "condition": {
+      "actions": [
+        {
+          "action": "show"
+        }
+      ],
+      "match": "all",
+      "rules": [
+        {
+          "field": "d",
+          "operator": "equals",
+          "value_date": {
+            "days": 0
+          }
+        }
+      ]
+    },
+    "values": {
+      "d": "2026-02-31"
+    },
+    "fields": {
+      "d": {
+        "type": "date",
+        "relative_date": "Y-m-d"
+      }
+    },
+    "today": "2026-02-31",
+    "expected": false
+  },
+  {
+    "name": "value_date never matches a source without relative date support",
+    "condition": {
+      "actions": [
+        {
+          "action": "show"
+        }
+      ],
+      "match": "all",
+      "rules": [
+        {
+          "field": "d",
+          "operator": "equals",
+          "value_date": {
+            "days": 0
+          }
+        }
+      ]
+    },
+    "values": {
+      "d": "2026-11-07"
+    },
+    "fields": {
+      "d": {
+        "type": "text"
+      }
+    },
+    "today": "2026-11-07",
+    "expected": false
+  },
+  {
+    "name": "value_date never matches more than 3650 days",
+    "condition": {
+      "actions": [
+        {
+          "action": "show"
+        }
+      ],
+      "match": "all",
+      "rules": [
+        {
+          "field": "d",
+          "operator": "equals",
+          "value_date": {
+            "days": 3651
+          }
+        }
+      ]
+    },
+    "values": {
+      "d": "2037-11-08"
+    },
+    "fields": {
+      "d": {
+        "type": "date",
+        "relative_date": "Y-m-d"
+      }
+    },
+    "today": "2026-11-07",
+    "expected": false
+  },
+  {
+    "name": "value_date month equals the current month",
+    "condition": {
+      "actions": [
+        {
+          "action": "show"
+        }
+      ],
+      "match": "all",
+      "rules": [
+        {
+          "field": "m",
+          "operator": "equals",
+          "value_date": {
+            "days": 5
+          }
+        }
+      ]
+    },
+    "values": {
+      "m": "2026-11"
+    },
+    "fields": {
+      "m": {
+        "type": "month",
+        "relative_date": "Y-m"
+      }
+    },
+    "today": "2026-11-20",
+    "expected": true
+  },
+  {
+    "name": "value_date month greater than the current month needs a later month",
+    "condition": {
+      "actions": [
+        {
+          "action": "show"
+        }
+      ],
+      "match": "all",
+      "rules": [
+        {
+          "field": "m",
+          "operator": "greater_than",
+          "value_date": {
+            "days": 5
+          }
+        }
+      ]
+    },
+    "values": {
+      "m": "2026-11"
+    },
+    "fields": {
+      "m": {
+        "type": "month",
+        "relative_date": "Y-m"
+      }
+    },
+    "today": "2026-11-20",
+    "expected": false
+  },
+  {
+    "name": "value_date month greater than the current month",
+    "condition": {
+      "actions": [
+        {
+          "action": "show"
+        }
+      ],
+      "match": "all",
+      "rules": [
+        {
+          "field": "m",
+          "operator": "greater_than",
+          "value_date": {
+            "days": 5
+          }
+        }
+      ]
+    },
+    "values": {
+      "m": "2026-12"
+    },
+    "fields": {
+      "m": {
+        "type": "month",
+        "relative_date": "Y-m"
+      }
+    },
+    "today": "2026-11-20",
+    "expected": true
+  },
+  {
+    "name": "value_date month a month ago",
+    "condition": {
+      "actions": [
+        {
+          "action": "show"
+        }
+      ],
+      "match": "all",
+      "rules": [
+        {
+          "field": "m",
+          "operator": "equals",
+          "value_date": {
+            "days": -31
+          }
+        }
+      ]
+    },
+    "values": {
+      "m": "2026-10"
+    },
+    "fields": {
+      "m": {
+        "type": "month",
+        "relative_date": "Y-m"
+      }
+    },
+    "today": "2026-11-20",
+    "expected": true
+  },
+  {
+    "name": "value_date datetime compares the date part",
+    "condition": {
+      "actions": [
+        {
+          "action": "show"
+        }
+      ],
+      "match": "all",
+      "rules": [
+        {
+          "field": "t",
+          "operator": "equals",
+          "value_date": {
+            "days": 0
+          }
+        }
+      ]
+    },
+    "values": {
+      "t": "2026-11-07T23:59"
+    },
+    "fields": {
+      "t": {
+        "type": "datetime",
+        "relative_date": "Y-m-d"
+      }
+    },
+    "today": "2026-11-07",
+    "expected": true
+  },
+  {
+    "name": "value_date datetime later day is greater",
+    "condition": {
+      "actions": [
+        {
+          "action": "show"
+        }
+      ],
+      "match": "all",
+      "rules": [
+        {
+          "field": "t",
+          "operator": "greater_than",
+          "value_date": {
+            "days": 0
+          }
+        }
+      ]
+    },
+    "values": {
+      "t": "2026-11-08T00:00"
+    },
+    "fields": {
+      "t": {
+        "type": "datetime",
+        "relative_date": "Y-m-d"
+      }
+    },
+    "today": "2026-11-07",
+    "expected": true
+  },
+  {
+    "name": "value_date datetime same day is not greater",
+    "condition": {
+      "actions": [
+        {
+          "action": "show"
+        }
+      ],
+      "match": "all",
+      "rules": [
+        {
+          "field": "t",
+          "operator": "greater_than",
+          "value_date": {
+            "days": 0
+          }
+        }
+      ]
+    },
+    "values": {
+      "t": "2026-11-07T23:59"
+    },
+    "fields": {
+      "t": {
+        "type": "datetime",
+        "relative_date": "Y-m-d"
+      }
+    },
+    "today": "2026-11-07",
+    "expected": false
+  },
+  {
+    "name": "value_date empty answer never matches",
+    "condition": {
+      "actions": [
+        {
+          "action": "show"
+        }
+      ],
+      "match": "all",
+      "rules": [
+        {
+          "field": "d",
+          "operator": "less_than",
+          "value_date": {
+            "days": 0
+          }
+        }
+      ]
+    },
+    "values": {
+      "d": ""
+    },
+    "fields": {
+      "d": {
+        "type": "date",
+        "relative_date": "Y-m-d"
+      }
+    },
+    "today": "2026-11-07",
+    "expected": false
+  },
+  {
+    "name": "is_one_of matches an entry case-insensitively",
+    "condition": {
+      "actions": [
+        {
+          "action": "show"
+        }
+      ],
+      "match": "all",
+      "rules": [
+        {
+          "field": "a",
+          "operator": "is_one_of",
+          "value": "Red\n  green \r\n\n\nBlue, Pink"
+        }
+      ]
+    },
+    "values": {
+      "a": "GREEN"
+    },
+    "expected": true
+  },
+  {
+    "name": "is_one_of does not split on commas",
+    "condition": {
+      "actions": [
+        {
+          "action": "show"
+        }
+      ],
+      "match": "all",
+      "rules": [
+        {
+          "field": "a",
+          "operator": "is_one_of",
+          "value": "Red\nBlue, Pink"
+        }
+      ]
+    },
+    "values": {
+      "a": "blue"
+    },
+    "expected": false
+  },
+  {
+    "name": "is_one_of keeps an entry with a comma",
+    "condition": {
+      "actions": [
+        {
+          "action": "show"
+        }
+      ],
+      "match": "all",
+      "rules": [
+        {
+          "field": "a",
+          "operator": "is_one_of",
+          "value": "Red\nBlue, Pink"
+        }
+      ]
+    },
+    "values": {
+      "a": " blue, pink "
+    },
+    "expected": true
+  },
+  {
+    "name": "is_one_of ignores blank entries",
+    "condition": {
+      "actions": [
+        {
+          "action": "show"
+        }
+      ],
+      "match": "all",
+      "rules": [
+        {
+          "field": "a",
+          "operator": "is_one_of",
+          "value": "\n \n"
+        }
+      ]
+    },
+    "values": {
+      "a": ""
+    },
+    "expected": false
+  },
+  {
+    "name": "is_one_of matches when any selected option is listed",
+    "condition": {
+      "actions": [
+        {
+          "action": "show"
+        }
+      ],
+      "match": "all",
+      "rules": [
+        {
+          "field": "a",
+          "operator": "is_one_of",
+          "value": "red\ngreen"
+        }
+      ]
+    },
+    "values": {
+      "a": [
+        "Blue",
+        "GREEN"
+      ]
+    },
+    "expected": true
+  },
+  {
+    "name": "is_one_of fails when no selected option is listed",
+    "condition": {
+      "actions": [
+        {
+          "action": "show"
+        }
+      ],
+      "match": "all",
+      "rules": [
+        {
+          "field": "a",
+          "operator": "is_one_of",
+          "value": "red\ngreen"
+        }
+      ]
+    },
+    "values": {
+      "a": [
+        "Blue",
+        "pink"
+      ]
+    },
+    "expected": false
+  },
+  {
+    "name": "is_one_of fails for no selection",
+    "condition": {
+      "actions": [
+        {
+          "action": "show"
+        }
+      ],
+      "match": "all",
+      "rules": [
+        {
+          "field": "a",
+          "operator": "is_one_of",
+          "value": "red\ngreen"
+        }
+      ]
+    },
+    "values": {
+      "a": []
+    },
+    "expected": false
+  },
+  {
+    "name": "is_not_one_of fails when listed",
+    "condition": {
+      "actions": [
+        {
+          "action": "show"
+        }
+      ],
+      "match": "all",
+      "rules": [
+        {
+          "field": "a",
+          "operator": "is_not_one_of",
+          "value": "red\ngreen"
+        }
+      ]
+    },
+    "values": {
+      "a": "RED"
+    },
+    "expected": false
+  },
+  {
+    "name": "is_not_one_of matches when not listed",
+    "condition": {
+      "actions": [
+        {
+          "action": "show"
+        }
+      ],
+      "match": "all",
+      "rules": [
+        {
+          "field": "a",
+          "operator": "is_not_one_of",
+          "value": "red\ngreen"
+        }
+      ]
+    },
+    "values": {
+      "a": "blue"
+    },
+    "expected": true
+  },
+  {
+    "name": "is_not_one_of matches an empty answer",
+    "condition": {
+      "actions": [
+        {
+          "action": "show"
+        }
+      ],
+      "match": "all",
+      "rules": [
+        {
+          "field": "a",
+          "operator": "is_not_one_of",
+          "value": "red\ngreen"
+        }
+      ]
+    },
+    "values": {
+      "a": ""
+    },
+    "expected": true
+  },
+  {
+    "name": "is_not_one_of fails when any selected option is listed",
+    "condition": {
+      "actions": [
+        {
+          "action": "show"
+        }
+      ],
+      "match": "all",
+      "rules": [
+        {
+          "field": "a",
+          "operator": "is_not_one_of",
+          "value": "red\ngreen"
+        }
+      ]
+    },
+    "values": {
+      "a": [
+        "Blue",
+        "GREEN"
+      ]
+    },
+    "expected": false
+  },
+  {
+    "name": "object answer does not equal an element value",
+    "condition": {
+      "actions": [
+        {
+          "action": "show"
+        }
+      ],
+      "match": "all",
+      "rules": [
+        {
+          "field": "a",
+          "operator": "equals",
+          "value": "yes"
+        }
+      ]
+    },
+    "values": {
+      "a": {
+        "k": "yes"
+      }
+    },
+    "expected": false
+  },
+  {
+    "name": "object answer does not contain an element value",
+    "condition": {
+      "actions": [
+        {
+          "action": "show"
+        }
+      ],
+      "match": "all",
+      "rules": [
+        {
+          "field": "a",
+          "operator": "contains",
+          "value": "yes"
+        }
+      ]
+    },
+    "values": {
+      "a": {
+        "k": "yes"
+      }
+    },
+    "expected": false
+  },
+  {
+    "name": "object answer is empty",
+    "condition": {
+      "actions": [
+        {
+          "action": "show"
+        }
+      ],
+      "match": "all",
+      "rules": [
+        {
+          "field": "a",
+          "operator": "is_empty"
+        }
+      ]
+    },
+    "values": {
+      "a": {
+        "k": "yes"
+      }
+    },
+    "expected": true
+  },
+  {
+    "name": "object answer is not not_empty",
+    "condition": {
+      "actions": [
+        {
+          "action": "show"
+        }
+      ],
+      "match": "all",
+      "rules": [
+        {
+          "field": "a",
+          "operator": "not_empty"
+        }
+      ]
+    },
+    "values": {
+      "a": {
+        "k": "yes"
+      }
+    },
+    "expected": false
+  },
+  {
+    "name": "object answer is not one of an element value list",
+    "condition": {
+      "actions": [
+        {
+          "action": "show"
+        }
+      ],
+      "match": "all",
+      "rules": [
+        {
+          "field": "a",
+          "operator": "is_one_of",
+          "value": "yes\nno"
+        }
+      ]
+    },
+    "values": {
+      "a": {
+        "k": "yes"
+      }
+    },
+    "expected": false
+  },
+  {
+    "name": "object compared field counts as empty",
+    "condition": {
+      "actions": [
+        {
+          "action": "show"
+        }
+      ],
+      "match": "all",
+      "rules": [
+        {
+          "field": "a",
+          "operator": "equals",
+          "value_field": "b"
+        }
+      ]
+    },
+    "values": {
+      "a": "",
+      "b": {
+        "k": "yes"
+      }
+    },
+    "expected": true
+  },
+  {
+    "name": "object compared field is not its element value",
+    "condition": {
+      "actions": [
+        {
+          "action": "show"
+        }
+      ],
+      "match": "all",
+      "rules": [
+        {
+          "field": "a",
+          "operator": "equals",
+          "value_field": "b"
+        }
+      ]
+    },
+    "values": {
+      "a": "yes",
+      "b": {
+        "k": "yes"
+      }
+    },
+    "expected": false
+  },
+  {
+    "name": "object answer counts as empty for a relative date",
+    "condition": {
+      "actions": [
+        {
+          "action": "show"
+        }
+      ],
+      "match": "all",
+      "rules": [
+        {
+          "field": "d",
+          "operator": "not_empty",
+          "value_date": {
+            "days": 3
+          }
+        }
+      ]
+    },
+    "values": {
+      "d": {
+        "k": "2026-11-11"
+      }
+    },
+    "fields": {
+      "d": {
+        "type": "date",
+        "relative_date": "Y-m-d"
+      }
+    },
+    "today": "2026-11-07",
+    "expected": false
+  }
+]

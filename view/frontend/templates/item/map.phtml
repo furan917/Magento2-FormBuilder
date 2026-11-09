@@ -1,0 +1,76 @@
+<?php
+/** @var \Magento\Framework\View\Element\Template $block */
+/** @var \Magento\Framework\Escaper $escaper */
+$form = $block->getData('parent_block');
+extract($form->getItemContext((array)$block->getData('item'), $escaper), EXTR_SKIP);
+$setting = static fn (string $key, float $default, float $min, float $max): float
+    => max($min, min($max, is_numeric($settings[$key] ?? null) ? (float)$settings[$key] : $default));
+$centreLat = $setting('default_lat', 51.5, -90, 90);
+$centreLng = $setting('default_lng', 0, -180, 180);
+$zoom = (int)$setting('default_zoom', 5, 1, 19);
+$height = (int)$setting('height', 320, 200, 800);
+$lngId = $controlId . '-lng';
+$searchId = $controlId . '-search';
+$sub = static fn (string $id, string $label) => '<label class="ffb-sublabel" for="'
+    . $escaper->escapeHtmlAttr($id) . '">' . $escaper->escapeHtml($label) . '</label>';
+$google = ($form->getConfig()['maps']['provider'] ?? '') === 'google';
+$coordinate = ['type' => 'text', 'class' => 'ffb-input', 'inputmode' => 'decimal', 'autocomplete' => 'off', 'required' => $required];
+?>
+<?= /* @noEscape */ $form->renderPartial($block, 'item/_open.phtml', ['group' => true]) ?>
+    <div<?= /* @noEscape */ $attrs([
+        'class' => 'ffb-map',
+        'data-ffb-map' => true,
+        'data-center-lat' => (string)$centreLat,
+        'data-center-lng' => (string)$centreLng,
+        'data-zoom' => (string)$zoom,
+        'style' => '--ffb-map-height:' . $height . 'px',
+    ]) ?>>
+        <div class="ffb-map-placeholder" data-ffb-map-placeholder>
+            <p class="ffb-map-notice" data-ffb-map-notice><?= $escaper->escapeHtml($google
+                ? __('Loading the map sends your IP address to %1.', 'Google')
+                : __('Loading the map contacts a third-party map service and shares your IP address with it.')) ?></p>
+<?php if ($google): ?>
+            <p class="ffb-map-privacy"><a href="https://policies.google.com/privacy" target="_blank" rel="noopener noreferrer"><?= $escaper->escapeHtml(__('Google privacy policy')) ?></a></p>
+<?php endif; ?>
+            <button type="button" class="ffb-btn ffb-btn-secondary" data-ffb-map-load><?= $escaper->escapeHtml(__('Load map')) ?></button>
+        </div>
+        <div<?= /* @noEscape */ $attrs([
+            'class' => 'ffb-map-canvas',
+            'data-ffb-map-canvas' => (string)($form->getConfig()['maps']['canvasMarker'] ?? '') ?: true,
+            'role' => 'application',
+            'aria-label' => (string)__('Map. Click or tap to place a pin.'),
+            'hidden' => true,
+        ]) ?>></div>
+        <button type="button" class="ffb-btn ffb-btn-secondary ffb-map-centre" data-ffb-map-centre hidden><?= $escaper->escapeHtml(__('Place pin at map centre')) ?></button>
+        <div<?= /* @noEscape */ $attrs([
+            'class' => 'ffb-map-search',
+            'data-ffb-map-search' => true,
+            'role' => 'search',
+            'hidden' => true,
+            'data-busy' => (string)__('The search service is busy. Please try again in a moment.'),
+            'data-error' => (string)__('Search is unavailable right now. You can enter the coordinates instead.'),
+            'data-empty' => (string)__('No places found.'),
+            'data-short' => (string)__('Enter at least 3 characters to search.'),
+        ]) ?>>
+            <?= /* @noEscape */ $sub($searchId, (string)__('Search for a place')) ?>
+            <input<?= /* @noEscape */ $attrs(['id' => $searchId, 'type' => 'search', 'class' => 'ffb-input', 'autocomplete' => 'off', 'maxlength' => '200', 'data-ffb-map-search-input' => true]) ?>>
+            <button type="button" class="ffb-btn ffb-btn-secondary" data-ffb-map-search-button><?= $escaper->escapeHtml(__('Search')) ?></button>
+            <ul class="ffb-map-results" data-ffb-map-search-results hidden></ul>
+            <p class="ffb-map-status" data-ffb-map-search-status aria-live="polite"></p>
+            <p class="ffb-map-attribution"><?= $escaper->escapeHtml(__('Search © OpenStreetMap contributors / Nominatim')) ?></p>
+        </div>
+        <div class="ffb-map-coords">
+            <div class="ffb-map-coord">
+                <?= /* @noEscape */ $sub($controlId, (string)__('Latitude')) ?>
+                <input<?= /* @noEscape */ $attrs(['id' => $controlId, 'name' => $base['name'] . '[lat]', 'data-ffb-map-lat' => true, 'aria-describedby' => $describedBy] + $coordinate) ?>>
+            </div>
+            <div class="ffb-map-coord">
+                <?= /* @noEscape */ $sub($lngId, (string)__('Longitude')) ?>
+                <input<?= /* @noEscape */ $attrs(['id' => $lngId, 'name' => $base['name'] . '[lng]', 'data-ffb-map-lng' => true, 'aria-describedby' => $describedBy] + $coordinate) ?>>
+            </div>
+        </div>
+        <input type="hidden" name="<?= $escaper->escapeHtmlAttr($base['name'] . '[zoom]') ?>" data-ffb-map-zoom>
+        <input type="hidden" name="<?= $escaper->escapeHtmlAttr($base['name'] . '[label]') ?>" data-ffb-map-label>
+        <p class="ffb-map-status" data-ffb-map-status aria-live="polite"></p>
+    </div>
+<?= /* @noEscape */ $form->renderPartial($block, 'item/_close.phtml', ['group' => true]) ?>

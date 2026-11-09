@@ -1,0 +1,1960 @@
+[
+  {
+    "name": "show action hides the item when the rules do not match",
+    "schema": {
+      "version": 1,
+      "pages": [
+        {
+          "id": "p_aaaa",
+          "title": "aaaa",
+          "condition": null,
+          "skip": null,
+          "items": [
+            {
+              "id": "f_aaaa",
+              "kind": "field",
+              "type": "text",
+              "name": "a",
+              "label": "a",
+              "required": false,
+              "locked": false,
+              "options": [],
+              "condition": null
+            },
+            {
+              "id": "f_bbbb",
+              "kind": "field",
+              "type": "text",
+              "name": "b",
+              "label": "b",
+              "required": false,
+              "locked": false,
+              "options": [],
+              "condition": {
+                "actions": [
+                  {
+                    "action": "show"
+                  }
+                ],
+                "match": "all",
+                "rules": [
+                  {
+                    "field": "a",
+                    "operator": "equals",
+                    "value": "1"
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    "values": {
+      "a": "2",
+      "b": "x"
+    },
+    "expected": {
+      "visible": {
+        "p_aaaa": true,
+        "f_aaaa": true,
+        "f_bbbb": false
+      },
+      "values": {
+        "a": "2"
+      }
+    }
+  },
+  {
+    "name": "hide action hides the item when the rules match",
+    "schema": {
+      "version": 1,
+      "pages": [
+        {
+          "id": "p_aaaa",
+          "title": "aaaa",
+          "condition": null,
+          "skip": null,
+          "items": [
+            {
+              "id": "f_aaaa",
+              "kind": "field",
+              "type": "text",
+              "name": "a",
+              "label": "a",
+              "required": false,
+              "locked": false,
+              "options": [],
+              "condition": null
+            },
+            {
+              "id": "f_bbbb",
+              "kind": "field",
+              "type": "text",
+              "name": "b",
+              "label": "b",
+              "required": false,
+              "locked": false,
+              "options": [],
+              "condition": {
+                "actions": [
+                  {
+                    "action": "hide"
+                  }
+                ],
+                "match": "all",
+                "rules": [
+                  {
+                    "field": "a",
+                    "operator": "equals",
+                    "value": "1"
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    "values": {
+      "a": "1",
+      "b": "x"
+    },
+    "expected": {
+      "visible": {
+        "f_bbbb": false
+      }
+    }
+  },
+  {
+    "name": "an item without a show or hide action stays visible",
+    "schema": {
+      "version": 1,
+      "pages": [
+        {
+          "id": "p_aaaa",
+          "title": "aaaa",
+          "condition": null,
+          "skip": null,
+          "items": [
+            {
+              "id": "f_aaaa",
+              "kind": "field",
+              "type": "text",
+              "name": "a",
+              "label": "a",
+              "required": false,
+              "locked": false,
+              "options": [],
+              "condition": null
+            },
+            {
+              "id": "f_bbbb",
+              "kind": "field",
+              "type": "text",
+              "name": "b",
+              "label": "b",
+              "required": false,
+              "locked": false,
+              "options": [],
+              "condition": {
+                "actions": [
+                  {
+                    "action": "require"
+                  }
+                ],
+                "match": "all",
+                "rules": [
+                  {
+                    "field": "a",
+                    "operator": "equals",
+                    "value": "1"
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    "values": {
+      "a": "2"
+    },
+    "expected": {
+      "visible": {
+        "f_bbbb": true
+      },
+      "required": {
+        "f_bbbb": false
+      }
+    }
+  },
+  {
+    "name": "the actions list wins over a stale single action",
+    "schema": {
+      "version": 1,
+      "pages": [
+        {
+          "id": "p_aaaa",
+          "title": "aaaa",
+          "condition": null,
+          "skip": null,
+          "items": [
+            {
+              "id": "f_aaaa",
+              "kind": "field",
+              "type": "text",
+              "name": "a",
+              "label": "a",
+              "required": false,
+              "locked": false,
+              "options": [],
+              "condition": null
+            },
+            {
+              "id": "f_bbbb",
+              "kind": "field",
+              "type": "text",
+              "name": "b",
+              "label": "b",
+              "required": false,
+              "locked": false,
+              "options": [],
+              "condition": {
+                "action": "hide",
+                "actions": [
+                  {
+                    "action": "show"
+                  }
+                ],
+                "match": "all",
+                "rules": [
+                  {
+                    "field": "a",
+                    "operator": "equals",
+                    "value": "1"
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    "values": {
+      "a": "1"
+    },
+    "expected": {
+      "visible": {
+        "f_bbbb": true
+      }
+    }
+  },
+  {
+    "name": "require action makes the field required when it matches",
+    "schema": {
+      "version": 1,
+      "pages": [
+        {
+          "id": "p_aaaa",
+          "title": "aaaa",
+          "condition": null,
+          "skip": null,
+          "items": [
+            {
+              "id": "f_aaaa",
+              "kind": "field",
+              "type": "text",
+              "name": "a",
+              "label": "a",
+              "required": false,
+              "locked": false,
+              "options": [],
+              "condition": null
+            },
+            {
+              "id": "f_bbbb",
+              "kind": "field",
+              "type": "text",
+              "name": "b",
+              "label": "b",
+              "required": false,
+              "locked": false,
+              "options": [],
+              "condition": {
+                "actions": [
+                  {
+                    "action": "require"
+                  }
+                ],
+                "match": "all",
+                "rules": [
+                  {
+                    "field": "a",
+                    "operator": "equals",
+                    "value": "1"
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    "values": {
+      "a": "1"
+    },
+    "expected": {
+      "required": {
+        "f_aaaa": false,
+        "f_bbbb": true
+      }
+    }
+  },
+  {
+    "name": "require action keeps the own required flag when it does not match",
+    "schema": {
+      "version": 1,
+      "pages": [
+        {
+          "id": "p_aaaa",
+          "title": "aaaa",
+          "condition": null,
+          "skip": null,
+          "items": [
+            {
+              "id": "f_aaaa",
+              "kind": "field",
+              "type": "text",
+              "name": "a",
+              "label": "a",
+              "required": false,
+              "locked": false,
+              "options": [],
+              "condition": null
+            },
+            {
+              "id": "f_bbbb",
+              "kind": "field",
+              "type": "text",
+              "name": "b",
+              "label": "b",
+              "required": true,
+              "locked": false,
+              "options": [],
+              "condition": {
+                "actions": [
+                  {
+                    "action": "require"
+                  }
+                ],
+                "match": "all",
+                "rules": [
+                  {
+                    "field": "a",
+                    "operator": "equals",
+                    "value": "1"
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    "values": {
+      "a": "2"
+    },
+    "expected": {
+      "required": {
+        "f_bbbb": true
+      }
+    }
+  },
+  {
+    "name": "an exempt field is never required",
+    "schema": {
+      "version": 1,
+      "pages": [
+        {
+          "id": "p_aaaa",
+          "title": "aaaa",
+          "condition": null,
+          "skip": null,
+          "items": [
+            {
+              "id": "f_aaaa",
+              "kind": "field",
+              "type": "text",
+              "name": "a",
+              "label": "a",
+              "required": false,
+              "locked": false,
+              "options": [],
+              "condition": null
+            },
+            {
+              "id": "f_bbbb",
+              "kind": "field",
+              "type": "text",
+              "name": "b",
+              "label": "b",
+              "required": false,
+              "locked": false,
+              "options": [],
+              "condition": {
+                "actions": [
+                  {
+                    "action": "require"
+                  }
+                ],
+                "match": "all",
+                "rules": [
+                  {
+                    "field": "a",
+                    "operator": "equals",
+                    "value": "1"
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    "values": {
+      "a": "1"
+    },
+    "expected": {
+      "required": {
+        "f_bbbb": false
+      }
+    },
+    "exempt": [
+      "b"
+    ]
+  },
+  {
+    "name": "set value overwrites a locked field",
+    "schema": {
+      "version": 1,
+      "pages": [
+        {
+          "id": "p_aaaa",
+          "title": "aaaa",
+          "condition": null,
+          "skip": null,
+          "items": [
+            {
+              "id": "f_aaaa",
+              "kind": "field",
+              "type": "text",
+              "name": "a",
+              "label": "a",
+              "required": false,
+              "locked": false,
+              "options": [],
+              "condition": null
+            },
+            {
+              "id": "f_bbbb",
+              "kind": "field",
+              "type": "text",
+              "name": "b",
+              "label": "b",
+              "required": false,
+              "locked": true,
+              "options": [],
+              "condition": {
+                "actions": [
+                  {
+                    "action": "set_value",
+                    "param": "fixed"
+                  }
+                ],
+                "match": "all",
+                "rules": [
+                  {
+                    "field": "a",
+                    "operator": "equals",
+                    "value": "1"
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    "values": {
+      "a": "1",
+      "b": "posted"
+    },
+    "expected": {
+      "values": {
+        "b": "fixed"
+      },
+      "defaults": {}
+    }
+  },
+  {
+    "name": "set value overwrites a hidden type field",
+    "schema": {
+      "version": 1,
+      "pages": [
+        {
+          "id": "p_aaaa",
+          "title": "aaaa",
+          "condition": null,
+          "skip": null,
+          "items": [
+            {
+              "id": "f_aaaa",
+              "kind": "field",
+              "type": "text",
+              "name": "a",
+              "label": "a",
+              "required": false,
+              "locked": false,
+              "options": [],
+              "condition": null
+            },
+            {
+              "id": "f_bbbb",
+              "kind": "field",
+              "type": "hidden",
+              "name": "b",
+              "label": "b",
+              "required": false,
+              "locked": false,
+              "options": [],
+              "condition": {
+                "actions": [
+                  {
+                    "action": "set_value",
+                    "param": "fixed"
+                  }
+                ],
+                "match": "all",
+                "rules": [
+                  {
+                    "field": "a",
+                    "operator": "equals",
+                    "value": "1"
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    "values": {
+      "a": "1",
+      "b": "posted"
+    },
+    "expected": {
+      "values": {
+        "b": "fixed"
+      },
+      "defaults": {}
+    }
+  },
+  {
+    "name": "set value on an editable field is only a default",
+    "schema": {
+      "version": 1,
+      "pages": [
+        {
+          "id": "p_aaaa",
+          "title": "aaaa",
+          "condition": null,
+          "skip": null,
+          "items": [
+            {
+              "id": "f_aaaa",
+              "kind": "field",
+              "type": "text",
+              "name": "a",
+              "label": "a",
+              "required": false,
+              "locked": false,
+              "options": [],
+              "condition": null
+            },
+            {
+              "id": "f_bbbb",
+              "kind": "field",
+              "type": "text",
+              "name": "b",
+              "label": "b",
+              "required": false,
+              "locked": false,
+              "options": [],
+              "condition": {
+                "actions": [
+                  {
+                    "action": "set_value",
+                    "param": "fixed"
+                  }
+                ],
+                "match": "all",
+                "rules": [
+                  {
+                    "field": "a",
+                    "operator": "equals",
+                    "value": "1"
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    "values": {
+      "a": "1",
+      "b": "posted"
+    },
+    "expected": {
+      "values": {
+        "b": "posted"
+      },
+      "defaults": {
+        "f_bbbb": "fixed"
+      }
+    }
+  },
+  {
+    "name": "set value does nothing when the rules do not match",
+    "schema": {
+      "version": 1,
+      "pages": [
+        {
+          "id": "p_aaaa",
+          "title": "aaaa",
+          "condition": null,
+          "skip": null,
+          "items": [
+            {
+              "id": "f_aaaa",
+              "kind": "field",
+              "type": "text",
+              "name": "a",
+              "label": "a",
+              "required": false,
+              "locked": false,
+              "options": [],
+              "condition": null
+            },
+            {
+              "id": "f_bbbb",
+              "kind": "field",
+              "type": "text",
+              "name": "b",
+              "label": "b",
+              "required": false,
+              "locked": true,
+              "options": [],
+              "condition": {
+                "actions": [
+                  {
+                    "action": "set_value",
+                    "param": "fixed"
+                  }
+                ],
+                "match": "all",
+                "rules": [
+                  {
+                    "field": "a",
+                    "operator": "equals",
+                    "value": "1"
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    "values": {
+      "a": "2",
+      "b": "posted"
+    },
+    "expected": {
+      "values": {
+        "b": "posted"
+      },
+      "defaults": {}
+    }
+  },
+  {
+    "name": "set value is visible to later conditions",
+    "schema": {
+      "version": 1,
+      "pages": [
+        {
+          "id": "p_aaaa",
+          "title": "aaaa",
+          "condition": null,
+          "skip": null,
+          "items": [
+            {
+              "id": "f_aaaa",
+              "kind": "field",
+              "type": "text",
+              "name": "a",
+              "label": "a",
+              "required": false,
+              "locked": false,
+              "options": [],
+              "condition": null
+            },
+            {
+              "id": "f_bbbb",
+              "kind": "field",
+              "type": "text",
+              "name": "b",
+              "label": "b",
+              "required": false,
+              "locked": true,
+              "options": [],
+              "condition": {
+                "actions": [
+                  {
+                    "action": "set_value",
+                    "param": "fixed"
+                  }
+                ],
+                "match": "all",
+                "rules": [
+                  {
+                    "field": "a",
+                    "operator": "equals",
+                    "value": "1"
+                  }
+                ]
+              }
+            },
+            {
+              "id": "f_cccc",
+              "kind": "field",
+              "type": "text",
+              "name": "c",
+              "label": "c",
+              "required": false,
+              "locked": false,
+              "options": [],
+              "condition": {
+                "actions": [
+                  {
+                    "action": "show"
+                  }
+                ],
+                "match": "all",
+                "rules": [
+                  {
+                    "field": "b",
+                    "operator": "equals",
+                    "value": "fixed"
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    "values": {
+      "a": "1",
+      "b": "posted",
+      "c": "x"
+    },
+    "expected": {
+      "visible": {
+        "f_cccc": true
+      },
+      "values": {
+        "c": "x"
+      }
+    }
+  },
+  {
+    "name": "set value on a hidden item is ignored",
+    "schema": {
+      "version": 1,
+      "pages": [
+        {
+          "id": "p_aaaa",
+          "title": "aaaa",
+          "condition": null,
+          "skip": null,
+          "items": [
+            {
+              "id": "f_aaaa",
+              "kind": "field",
+              "type": "text",
+              "name": "a",
+              "label": "a",
+              "required": false,
+              "locked": false,
+              "options": [],
+              "condition": null
+            },
+            {
+              "id": "f_bbbb",
+              "kind": "field",
+              "type": "text",
+              "name": "b",
+              "label": "b",
+              "required": false,
+              "locked": true,
+              "options": [],
+              "condition": {
+                "actions": [
+                  {
+                    "action": "hide"
+                  },
+                  {
+                    "action": "set_value",
+                    "param": "fixed"
+                  }
+                ],
+                "match": "all",
+                "rules": [
+                  {
+                    "field": "a",
+                    "operator": "equals",
+                    "value": "1"
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    "values": {
+      "a": "1",
+      "b": "posted"
+    },
+    "expected": {
+      "visible": {
+        "f_bbbb": false
+      },
+      "values": {
+        "a": "1"
+      },
+      "defaults": {}
+    }
+  },
+  {
+    "name": "hide options action hides the options when it matches",
+    "schema": {
+      "version": 1,
+      "pages": [
+        {
+          "id": "p_aaaa",
+          "title": "aaaa",
+          "condition": null,
+          "skip": null,
+          "items": [
+            {
+              "id": "f_aaaa",
+              "kind": "field",
+              "type": "text",
+              "name": "a",
+              "label": "a",
+              "required": false,
+              "locked": false,
+              "options": [],
+              "condition": null
+            },
+            {
+              "id": "f_bbbb",
+              "kind": "field",
+              "type": "select",
+              "name": "b",
+              "label": "b",
+              "required": false,
+              "locked": false,
+              "options": [],
+              "condition": {
+                "actions": [
+                  {
+                    "action": "hide_options",
+                    "param": [
+                      "x",
+                      "y"
+                    ]
+                  }
+                ],
+                "match": "all",
+                "rules": [
+                  {
+                    "field": "a",
+                    "operator": "equals",
+                    "value": "1"
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    "values": {
+      "a": "1"
+    },
+    "expected": {
+      "hidden_options": {
+        "f_bbbb": [
+          "x",
+          "y"
+        ]
+      }
+    }
+  },
+  {
+    "name": "hide options action does nothing when it does not match",
+    "schema": {
+      "version": 1,
+      "pages": [
+        {
+          "id": "p_aaaa",
+          "title": "aaaa",
+          "condition": null,
+          "skip": null,
+          "items": [
+            {
+              "id": "f_aaaa",
+              "kind": "field",
+              "type": "text",
+              "name": "a",
+              "label": "a",
+              "required": false,
+              "locked": false,
+              "options": [],
+              "condition": null
+            },
+            {
+              "id": "f_bbbb",
+              "kind": "field",
+              "type": "select",
+              "name": "b",
+              "label": "b",
+              "required": false,
+              "locked": false,
+              "options": [],
+              "condition": {
+                "actions": [
+                  {
+                    "action": "hide_options",
+                    "param": [
+                      "x"
+                    ]
+                  }
+                ],
+                "match": "all",
+                "rules": [
+                  {
+                    "field": "a",
+                    "operator": "equals",
+                    "value": "1"
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    "values": {
+      "a": "2"
+    },
+    "expected": {
+      "hidden_options": {}
+    }
+  },
+  {
+    "name": "an unknown action code changes nothing",
+    "schema": {
+      "version": 1,
+      "pages": [
+        {
+          "id": "p_aaaa",
+          "title": "aaaa",
+          "condition": null,
+          "skip": null,
+          "items": [
+            {
+              "id": "f_aaaa",
+              "kind": "field",
+              "type": "text",
+              "name": "a",
+              "label": "a",
+              "required": false,
+              "locked": false,
+              "options": [],
+              "condition": null
+            },
+            {
+              "id": "f_bbbb",
+              "kind": "field",
+              "type": "text",
+              "name": "b",
+              "label": "b",
+              "required": false,
+              "locked": false,
+              "options": [],
+              "condition": {
+                "actions": [
+                  {
+                    "action": "nope",
+                    "param": "x"
+                  }
+                ],
+                "match": "all",
+                "rules": [
+                  {
+                    "field": "a",
+                    "operator": "equals",
+                    "value": "1"
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    "values": {
+      "a": "1"
+    },
+    "expected": {
+      "visible": {
+        "f_bbbb": true
+      },
+      "required": {
+        "f_bbbb": false
+      }
+    }
+  },
+  {
+    "name": "a section action cascades to its fields",
+    "schema": {
+      "version": 1,
+      "pages": [
+        {
+          "id": "p_aaaa",
+          "title": "aaaa",
+          "condition": null,
+          "skip": null,
+          "items": [
+            {
+              "id": "f_aaaa",
+              "kind": "field",
+              "type": "text",
+              "name": "a",
+              "label": "a",
+              "required": false,
+              "locked": false,
+              "options": [],
+              "condition": null
+            },
+            {
+              "id": "s_bbbb",
+              "kind": "section",
+              "title": "bbbb",
+              "condition": {
+                "actions": [
+                  {
+                    "action": "hide"
+                  }
+                ],
+                "match": "all",
+                "rules": [
+                  {
+                    "field": "a",
+                    "operator": "equals",
+                    "value": "1"
+                  }
+                ]
+              },
+              "items": [
+                {
+                  "id": "f_cccc",
+                  "kind": "field",
+                  "type": "text",
+                  "name": "c",
+                  "label": "c",
+                  "required": false,
+                  "locked": false,
+                  "options": [],
+                  "condition": null
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "values": {
+      "a": "1",
+      "c": "x"
+    },
+    "expected": {
+      "visible": {
+        "s_bbbb": false,
+        "f_cccc": false
+      },
+      "values": {
+        "a": "1"
+      }
+    }
+  },
+  {
+    "name": "a skip condition can reference fields on its own page",
+    "schema": {
+      "version": 1,
+      "pages": [
+        {
+          "id": "p_aaaa",
+          "title": "aaaa",
+          "condition": null,
+          "skip": {
+            "match": "all",
+            "rules": [
+              {
+                "field": "a",
+                "operator": "equals",
+                "value": "1"
+              }
+            ],
+            "target": "p_cccc"
+          },
+          "items": [
+            {
+              "id": "f_aaaa",
+              "kind": "field",
+              "type": "text",
+              "name": "a",
+              "label": "a",
+              "required": false,
+              "locked": false,
+              "options": [],
+              "condition": null
+            }
+          ]
+        },
+        {
+          "id": "p_bbbb",
+          "title": "bbbb",
+          "condition": null,
+          "skip": null,
+          "items": [
+            {
+              "id": "f_bbbb",
+              "kind": "field",
+              "type": "text",
+              "name": "b",
+              "label": "b",
+              "required": false,
+              "locked": false,
+              "options": [],
+              "condition": null
+            }
+          ]
+        },
+        {
+          "id": "p_cccc",
+          "title": "cccc",
+          "condition": null,
+          "skip": null,
+          "items": [
+            {
+              "id": "f_cccc",
+              "kind": "field",
+              "type": "text",
+              "name": "c",
+              "label": "c",
+              "required": false,
+              "locked": false,
+              "options": [],
+              "condition": null
+            }
+          ]
+        }
+      ]
+    },
+    "values": {
+      "a": "1",
+      "b": "x",
+      "c": "y"
+    },
+    "expected": {
+      "visible": {
+        "p_aaaa": true,
+        "p_bbbb": false,
+        "f_bbbb": false,
+        "p_cccc": true,
+        "f_cccc": true
+      },
+      "values": {
+        "a": "1",
+        "c": "y"
+      }
+    }
+  },
+  {
+    "name": "a skip that does not match skips nothing",
+    "schema": {
+      "version": 1,
+      "pages": [
+        {
+          "id": "p_aaaa",
+          "title": "aaaa",
+          "condition": null,
+          "skip": {
+            "match": "all",
+            "rules": [
+              {
+                "field": "a",
+                "operator": "equals",
+                "value": "1"
+              }
+            ],
+            "target": "p_cccc"
+          },
+          "items": [
+            {
+              "id": "f_aaaa",
+              "kind": "field",
+              "type": "text",
+              "name": "a",
+              "label": "a",
+              "required": false,
+              "locked": false,
+              "options": [],
+              "condition": null
+            }
+          ]
+        },
+        {
+          "id": "p_bbbb",
+          "title": "bbbb",
+          "condition": null,
+          "skip": null,
+          "items": [
+            {
+              "id": "f_bbbb",
+              "kind": "field",
+              "type": "text",
+              "name": "b",
+              "label": "b",
+              "required": false,
+              "locked": false,
+              "options": [],
+              "condition": null
+            }
+          ]
+        },
+        {
+          "id": "p_cccc",
+          "title": "cccc",
+          "condition": null,
+          "skip": null,
+          "items": [
+            {
+              "id": "f_cccc",
+              "kind": "field",
+              "type": "text",
+              "name": "c",
+              "label": "c",
+              "required": false,
+              "locked": false,
+              "options": [],
+              "condition": null
+            }
+          ]
+        }
+      ]
+    },
+    "values": {
+      "a": "2",
+      "b": "x"
+    },
+    "expected": {
+      "visible": {
+        "p_bbbb": true,
+        "f_bbbb": true
+      }
+    }
+  },
+  {
+    "name": "fields on skipped pages count as empty for later conditions",
+    "schema": {
+      "version": 1,
+      "pages": [
+        {
+          "id": "p_aaaa",
+          "title": "aaaa",
+          "condition": null,
+          "skip": {
+            "match": "all",
+            "rules": [
+              {
+                "field": "a",
+                "operator": "equals",
+                "value": "1"
+              }
+            ],
+            "target": "p_cccc"
+          },
+          "items": [
+            {
+              "id": "f_aaaa",
+              "kind": "field",
+              "type": "text",
+              "name": "a",
+              "label": "a",
+              "required": false,
+              "locked": false,
+              "options": [],
+              "condition": null
+            }
+          ]
+        },
+        {
+          "id": "p_bbbb",
+          "title": "bbbb",
+          "condition": null,
+          "skip": null,
+          "items": [
+            {
+              "id": "f_bbbb",
+              "kind": "field",
+              "type": "text",
+              "name": "b",
+              "label": "b",
+              "required": false,
+              "locked": false,
+              "options": [],
+              "condition": null
+            }
+          ]
+        },
+        {
+          "id": "p_cccc",
+          "title": "cccc",
+          "condition": null,
+          "skip": null,
+          "items": [
+            {
+              "id": "f_cccc",
+              "kind": "field",
+              "type": "text",
+              "name": "c",
+              "label": "c",
+              "required": false,
+              "locked": false,
+              "options": [],
+              "condition": {
+                "actions": [
+                  {
+                    "action": "show"
+                  }
+                ],
+                "match": "all",
+                "rules": [
+                  {
+                    "field": "b",
+                    "operator": "is_empty",
+                    "value": ""
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    "values": {
+      "a": "1",
+      "b": "x",
+      "c": "y"
+    },
+    "expected": {
+      "visible": {
+        "f_cccc": true
+      }
+    }
+  },
+  {
+    "name": "the skip of a hidden page is ignored",
+    "schema": {
+      "version": 1,
+      "pages": [
+        {
+          "id": "p_aaaa",
+          "title": "aaaa",
+          "condition": null,
+          "skip": null,
+          "items": [
+            {
+              "id": "f_aaaa",
+              "kind": "field",
+              "type": "text",
+              "name": "a",
+              "label": "a",
+              "required": false,
+              "locked": false,
+              "options": [],
+              "condition": null
+            }
+          ]
+        },
+        {
+          "id": "p_bbbb",
+          "title": "bbbb",
+          "condition": {
+            "actions": [
+              {
+                "action": "show"
+              }
+            ],
+            "match": "all",
+            "rules": [
+              {
+                "field": "a",
+                "operator": "equals",
+                "value": "1"
+              }
+            ]
+          },
+          "skip": {
+            "match": "all",
+            "rules": [
+              {
+                "field": "b",
+                "operator": "is_empty",
+                "value": ""
+              }
+            ],
+            "target": "p_dddd"
+          },
+          "items": [
+            {
+              "id": "f_bbbb",
+              "kind": "field",
+              "type": "text",
+              "name": "b",
+              "label": "b",
+              "required": false,
+              "locked": false,
+              "options": [],
+              "condition": null
+            }
+          ]
+        },
+        {
+          "id": "p_cccc",
+          "title": "cccc",
+          "condition": null,
+          "skip": null,
+          "items": [
+            {
+              "id": "f_cccc",
+              "kind": "field",
+              "type": "text",
+              "name": "c",
+              "label": "c",
+              "required": false,
+              "locked": false,
+              "options": [],
+              "condition": null
+            }
+          ]
+        },
+        {
+          "id": "p_dddd",
+          "title": "dddd",
+          "condition": null,
+          "skip": null,
+          "items": [
+            {
+              "id": "f_dddd",
+              "kind": "field",
+              "type": "text",
+              "name": "d",
+              "label": "d",
+              "required": false,
+              "locked": false,
+              "options": [],
+              "condition": null
+            }
+          ]
+        }
+      ]
+    },
+    "values": {
+      "a": "2"
+    },
+    "expected": {
+      "visible": {
+        "p_bbbb": false,
+        "p_cccc": true,
+        "p_dddd": true
+      }
+    }
+  },
+  {
+    "name": "a skip falls through when its target page is hidden by its own condition",
+    "schema": {
+      "version": 1,
+      "pages": [
+        {
+          "id": "p_aaaa",
+          "title": "aaaa",
+          "condition": null,
+          "skip": {
+            "match": "all",
+            "rules": [
+              {
+                "field": "a",
+                "operator": "equals",
+                "value": "1"
+              }
+            ],
+            "target": "p_cccc"
+          },
+          "items": [
+            {
+              "id": "f_aaaa",
+              "kind": "field",
+              "type": "text",
+              "name": "a",
+              "label": "a",
+              "required": false,
+              "locked": false,
+              "options": [],
+              "condition": null
+            }
+          ]
+        },
+        {
+          "id": "p_bbbb",
+          "title": "bbbb",
+          "condition": null,
+          "skip": null,
+          "items": [
+            {
+              "id": "f_bbbb",
+              "kind": "field",
+              "type": "text",
+              "name": "b",
+              "label": "b",
+              "required": false,
+              "locked": false,
+              "options": [],
+              "condition": null
+            }
+          ]
+        },
+        {
+          "id": "p_cccc",
+          "title": "cccc",
+          "condition": {
+            "actions": [
+              {
+                "action": "show"
+              }
+            ],
+            "match": "all",
+            "rules": [
+              {
+                "field": "a",
+                "operator": "equals",
+                "value": "9"
+              }
+            ]
+          },
+          "skip": null,
+          "items": [
+            {
+              "id": "f_cccc",
+              "kind": "field",
+              "type": "text",
+              "name": "c",
+              "label": "c",
+              "required": false,
+              "locked": false,
+              "options": [],
+              "condition": null
+            }
+          ]
+        },
+        {
+          "id": "p_dddd",
+          "title": "dddd",
+          "condition": null,
+          "skip": null,
+          "items": [
+            {
+              "id": "f_dddd",
+              "kind": "field",
+              "type": "text",
+              "name": "d",
+              "label": "d",
+              "required": false,
+              "locked": false,
+              "options": [],
+              "condition": null
+            }
+          ]
+        }
+      ]
+    },
+    "values": {
+      "a": "1"
+    },
+    "expected": {
+      "visible": {
+        "p_bbbb": false,
+        "p_cccc": false,
+        "p_dddd": true
+      }
+    }
+  },
+  {
+    "name": "a page can have both a show condition and a skip condition",
+    "schema": {
+      "version": 1,
+      "pages": [
+        {
+          "id": "p_aaaa",
+          "title": "aaaa",
+          "condition": null,
+          "skip": null,
+          "items": [
+            {
+              "id": "f_aaaa",
+              "kind": "field",
+              "type": "text",
+              "name": "a",
+              "label": "a",
+              "required": false,
+              "locked": false,
+              "options": [],
+              "condition": null
+            }
+          ]
+        },
+        {
+          "id": "p_bbbb",
+          "title": "bbbb",
+          "condition": {
+            "actions": [
+              {
+                "action": "show"
+              }
+            ],
+            "match": "all",
+            "rules": [
+              {
+                "field": "a",
+                "operator": "equals",
+                "value": "1"
+              }
+            ]
+          },
+          "skip": {
+            "match": "all",
+            "rules": [
+              {
+                "field": "b",
+                "operator": "equals",
+                "value": "go"
+              }
+            ],
+            "target": "p_dddd"
+          },
+          "items": [
+            {
+              "id": "f_bbbb",
+              "kind": "field",
+              "type": "text",
+              "name": "b",
+              "label": "b",
+              "required": false,
+              "locked": false,
+              "options": [],
+              "condition": null
+            }
+          ]
+        },
+        {
+          "id": "p_cccc",
+          "title": "cccc",
+          "condition": null,
+          "skip": null,
+          "items": [
+            {
+              "id": "f_cccc",
+              "kind": "field",
+              "type": "text",
+              "name": "c",
+              "label": "c",
+              "required": false,
+              "locked": false,
+              "options": [],
+              "condition": null
+            }
+          ]
+        },
+        {
+          "id": "p_dddd",
+          "title": "dddd",
+          "condition": null,
+          "skip": null,
+          "items": [
+            {
+              "id": "f_dddd",
+              "kind": "field",
+              "type": "text",
+              "name": "d",
+              "label": "d",
+              "required": false,
+              "locked": false,
+              "options": [],
+              "condition": null
+            }
+          ]
+        }
+      ]
+    },
+    "values": {
+      "a": "1",
+      "b": "go"
+    },
+    "expected": {
+      "visible": {
+        "p_bbbb": true,
+        "p_cccc": false,
+        "p_dddd": true
+      }
+    }
+  },
+  {
+    "name": "overlapping skips use the first matched skip and ignore skips on pages it hides",
+    "schema": {
+      "version": 1,
+      "pages": [
+        {
+          "id": "p_aaaa",
+          "title": "aaaa",
+          "condition": null,
+          "skip": {
+            "match": "all",
+            "rules": [
+              {
+                "field": "a",
+                "operator": "equals",
+                "value": "1"
+              }
+            ],
+            "target": "p_dddd"
+          },
+          "items": [
+            {
+              "id": "f_aaaa",
+              "kind": "field",
+              "type": "text",
+              "name": "a",
+              "label": "a",
+              "required": false,
+              "locked": false,
+              "options": [],
+              "condition": null
+            }
+          ]
+        },
+        {
+          "id": "p_bbbb",
+          "title": "bbbb",
+          "condition": null,
+          "skip": {
+            "match": "all",
+            "rules": [
+              {
+                "field": "b",
+                "operator": "is_empty",
+                "value": ""
+              }
+            ],
+            "target": "p_eeee"
+          },
+          "items": [
+            {
+              "id": "f_bbbb",
+              "kind": "field",
+              "type": "text",
+              "name": "b",
+              "label": "b",
+              "required": false,
+              "locked": false,
+              "options": [],
+              "condition": null
+            }
+          ]
+        },
+        {
+          "id": "p_cccc",
+          "title": "cccc",
+          "condition": null,
+          "skip": null,
+          "items": [
+            {
+              "id": "f_cccc",
+              "kind": "field",
+              "type": "text",
+              "name": "c",
+              "label": "c",
+              "required": false,
+              "locked": false,
+              "options": [],
+              "condition": null
+            }
+          ]
+        },
+        {
+          "id": "p_dddd",
+          "title": "dddd",
+          "condition": null,
+          "skip": null,
+          "items": [
+            {
+              "id": "f_dddd",
+              "kind": "field",
+              "type": "text",
+              "name": "d",
+              "label": "d",
+              "required": false,
+              "locked": false,
+              "options": [],
+              "condition": null
+            }
+          ]
+        },
+        {
+          "id": "p_eeee",
+          "title": "eeee",
+          "condition": null,
+          "skip": null,
+          "items": [
+            {
+              "id": "f_eeee",
+              "kind": "field",
+              "type": "text",
+              "name": "e",
+              "label": "e",
+              "required": false,
+              "locked": false,
+              "options": [],
+              "condition": null
+            }
+          ]
+        }
+      ]
+    },
+    "values": {
+      "a": "1"
+    },
+    "expected": {
+      "visible": {
+        "p_bbbb": false,
+        "p_cccc": false,
+        "p_dddd": true,
+        "p_eeee": true
+      }
+    }
+  },
+  {
+    "name": "a skip with an empty rules list never skips",
+    "schema": {
+      "version": 1,
+      "pages": [
+        {
+          "id": "p_aaaa",
+          "title": "aaaa",
+          "condition": null,
+          "skip": {
+            "match": "all",
+            "rules": [],
+            "target": "p_bbbb"
+          },
+          "items": [
+            {
+              "id": "f_aaaa",
+              "kind": "field",
+              "type": "text",
+              "name": "a",
+              "label": "a",
+              "required": false,
+              "locked": false,
+              "options": [],
+              "condition": null
+            }
+          ]
+        },
+        {
+          "id": "p_bbbb",
+          "title": "bbbb",
+          "condition": null,
+          "skip": null,
+          "items": [
+            {
+              "id": "f_bbbb",
+              "kind": "field",
+              "type": "text",
+              "name": "b",
+              "label": "b",
+              "required": false,
+              "locked": false,
+              "options": [],
+              "condition": null
+            }
+          ]
+        },
+        {
+          "id": "p_cccc",
+          "title": "cccc",
+          "condition": null,
+          "skip": null,
+          "items": [
+            {
+              "id": "f_cccc",
+              "kind": "field",
+              "type": "text",
+              "name": "c",
+              "label": "c",
+              "required": false,
+              "locked": false,
+              "options": [],
+              "condition": null
+            }
+          ]
+        }
+      ]
+    },
+    "values": {
+      "a": "1"
+    },
+    "expected": {
+      "visible": {
+        "p_bbbb": true,
+        "p_cccc": true
+      }
+    }
+  }
+]

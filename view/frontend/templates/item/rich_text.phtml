@@ -1,0 +1,9 @@
+<?php
+/** @var \Magento\Framework\DataObject $block */
+/** @var \Magento\Framework\Escaper $escaper */
+$item = $block->getData('item');
+$width = in_array($item['width'] ?? '', ['full', 'two_thirds', 'half', 'third'], true) ? $item['width'] : 'full';
+?>
+<div class="ffb-item ffb-content ffb-content-rich_text ffb-w-<?= $escaper->escapeHtmlAttr($width) ?>" data-ffb-item="<?= $escaper->escapeHtmlAttr($item['id'] ?? '') ?>">
+    <div class="ffb-rich"><?= /* @noEscape */ $block->getData('parent_block')->renderRichText((string)($item['text'] ?? '')) ?></div>
+</div>

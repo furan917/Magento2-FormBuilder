@@ -1,0 +1,62 @@
+<?php
+/** @var \Furan\FormBuilder\Block\Adminhtml\Webhook\Index $block */
+/** @var \Magento\Framework\Escaper $escaper */
+$list = $block->getListing();
+?>
+<div class="ffb-rules">
+    <section class="ffb-rules-card" aria-labelledby="ffb-webhooks-title">
+        <div class="ffb-rules-head">
+            <div>
+                <h2 class="ffb-rules-title" id="ffb-webhooks-title"><?= $escaper->escapeHtml(__('Webhook endpoints')) ?></h2>
+                <p class="ffb-rules-muted"><?= $escaper->escapeHtml(__('An endpoint receives a signed message when a submission is received, edited or changes status. Data leaves Magento when it is sent, and erasure requests do not reach the receiver.')) ?></p>
+            </div>
+            <?php if ($block->canAdd()): ?>
+                <a class="ffb-rules-btn ffb-rules-btn-primary" href="<?= $escaper->escapeUrl($block->getNewUrl()) ?>"><?= $escaper->escapeHtml(__('Add endpoint')) ?></a>
+            <?php endif; ?>
+        </div>
+        <?php if (!$list['rows']): ?>
+            <p class="ffb-rules-empty"><?= $escaper->escapeHtml(__('No webhook endpoints yet.')) ?></p>
+        <?php else: ?>
+            <div class="ffb-rules-scroll" role="region" tabindex="0" aria-labelledby="ffb-webhooks-title">
+                <table class="ffb-rules-table ffb-admin-webhook-table">
+                    <caption class="ffb-admin-visually-hidden"><?= $escaper->escapeHtml(__('Webhook endpoints')) ?></caption>
+                    <thead>
+                    <tr>
+                        <th scope="col"><?= $escaper->escapeHtml(__('Name')) ?></th>
+                        <th scope="col"><?= $escaper->escapeHtml(__('Receiver host')) ?></th>
+                        <th scope="col"><?= $escaper->escapeHtml(__('Status')) ?></th>
+                        <th scope="col"><?= $escaper->escapeHtml(__('Delivery log')) ?></th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <?php foreach ($list['rows'] as $row): ?>
+                        <tr>
+                            <th scope="row"><a class="ffb-rules-name" href="<?= $escaper->escapeUrl($row['url']) ?>"><?= $escaper->escapeHtml($row['name']) ?></a></th>
+                            <td class="ffb-rules-mono"><?= $escaper->escapeHtml($row['host']) ?></td>
+                            <td>
+                                <span class="ffb-rules-pill<?= $row['active'] ? ' is-used' : '' ?>"><?= $escaper->escapeHtml($row['active'] ? __('Active') : __('Inactive')) ?></span>
+                                <?php if ($row['reason'] !== ''): ?>
+                                    <span class="ffb-rules-hint"><?= $escaper->escapeHtml($row['reason']) ?></span>
+                                <?php endif; ?>
+                            </td>
+                            <td><a href="<?= $escaper->escapeUrl($row['log_url']) ?>" aria-label="<?= $escaper->escapeHtmlAttr(__('Delivery log of %1', $row['name'])) ?>"><?= $escaper->escapeHtml(__('Delivery log')) ?></a></td>
+                        </tr>
+                    <?php endforeach; ?>
+                    </tbody>
+                </table>
+            </div>
+        <?php endif; ?>
+        <?php if (!$block->isFirstPage() || $list['next'] !== null): ?>
+            <nav class="ffb-rules-pager" aria-label="<?= $escaper->escapeHtmlAttr(__('Webhook endpoint pages')) ?>">
+                <span class="ffb-rules-pages">
+                    <?php if (!$block->isFirstPage()): ?>
+                        <a class="ffb-rules-btn" href="<?= $escaper->escapeUrl($block->getFirstUrl()) ?>"><?= $escaper->escapeHtml(__('Back to the first page')) ?></a>
+                    <?php endif; ?>
+                    <?php if ($list['next'] !== null): ?>
+                        <a class="ffb-rules-btn" href="<?= $escaper->escapeUrl($block->getNextUrl()) ?>"><?= $escaper->escapeHtml(__('Next')) ?></a>
+                    <?php endif; ?>
+                </span>
+            </nav>
+        <?php endif; ?>
+    </section>
+</div>

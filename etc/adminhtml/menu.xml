@@ -1,0 +1,25 @@
+<?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Backend:etc/menu.xsd">
+    <menu>
+        <add id="Furan_FormBuilder::formbuilder" title="Form Builder" translate="title" module="Furan_FormBuilder"
+             sortOrder="40" parent="Magento_Backend::content" resource="Furan_FormBuilder::formbuilder"/>
+        <add id="Furan_FormBuilder::form_list" title="Forms" translate="title" module="Furan_FormBuilder"
+             sortOrder="10" parent="Furan_FormBuilder::formbuilder" action="furanform/form/index"
+             resource="Furan_FormBuilder::forms"/>
+        <add id="Furan_FormBuilder::submission_list" title="Submissions" translate="title" module="Furan_FormBuilder"
+             sortOrder="20" parent="Furan_FormBuilder::formbuilder" action="furanform/submission/index"
+             resource="Furan_FormBuilder::submissions"/>
+        <add id="Furan_FormBuilder::rule_list" title="Validation rules" translate="title" module="Furan_FormBuilder"
+             sortOrder="35" parent="Furan_FormBuilder::formbuilder" action="furanform/rule/index"
+             resource="Furan_FormBuilder::rules"/>
+        <add id="Furan_FormBuilder::field_group_list" title="Field groups" translate="title" module="Furan_FormBuilder"
+             sortOrder="30" parent="Furan_FormBuilder::formbuilder" action="furanform/fieldgroup/index"
+             resource="Furan_FormBuilder::field_groups"/>
+        <add id="Furan_FormBuilder::webhook_list" title="Webhooks" translate="title" module="Furan_FormBuilder"
+             sortOrder="38" parent="Furan_FormBuilder::formbuilder" action="furanform/webhook/index"
+             resource="Furan_FormBuilder::webhooks"/>
+        <add id="Furan_FormBuilder::privacy" title="Privacy" translate="title" module="Furan_FormBuilder"
+             sortOrder="40" parent="Furan_FormBuilder::formbuilder" action="furanform/privacy/index"
+             resource="Furan_FormBuilder::privacy"/>
+    </menu>
+</config>

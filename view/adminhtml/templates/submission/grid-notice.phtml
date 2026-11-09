@@ -1,0 +1,15 @@
+<?php
+use Furan\FormBuilder\ViewModel\Submission\GridNotice;
+
+/** @var \Magento\Framework\Escaper $escaper */
+/** @var \Magento\Framework\View\Element\Template $block */
+/** @var GridNotice $viewModel */
+$viewModel = $block->getData('view_model');
+if (!$viewModel->isVisible()) {
+    return;
+}
+$cap = $viewModel->formattedCap();
+?>
+<div class="message message-notice">
+    <div><?= $escaper->escapeHtml(__('The list shows at most %1 matching submissions. Use the filters or Export to reach the rest. Select all acts on every matching submission, including any beyond %1.', $cap)) ?></div>
+</div>

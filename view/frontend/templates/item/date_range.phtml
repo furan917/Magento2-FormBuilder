@@ -1,0 +1,22 @@
+<?php
+/** @var \Magento\Framework\View\Element\Template $block */
+/** @var \Magento\Framework\Escaper $escaper */
+$form = $block->getData('parent_block');
+extract($form->getItemContext((array)$block->getData('item'), $escaper), EXTR_SKIP);
+$startLabel = trim((string)($settings['start_label'] ?? ''));
+$endLabel = trim((string)($settings['end_label'] ?? ''));
+$bounds = ['min' => $settings['min_date'] ?? null, 'max' => $settings['max_date'] ?? null];
+$endId = $controlId . '-end';
+?>
+<?= /* @noEscape */ $form->renderPartial($block, 'item/_open.phtml', ['group' => true]) ?>
+    <div class="ffb-date-range">
+        <div class="ffb-date-range-part">
+            <label class="ffb-sublabel" for="<?= $escaper->escapeHtmlAttr($controlId) ?>"><?= $escaper->escapeHtml($startLabel !== '' ? $startLabel : __('Start date')) ?></label>
+            <input<?= /* @noEscape */ $attrs(['type' => 'date', 'name' => $base['name'] . '[start]'] + $base + $bounds) ?>>
+        </div>
+        <div class="ffb-date-range-part">
+            <label class="ffb-sublabel" for="<?= $escaper->escapeHtmlAttr($endId) ?>"><?= $escaper->escapeHtml($endLabel !== '' ? $endLabel : __('End date')) ?></label>
+            <input<?= /* @noEscape */ $attrs(['type' => 'date', 'name' => $base['name'] . '[end]', 'id' => $endId] + $base + $bounds) ?>>
+        </div>
+    </div>
+<?= /* @noEscape */ $form->renderPartial($block, 'item/_close.phtml', ['group' => true]) ?>

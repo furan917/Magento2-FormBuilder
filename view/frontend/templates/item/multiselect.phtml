@@ -1,0 +1,8 @@
+<?php
+/** @var \Magento\Framework\View\Element\Template $block */
+/** @var \Magento\Framework\Escaper $escaper */
+$form = $block->getData('parent_block');
+$multiple = true;
+$options = (array)(($block->getData('item') ?? [])['options'] ?? []);
+?>
+<?= /* @noEscape */ $form->renderPartial($block, 'item/_select.phtml', ['multiple' => $multiple, 'options' => $options]) ?>

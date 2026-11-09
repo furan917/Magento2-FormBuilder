@@ -1,0 +1,48 @@
+<?php
+/** @var \Magento\Framework\View\Element\Template $block */
+/** @var \Magento\Framework\Escaper $escaper */
+$form = $block->getData('parent_block');
+extract($form->getItemContext((array)$block->getData('item'), $escaper), EXTR_SKIP);
+$lines = max(1, min(4, (int)($item['render']['street_lines'] ?? 2)));
+$part = static fn (string $key): string => $controlId . '-' . $key;
+$name = static fn (string $key): string => $base['name'] . '[' . $key . ']';
+$hintId = $part('hint');
+$sub = static fn (string $key, string $label) => '<label class="ffb-sublabel" for="'
+    . $escaper->escapeHtmlAttr($part($key)) . '">' . $escaper->escapeHtml($label) . '</label>';
+$plain = ['class' => 'ffb-input'];
+?>
+<?= /* @noEscape */ $form->renderPartial($block, 'item/_open.phtml', ['group' => true]) ?>
+    <div class="ffb-address">
+        <div class="ffb-address-part ffb-address-country">
+            <label class="ffb-sublabel" for="<?= $escaper->escapeHtmlAttr($controlId) ?>"><?= $escaper->escapeHtml(__('Country')) ?></label>
+            <select<?= /* @noEscape */ $attrs(['name' => $name('country_id'), 'autocomplete' => 'country', 'data-ffb-required-part' => true] + $base) ?>>
+                <option value=""><?= $escaper->escapeHtml(__('Please select')) ?></option>
+<?php foreach ($form->getCountryOptions() as $option): ?>
+                <option value="<?= $escaper->escapeHtmlAttr((string)($option['value'] ?? '')) ?>"><?= $escaper->escapeHtml((string)($option['label'] ?? '')) ?></option>
+<?php endforeach; ?>
+            </select>
+        </div>
+<?php for ($i = 1; $i <= $lines; $i++): ?>
+        <div class="ffb-address-part ffb-address-street">
+            <?= /* @noEscape */ $sub('street-' . $i, (string)($i === 1 ? __('Street address') : __('Street address line %1', $i))) ?>
+            <input<?= /* @noEscape */ $attrs(['type' => 'text', 'id' => $part('street-' . $i), 'name' => $name('street') . '[]', 'required' => $required && $i === 1, 'autocomplete' => 'address-line' . $i, 'data-ffb-required-part' => $i === 1] + $plain) ?>>
+        </div>
+<?php endfor; ?>
+        <div class="ffb-address-part ffb-address-city">
+            <?= /* @noEscape */ $sub('city', (string)__('City')) ?>
+            <input<?= /* @noEscape */ $attrs(['type' => 'text', 'id' => $part('city'), 'name' => $name('city'), 'required' => $required, 'autocomplete' => 'address-level2', 'data-ffb-required-part' => true] + $plain) ?>>
+        </div>
+        <div class="ffb-address-part ffb-address-region">
+            <?= /* @noEscape */ $sub('region', (string)__('Region')) ?>
+            <select<?= /* @noEscape */ $attrs(['id' => $part('region-id'), 'name' => $name('region_id'), 'hidden' => true, 'data-ffb-region-list' => true] + $plain) ?>>
+                <option value=""><?= $escaper->escapeHtml(__('Please select')) ?></option>
+            </select>
+            <input<?= /* @noEscape */ $attrs(['type' => 'text', 'id' => $part('region'), 'name' => $name('region'), 'autocomplete' => 'address-level1', 'data-ffb-region-text' => true] + $plain) ?>>
+        </div>
+        <div class="ffb-address-part ffb-address-postcode">
+            <?= /* @noEscape */ $sub('postcode', (string)__('Postcode')) ?>
+            <input<?= /* @noEscape */ $attrs(['type' => 'text', 'id' => $part('postcode'), 'name' => $name('postcode'), 'required' => $required, 'autocomplete' => 'postal-code', 'data-ffb-required-part' => true, 'aria-describedby' => $hintId] + $plain) ?>>
+            <p class="ffb-hint" id="<?= $escaper->escapeHtmlAttr($hintId) ?>" aria-live="polite" data-ffb-hint></p>
+        </div>
+    </div>
+<?= /* @noEscape */ $form->renderPartial($block, 'item/_close.phtml', ['group' => true]) ?>

@@ -1,0 +1,10 @@
+<?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework-message-queue:etc/topology.xsd">
+    <exchange name="magento">
+        <binding id="furanFormBuilderMail" topic="furan_formbuilder.mail" destination="furan_formbuilder.mail"/>
+        <binding id="furanFormBuilderExport" topic="furan_formbuilder.export" destination="furan_formbuilder.export"/>
+        <binding id="furanFormBuilderAction" topic="furan_formbuilder.action" destination="furan_formbuilder.action"/>
+        <binding id="furanFormBuilderWebhook" topic="furan_formbuilder.webhook" destination="furan_formbuilder.webhook"/>
+        <binding id="furanFormBuilderPrivacy" topic="furan_formbuilder.privacy" destination="furan_formbuilder.privacy"/>
+    </exchange>
+</config>

@@ -1,0 +1,12 @@
+<?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:Event/etc/events.xsd">
+    <event name="furan_formbuilder_form_delete_commit_after">
+        <observer name="furan_formbuilder_delete_form_files" instance="Furan\FormBuilder\Observer\DeleteFormFiles"/>
+    </event>
+    <event name="customer_delete_before">
+        <observer name="furan_formbuilder_customer_delete_before" instance="Furan\FormBuilder\Observer\CustomerDeleteBefore"/>
+    </event>
+    <event name="customer_delete_commit_after">
+        <observer name="furan_formbuilder_customer_delete_commit_after" instance="Furan\FormBuilder\Observer\CustomerDeleteCommitAfter"/>
+    </event>
+</config>

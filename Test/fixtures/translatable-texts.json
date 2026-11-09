@@ -1,0 +1,88 @@
+{
+  "schema": {
+    "version": 1,
+    "pages": [
+      {
+        "id": "p_aaaa01",
+        "title": "About you",
+        "condition": null,
+        "items": [
+          {
+            "id": "s_aaaa02", "kind": "section", "title": "Details", "description": "A few questions", "condition": null,
+            "items": [
+              {
+                "id": "f_aaaa03", "kind": "field", "type": "text", "name": "name", "label": "Name", "help": "Your full name",
+                "placeholder": "Jane Doe",
+                "rules": [
+                  {"rule": "min_length", "value": 2, "message": "Too short"},
+                  {"rule": "preset", "value": "uk_postcode", "message": ""}
+                ],
+                "options": [], "settings": {"prefix": "£", "suffix": ""}, "condition": null
+              }
+            ]
+          },
+          {"id": "c_aaaa04", "kind": "content", "type": "notice", "style": "info", "title": "Note", "text": "Read this first", "condition": null},
+          {
+            "id": "f_aaaa05", "kind": "field", "type": "select", "name": "pick", "label": "Pick one", "help": "", "placeholder": "",
+            "rules": [],
+            "options": [{"label": "One", "value": "1"}, {"label": "Two", "value": "two.2", "description": "The second"}],
+            "settings": {"empty_label": "Choose…"}, "condition": null
+          },
+          {
+            "id": "f_aaaa06", "kind": "field", "type": "matrix", "name": "grid", "label": "Grid", "help": "", "placeholder": "",
+            "rules": [], "options": [{"label": "Yes", "value": "y"}],
+            "settings": {"rows": ["Speed", "Price"], "require_all": true}, "condition": null
+          },
+          {
+            "id": "f_aaaa07", "kind": "field", "type": "consent", "name": "agree", "label": "I agree", "help": "", "placeholder": "",
+            "rules": [], "options": [],
+            "settings": {"details": "", "privacy_url": "/privacy", "privacy_label": "Privacy policy"}, "condition": null
+          },
+          {
+            "id": "f_aaaa08", "kind": "field", "type": "date_range", "name": "stay", "label": "Stay", "help": "", "placeholder": "",
+            "rules": [], "options": [],
+            "settings": {"start_label": "Arrive", "end_label": "Leave", "min_days": 2}, "condition": null
+          }
+        ]
+      }
+    ]
+  },
+  "settings": {
+    "submit_label": "Send", "next_label": "Next", "prev_label": "Back", "success_message": "Thanks!\nWe will reply soon.",
+    "page_title": "", "meta_description": "Contact us", "autoresponder_subject": "", "autoresponder_body": "",
+    "notify_subject": "New enquiry", "closed_message": "Closed for now", "not_open_message": ""
+  },
+  "expected": [
+    [["form", "submit_label"], "Send", 50, false, false],
+    [["form", "next_label"], "Next", 50, false, false],
+    [["form", "prev_label"], "Back", 50, false, false],
+    [["form", "success_message"], "Thanks!\nWe will reply soon.", 2000, true, false],
+    [["form", "meta_description"], "Contact us", 500, false, false],
+    [["form", "closed_message"], "Closed for now", 500, false, false],
+    [["items", "p_aaaa01", "title"], "About you", 255, false, false],
+    [["items", "s_aaaa02", "title"], "Details", 255, false, false],
+    [["items", "s_aaaa02", "description"], "A few questions", 1000, true, false],
+    [["items", "f_aaaa03", "label"], "Name", 255, false, false],
+    [["items", "f_aaaa03", "help"], "Your full name", 1000, true, false],
+    [["items", "f_aaaa03", "placeholder"], "Jane Doe", 255, false, false],
+    [["items", "f_aaaa03", "rules", "min_length", "message"], "Too short", 255, false, false],
+    [["items", "f_aaaa03", "settings", "prefix"], "£", 20, false, false],
+    [["items", "c_aaaa04", "title"], "Note", 255, false, false],
+    [["items", "c_aaaa04", "text"], "Read this first", 1000, true, false],
+    [["items", "f_aaaa05", "label"], "Pick one", 255, false, false],
+    [["items", "f_aaaa05", "options", "1", "label"], "One", 255, false, false],
+    [["items", "f_aaaa05", "options", "two.2", "label"], "Two", 255, false, false],
+    [["items", "f_aaaa05", "options", "two.2", "description"], "The second", 255, false, false],
+    [["items", "f_aaaa05", "settings", "empty_label"], "Choose…", 255, false, false],
+    [["items", "f_aaaa06", "label"], "Grid", 255, false, false],
+    [["items", "f_aaaa06", "options", "y", "label"], "Yes", 255, false, false],
+    [["items", "f_aaaa06", "settings", "rows", "0"], "Speed", 255, false, false],
+    [["items", "f_aaaa06", "settings", "rows", "1"], "Price", 255, false, false],
+    [["items", "f_aaaa07", "label"], "I agree", 255, false, false],
+    [["items", "f_aaaa07", "settings", "privacy_url"], "/privacy", 255, false, true],
+    [["items", "f_aaaa07", "settings", "privacy_label"], "Privacy policy", 100, false, false],
+    [["items", "f_aaaa08", "label"], "Stay", 255, false, false],
+    [["items", "f_aaaa08", "settings", "start_label"], "Arrive", 60, false, false],
+    [["items", "f_aaaa08", "settings", "end_label"], "Leave", 60, false, false]
+  ]
+}

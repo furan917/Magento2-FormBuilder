@@ -1,0 +1,11 @@
+<?php
+/** @var \Magento\Framework\View\Element\Template $block */
+/** @var \Magento\Framework\Escaper $escaper */
+$form = $block->getData('parent_block');
+extract($form->getItemContext((array)$block->getData('item'), $escaper), EXTR_SKIP);
+$onValue = (string)($settings['on_value'] ?? '') !== '' ? (string)$settings['on_value'] : 'yes';
+?>
+<div<?= /* @noEscape */ $attrs(['class' => $wrapperClass . ($cssClass !== '' ? ' ' . $cssClass : '')]) ?><?= /* @noEscape */ $dataAttrs ?>>
+    <input<?= /* @noEscape */ $attrs(array_replace($base, ['class' => 'ffb-choice ffb-switch']) + ['type' => 'checkbox', 'role' => 'switch', 'value' => $onValue]) ?>>
+    <label class="ffb-label" for="<?= $escaper->escapeHtmlAttr($controlId) ?>"><?= /* @noEscape */ $labelHtml ?></label>
+<?= /* @noEscape */ $form->renderPartial($block, 'item/_close.phtml', ['group' => false]) ?>

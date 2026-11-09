@@ -1,0 +1,325 @@
+<?php
+use Furan\FormBuilder\Api\FieldType\AdminViewTypeInterface as Kind;
+
+/** @var \Furan\FormBuilder\Block\Adminhtml\Submission\View $block */
+/** @var \Magento\Framework\Escaper $escaper */
+$submission = $block->getSubmission();
+if ($submission === null) {
+    return;
+}
+$groups = $block->getAnswerGroups();
+$formUrl = $block->getFormUrl();
+$analyticsUrl = $block->getAnalyticsUrl();
+$customerUrl = $block->getCustomerUrl();
+$customerId = (int)$submission->getCustomerId();
+$ip = (string)$submission->getRemoteIp();
+$step = 0;
+$card = $block->getCustomerCard();
+$product = $block->getProductContext();
+?>
+<div class="ffb-sub">
+    <input type="checkbox" id="ffb-sub-hide" class="ffb-sub-hide-input">
+    <div class="ffb-sub-main">
+        <div class="ffb-sub-head">
+            <div>
+                <h2 class="ffb-sub-title"><?= $escaper->escapeHtml($block->getFormTitle()) ?></h2>
+                <p class="ffb-sub-when"><?= $escaper->escapeHtml(__('Submitted %1', $block->getSubmittedAt())) ?></p>
+                <?php if ($submission->getReference() !== ''): ?>
+                    <p class="ffb-sub-reference"><?= $escaper->escapeHtml(__('Reference')) ?>: <code><?= $escaper->escapeHtml($submission->getReference()) ?></code></p>
+                <?php endif; ?>
+            </div>
+            <label class="ffb-sub-filter" for="ffb-sub-hide"><?= $escaper->escapeHtml(__('Hide unanswered')) ?></label>
+        </div>
+        <?php if (!$groups): ?>
+            <p class="ffb-sub-none"><?= $escaper->escapeHtml(__('This submission has no answers.')) ?></p>
+        <?php endif; ?>
+        <?php foreach ($groups as $group): ?>
+            <?php
+            $total = 0;
+            $answered = 0;
+            foreach ($group['sections'] as $section) {
+                $total += count($section['entries']);
+                $answered += count(array_filter($section['entries'], [$block, 'isAnswered']));
+            }
+            ?>
+            <section class="ffb-sub-page">
+                <header class="ffb-sub-page-head">
+                    <?php if ($group['removed']): ?>
+                        <h3 class="ffb-sub-page-title"><?= $escaper->escapeHtml(__('No longer on the form')) ?></h3>
+                    <?php else: ?>
+                        <span class="ffb-sub-step"><?= (int)++$step ?></span>
+                        <h3 class="ffb-sub-page-title"><?= $escaper->escapeHtml($group['title']) ?></h3>
+                    <?php endif; ?>
+                    <span class="ffb-sub-count"><?= $escaper->escapeHtml(__('%1 of %2 answered', $answered, $total)) ?></span>
+                </header>
+                <?php foreach ($group['sections'] as $section): ?>
+                    <?php if ($section['title'] !== ''): ?>
+                        <h4 class="ffb-sub-section"><?= $escaper->escapeHtml($section['title']) ?></h4>
+                    <?php endif; ?>
+                    <dl class="ffb-sub-rows">
+                        <?php foreach ($section['entries'] as $entry): ?>
+                            <?php
+                            $kind = $block->getDisplayKind($entry);
+                            $isAnswered = $block->isAnswered($entry);
+                            $values = $block->getDisplayValues($entry);
+                            $settings = (array)($entry['field']['settings'] ?? []);
+                            ?>
+                            <div class="ffb-sub-row<?= $isAnswered ? '' : ' is-empty' ?>">
+                                <dt><?= $escaper->escapeHtml((string)($entry['label'] ?? '')) ?></dt>
+                                <dd>
+                                <?php if (!$isAnswered): ?>
+                                    <span class="ffb-sub-muted"><?= $escaper->escapeHtml(__('Not answered')) ?></span>
+                                <?php elseif ($block->isFile($entry)): ?>
+                                    <span class="ffb-sub-file">
+                                        <span class="ffb-sub-file-name"><?= $escaper->escapeHtml((string)($entry['value']['name'] ?? '')) ?></span>
+                                        <span class="ffb-sub-muted"><?= $escaper->escapeHtml($block->formatFileSize((int)($entry['value']['size'] ?? 0))) ?></span>
+                                        <?php $downloadUrl = $block->getDownloadUrl((string)($entry['name'] ?? '')); ?>
+                                        <?php if ($downloadUrl !== ''): ?>
+                                            <a class="ffb-sub-download" href="<?= $escaper->escapeUrl($downloadUrl) ?>"><?= $escaper->escapeHtml(__('Download')) ?></a>
+                                        <?php endif; ?>
+                                    </span>
+                                <?php elseif (($typeHtml = $block->getDisplayHtml($entry, $escaper)) !== null): ?>
+                                    <?php // phpcs:ignore Magento2.Security.LanguageConstruct -- the field type escapes its own markup ?>
+                                    <?= /* @noEscape */ $typeHtml ?>
+                                <?php elseif ($kind === Kind::KIND_PAIRS): ?>
+                                    <dl class="ffb-sub-matrix">
+                                        <?php foreach ($values as $pair): ?>
+                                            <?php [$row, $col] = array_pad(explode(': ', $pair, 2), 2, ''); ?>
+                                            <div><dt><?= $escaper->escapeHtml($row) ?></dt><dd><?= $escaper->escapeHtml($col) ?></dd></div>
+                                        <?php endforeach; ?>
+                                    </dl>
+                                <?php elseif ($kind === Kind::KIND_LIST): ?>
+                                    <ol class="ffb-sub-list">
+                                        <?php foreach ($values as $value): ?>
+                                            <li><?= $escaper->escapeHtml($value) ?></li>
+                                        <?php endforeach; ?>
+                                    </ol>
+                                <?php elseif ($kind === Kind::KIND_CHIPS): ?>
+                                    <ul class="ffb-sub-chips">
+                                        <?php foreach ($values as $value): ?>
+                                            <li><?= $escaper->escapeHtml($value) ?></li>
+                                        <?php endforeach; ?>
+                                    </ul>
+                                <?php elseif ($kind === Kind::KIND_RATING): ?>
+                                    <?php $max = max(1, (int)($settings['max'] ?? 5)); $score = min($max, max(0, (int)$values[0])); ?>
+                                    <span class="ffb-sub-stars" aria-hidden="true"><?= $escaper->escapeHtml(str_repeat('★', $score)) ?><span><?= $escaper->escapeHtml(str_repeat('★', $max - $score)) ?></span></span>
+                                    <?= $escaper->escapeHtml(__('%1 of %2', $score, $max)) ?>
+                                <?php elseif ($kind === Kind::KIND_SCALE): ?>
+                                    <span class="ffb-sub-score"><?= $escaper->escapeHtml($values[0]) ?></span>
+                                    <span class="ffb-sub-muted"><?= $escaper->escapeHtml(__('on a %1 to %2 scale', (int)($settings['min'] ?? 0), (int)($settings['max'] ?? 10))) ?></span>
+                                <?php elseif ($kind === Kind::KIND_BOOLEAN): ?>
+                                    <?php if ($values[0] === 'Yes'): ?>
+                                        <span class="ffb-sub-yes"><?= $escaper->escapeHtml(__('Yes')) ?></span>
+                                    <?php else: ?>
+                                        <span class="ffb-sub-muted"><?= $escaper->escapeHtml(__('No')) ?></span>
+                                    <?php endif; ?>
+                                <?php elseif ($kind === Kind::KIND_COLOR && preg_match('/^#[0-9a-f]{6}$/iD', $values[0])): ?>
+                                    <span class="ffb-sub-swatch" style="background:<?= $escaper->escapeHtmlAttr($values[0]) ?>"></span>
+                                    <?= $escaper->escapeHtml($values[0]) ?>
+                                <?php elseif ($kind === Kind::KIND_MULTILINE): ?>
+                                    <?php // phpcs:ignore Magento2.Security.LanguageConstruct -- escaped first, then newlines become <br> ?>
+                                    <div class="ffb-sub-long"><?= /* @noEscape */ nl2br($escaper->escapeHtml(implode(', ', $values))) ?></div>
+                                <?php else: ?>
+                                    <?= $escaper->escapeHtml(implode(', ', $values)) ?>
+                                <?php endif; ?>
+                                </dd>
+                            </div>
+                        <?php endforeach; ?>
+                    </dl>
+                <?php endforeach; ?>
+            </section>
+        <?php endforeach; ?>
+        <?php $thread = $block->getThread(); ?>
+        <?php if ($thread || $block->canReply()): ?>
+            <section class="ffb-sub-thread" id="ffb-thread">
+                <h3 class="ffb-sub-page-title"><?= $escaper->escapeHtml(__('Conversation')) ?></h3>
+                <?php $before = $block->getBefore(); ?>
+                <?php if ($block->hasEarlierMessages() || $before !== null): ?>
+                    <p class="ffb-sub-muted ffb-sub-thread-paging">
+                        <?php if ($block->hasEarlierMessages() && $thread): ?>
+                            <span><?= $escaper->escapeHtml(__('Showing %1 messages. Earlier messages are hidden.', count($thread))) ?></span>
+                            <a href="<?= $escaper->escapeUrl($block->getEarlierUrl((int)$thread[0]['message_id'])) ?>"><?= $escaper->escapeHtml(__('Show earlier messages')) ?></a>
+                        <?php endif; ?>
+                        <?php if ($before !== null): ?>
+                            <a href="<?= $escaper->escapeUrl($block->getLatestUrl()) ?>"><?= $escaper->escapeHtml(__('Show latest messages')) ?></a>
+                        <?php endif; ?>
+                    </p>
+                <?php endif; ?>
+                <?php foreach ($thread as $message): ?>
+                    <div class="ffb-sub-msg ffb-sub-msg-<?= $escaper->escapeHtmlAttr((string)$message['author']) ?>">
+                        <div class="ffb-sub-msg-head">
+                            <strong><?= $escaper->escapeHtml((string)($message['author_name'] ?? '')) ?></strong>
+                            <span class="ffb-sub-muted"><?= $escaper->escapeHtml($block->formatMessageDate((string)$message['created_at'])) ?></span>
+                            <?php if ($message['author'] !== 'customer' && empty($message['emailed_at'])): ?>
+                                <span class="ffb-sub-muted"><?= $escaper->escapeHtml(__('Not emailed')) ?></span>
+                            <?php endif; ?>
+                        </div>
+                        <?php // phpcs:ignore Magento2.Security.LanguageConstruct -- MessageRenderer escapes everything it outputs ?>
+                        <div class="ffb-sub-long ffb-sub-msg-body"><?= /* @noEscape */ $block->renderMessage($message) ?></div>
+                    </div>
+                <?php endforeach; ?>
+                <?php if ($block->canReply()): ?>
+                    <form class="ffb-sub-reply" data-ffb-submit-once data-ffb-reply-editor method="post" action="<?= $escaper->escapeUrl($block->getReplyUrl()) ?>">
+                        <input name="form_key" type="hidden" value="<?= $escaper->escapeHtmlAttr($block->getFormKey()) ?>">
+                        <label for="ffb-sub-reply-body"><?= $escaper->escapeHtml(__('Reply by email')) ?></label>
+                        <div class="ffb-sub-editor">
+                            <div class="ffb-sub-editor-head" data-ffb-md-head hidden>
+                                <div class="ffb-sub-editor-tabs" role="tablist" aria-label="<?= $escaper->escapeHtmlAttr(__('Reply editor')) ?>">
+                                    <button type="button" role="tab" id="ffb-sub-tab-write" aria-selected="true" aria-controls="ffb-sub-reply-body" data-ffb-md-tab="write"><?= $escaper->escapeHtml(__('Write')) ?></button>
+                                    <button type="button" role="tab" id="ffb-sub-tab-preview" aria-selected="false" aria-controls="ffb-sub-reply-preview" data-ffb-md-tab="preview"><?= $escaper->escapeHtml(__('Preview')) ?></button>
+                                </div>
+                                <div class="ffb-sub-editor-tools" role="toolbar" aria-label="<?= $escaper->escapeHtmlAttr(__('Formatting')) ?>" aria-controls="ffb-sub-reply-body">
+                                    <button type="button" data-ffb-md="bold" aria-label="<?= $escaper->escapeHtmlAttr(__('Bold (Ctrl+B)')) ?>" title="<?= $escaper->escapeHtmlAttr(__('Bold (Ctrl+B)')) ?>"><strong aria-hidden="true">B</strong></button>
+                                    <button type="button" data-ffb-md="italic" aria-label="<?= $escaper->escapeHtmlAttr(__('Italic (Ctrl+I)')) ?>" title="<?= $escaper->escapeHtmlAttr(__('Italic (Ctrl+I)')) ?>"><em aria-hidden="true">I</em></button>
+                                    <button type="button" data-ffb-md="link" aria-label="<?= $escaper->escapeHtmlAttr(__('Link (Ctrl+K)')) ?>" title="<?= $escaper->escapeHtmlAttr(__('Link (Ctrl+K)')) ?>"><span aria-hidden="true">&#128279;</span></button>
+                                    <button type="button" data-ffb-md="bullets" aria-label="<?= $escaper->escapeHtmlAttr(__('Bulleted list')) ?>" title="<?= $escaper->escapeHtmlAttr(__('Bulleted list')) ?>"><span aria-hidden="true">&#8226;&#8202;&#8212;</span></button>
+                                    <button type="button" data-ffb-md="numbers" aria-label="<?= $escaper->escapeHtmlAttr(__('Numbered list')) ?>" title="<?= $escaper->escapeHtmlAttr(__('Numbered list')) ?>"><span aria-hidden="true">1.&#8202;&#8212;</span></button>
+                                </div>
+                            </div>
+                            <textarea id="ffb-sub-reply-body" name="body" class="admin__control-textarea" rows="7" maxlength="5000" required
+                                      data-ffb-md-input data-ffb-link-text="<?= $escaper->escapeHtmlAttr(__('link text')) ?>"
+                                      aria-describedby="ffb-sub-reply-help"></textarea>
+                            <div id="ffb-sub-reply-preview" class="ffb-sub-preview ffb-sub-msg-body" role="tabpanel" aria-labelledby="ffb-sub-tab-preview" aria-live="polite"
+                                 data-ffb-md-preview data-ffb-empty="<?= $escaper->escapeHtmlAttr(__('Nothing to preview.')) ?>" hidden></div>
+                        </div>
+                        <p id="ffb-sub-reply-help" class="ffb-sub-muted ffb-sub-editor-help"><?= $escaper->escapeHtml(__('Formatting: **bold**, *italic*, [text](https://...), lines starting with "- " or "1. " for lists. HTML is shown as text.')) ?></p>
+                        <button type="submit" class="action-default primary"><?= $escaper->escapeHtml(__('Send reply')) ?></button>
+                    </form>
+                    <?php if ((int)$submission->getCustomerId() <= 0): ?>
+                        <form class="ffb-sub-revoke" data-ffb-submit-once method="post" action="<?= $escaper->escapeUrl($block->getRevokeLinksUrl()) ?>">
+                            <input name="form_key" type="hidden" value="<?= $escaper->escapeHtmlAttr($block->getFormKey()) ?>">
+                            <button type="submit" class="action-default"><?= $escaper->escapeHtml(__('Revoke reply links')) ?></button>
+                            <span class="ffb-sub-muted"><?= $escaper->escapeHtml(__('Links in emails already sent stop working. Your next reply sends a new link.')) ?></span>
+                        </form>
+                    <?php endif; ?>
+                <?php endif; ?>
+            </section>
+        <?php endif; ?>
+    </div>
+    <aside class="ffb-sub-side">
+        <h3 class="ffb-sub-side-title"><?= $escaper->escapeHtml(__('Submission #%1', (int)$submission->getId())) ?></h3>
+        <dl class="ffb-sub-meta">
+            <div>
+                <dt><?= $escaper->escapeHtml(__('Form')) ?></dt>
+                <dd>
+                    <?php if ($formUrl !== ''): ?>
+                        <a href="<?= $escaper->escapeUrl($formUrl) ?>"><?= $escaper->escapeHtml($block->getFormTitle()) ?></a>
+                    <?php else: ?>
+                        <?= $escaper->escapeHtml($block->getFormTitle()) ?>
+                    <?php endif; ?>
+                    <?php if ($analyticsUrl !== ''): ?>
+                        <a class="ffb-sub-analytics" href="<?= $escaper->escapeUrl($analyticsUrl) ?>"><?= $escaper->escapeHtml(__('Analytics')) ?></a>
+                    <?php endif; ?>
+                </dd>
+            </div>
+            <div>
+                <dt><?= $escaper->escapeHtml(__('Status')) ?></dt>
+                <dd>
+                    <?php if ($block->canChangeStatus()): ?>
+                        <form class="ffb-sub-status" data-ffb-submit-once method="post" action="<?= $escaper->escapeUrl($block->getSaveStatusUrl()) ?>">
+                            <input name="form_key" type="hidden" value="<?= $escaper->escapeHtmlAttr($block->getFormKey()) ?>">
+                            <select name="status" class="admin__control-select" aria-label="<?= $escaper->escapeHtmlAttr(__('Status')) ?>">
+                                <?php foreach ($block->getStatusOptions() as $option): ?>
+                                    <option value="<?= (int)$option['value'] ?>"<?= (int)$option['value'] === $block->getCurrentStatus() ? ' selected' : '' ?>><?= $escaper->escapeHtml((string)$option['label']) ?></option>
+                                <?php endforeach; ?>
+                            </select>
+                            <button type="submit" class="action-default"><?= $escaper->escapeHtml(__('Update')) ?></button>
+                        </form>
+                    <?php else: ?>
+                        <?= $escaper->escapeHtml($block->getStatusLabel()) ?>
+                    <?php endif; ?>
+                </dd>
+            </div>
+            <div><dt><?= $escaper->escapeHtml(__('Submitted')) ?></dt><dd><?= $escaper->escapeHtml($block->getSubmittedAt()) ?></dd></div>
+            <div><dt><?= $escaper->escapeHtml(__('Store view')) ?></dt><dd><?= $escaper->escapeHtml($block->getStoreName()) ?></dd></div>
+            <?php if (!$card): ?>
+                <div>
+                    <dt><?= $escaper->escapeHtml(__('Customer')) ?></dt>
+                    <dd>
+                        <?php if ($customerId <= 0): ?>
+                            <?= $escaper->escapeHtml(__('Guest')) ?>
+                        <?php elseif ($customerUrl !== ''): ?>
+                            <a href="<?= $escaper->escapeUrl($customerUrl) ?>"><?= $escaper->escapeHtml(__('Customer #%1', $customerId)) ?></a>
+                        <?php else: ?>
+                            <?= $escaper->escapeHtml(__('Customer #%1', $customerId)) ?>
+                        <?php endif; ?>
+                    </dd>
+                </div>
+            <?php endif; ?>
+            <?php if ($ip !== ''): ?>
+                <div><dt><?= $escaper->escapeHtml(__('IP address')) ?></dt><dd><?= $escaper->escapeHtml($ip) ?></dd></div>
+            <?php endif; ?>
+        </dl>
+        <?php if ($card): ?>
+            <section class="ffb-sub-card">
+                <h4 class="ffb-sub-card-title"><?= $escaper->escapeHtml($card['type'] === 'guest' ? __('Guest') : __('Customer')) ?></h4>
+                <dl class="ffb-sub-meta">
+                    <?php $cardName = $card['name'] !== '' || $card['type'] === 'guest' ? $card['name'] : (string)__('Customer #%1', $customerId); ?>
+                    <?php if ($cardName !== ''): ?>
+                        <div>
+                            <dt><?= $escaper->escapeHtml(__('Name')) ?></dt>
+                            <dd>
+                                <?php if ($customerUrl !== '' && $card['type'] === 'customer'): ?>
+                                    <a href="<?= $escaper->escapeUrl($customerUrl) ?>"><?= $escaper->escapeHtml($cardName) ?></a>
+                                <?php else: ?>
+                                    <?= $escaper->escapeHtml($cardName) ?>
+                                <?php endif; ?>
+                            </dd>
+                        </div>
+                    <?php endif; ?>
+                    <div>
+                        <dt><?= $escaper->escapeHtml(__('Email')) ?></dt>
+                        <dd><?= $card['email'] !== '' ? $escaper->escapeHtml($card['email']) : '<span class="ffb-sub-muted">' . $escaper->escapeHtml(__('No email address')) . '</span>' ?></dd>
+                    </div>
+                    <?php if ($card['group'] !== ''): ?>
+                        <div><dt><?= $escaper->escapeHtml(__('Customer group')) ?></dt><dd><?= $escaper->escapeHtml($card['group']) ?></dd></div>
+                    <?php endif; ?>
+                    <?php if ($card['orders'] !== null): ?>
+                        <div><dt><?= $escaper->escapeHtml(__('Orders')) ?></dt><dd><?= (int)$card['orders']['count'] ?></dd></div>
+                        <div><dt><?= $escaper->escapeHtml(__('Lifetime spend')) ?></dt><dd><?= $escaper->escapeHtml($block->formatLifetime((float)$card['orders']['lifetime'])) ?></dd></div>
+                        <?php if ($card['orders']['lastOrderAt'] !== null): ?>
+                            <div><dt><?= $escaper->escapeHtml(__('Last order')) ?></dt><dd><?= $escaper->escapeHtml($block->formatSubmissionDate((string)$card['orders']['lastOrderAt'])) ?></dd></div>
+                        <?php endif; ?>
+                    <?php endif; ?>
+                </dl>
+                <?php if ($card['others']): ?>
+                    <h4 class="ffb-sub-card-title"><?= $escaper->escapeHtml(__('Other submissions')) ?></h4>
+                    <ul class="ffb-sub-others">
+                        <?php foreach ($card['others'] as $other): ?>
+                            <li>
+                                <a href="<?= $escaper->escapeUrl($block->getSubmissionUrl((int)$other['submission_id'])) ?>"><?= $escaper->escapeHtml(__('Submission #%1', (int)$other['submission_id'])) ?></a>
+                                <span class="ffb-sub-muted"><?= $escaper->escapeHtml($block->formatSubmissionDate((string)$other['created_at'])) ?></span>
+                                <?php if ((string)$other['summary'] !== ''): ?>
+                                    <span class="ffb-sub-other-summary"><?= $escaper->escapeHtml((string)$other['summary']) ?></span>
+                                <?php endif; ?>
+                            </li>
+                        <?php endforeach; ?>
+                    </ul>
+                <?php endif; ?>
+            </section>
+        <?php endif; ?>
+        <?php if ($product): ?>
+            <section class="ffb-sub-card">
+                <h4 class="ffb-sub-card-title"><?= $escaper->escapeHtml(__('Product')) ?></h4>
+                <dl class="ffb-sub-meta">
+                    <div>
+                        <dt><?= $escaper->escapeHtml(__('Name')) ?></dt>
+                        <dd>
+                            <?php if ($product['url'] !== ''): ?>
+                                <a href="<?= $escaper->escapeUrl($product['url']) ?>" target="_blank" rel="noopener noreferrer"><?= $escaper->escapeHtml($product['name']) ?></a>
+                            <?php else: ?>
+                                <?= $escaper->escapeHtml($product['name']) ?>
+                            <?php endif; ?>
+                        </dd>
+                    </div>
+                    <?php if ($product['sku'] !== ''): ?>
+                        <div><dt><?= $escaper->escapeHtml(__('SKU')) ?></dt><dd><?= $escaper->escapeHtml($product['sku']) ?></dd></div>
+                    <?php endif; ?>
+                    <?php if ($product['price'] !== null): ?>
+                        <div><dt><?= $escaper->escapeHtml(__('Price')) ?></dt><dd><?= $escaper->escapeHtml(trim(number_format((float)$product['price'], 2, '.', '') . ' ' . $product['currency'])) ?></dd></div>
+                    <?php endif; ?>
+                </dl>
+            </section>
+        <?php endif; ?>
+    </aside>
+</div>

@@ -1,0 +1,107 @@
+<?php
+/** @var \Furan\FormBuilder\Block\Adminhtml\WebhookDelivery\View $block */
+/** @var \Magento\Framework\Escaper $escaper */
+$detail = $block->getDetail();
+$formKey = $escaper->escapeHtmlAttr($block->getFormKey());
+?>
+<div class="ffb-rules">
+<?php if ($detail === null): ?>
+    <section class="ffb-rules-card">
+        <p class="ffb-rules-empty"><?= $escaper->escapeHtml(__('The delivery no longer exists.')) ?></p>
+        <a class="ffb-rules-btn ffb-rules-btn-back" href="<?= $escaper->escapeUrl($block->getBackUrl()) ?>"><?= $escaper->escapeHtml(__('Back')) ?></a>
+    </section>
+<?php else: ?>
+    <?php $delivery = $detail['delivery']; ?>
+    <section class="ffb-rules-card" aria-labelledby="ffb-delivery-title">
+        <div class="ffb-rules-head">
+            <h2 class="ffb-rules-title" id="ffb-delivery-title"><?= $escaper->escapeHtml(__('Delivery %1', $delivery['reference'])) ?></h2>
+            <a class="ffb-rules-btn ffb-rules-btn-back" href="<?= $escaper->escapeUrl($block->getBackUrl()) ?>"><?= $escaper->escapeHtml(__('Back to the log')) ?></a>
+        </div>
+        <dl class="ffb-admin-webhook-facts">
+            <div><dt><?= $escaper->escapeHtml(__('Endpoint')) ?></dt><dd><?= $escaper->escapeHtml($block->getEndpointName()) ?></dd></div>
+            <div><dt><?= $escaper->escapeHtml(__('Event')) ?></dt><dd><?= $escaper->escapeHtml(\Furan\FormBuilder\Model\Webhook\DeliveryStatus::eventLabel($delivery['event'])) ?></dd></div>
+            <div><dt><?= $escaper->escapeHtml(__('Status')) ?></dt><dd><?= $escaper->escapeHtml(\Furan\FormBuilder\Model\Webhook\DeliveryStatus::label($delivery['status'])) ?></dd></div>
+            <div><dt><?= $escaper->escapeHtml(__('Attempts')) ?></dt><dd><?= (int)$delivery['attempts'] ?></dd></div>
+            <div><dt><?= $escaper->escapeHtml(__('Created (UTC)')) ?></dt><dd><?= $escaper->escapeHtml($delivery['created_at']) ?></dd></div>
+            <?php if ($delivery['replay_of'] !== null): ?>
+                <div><dt><?= $escaper->escapeHtml(__('Replay of delivery')) ?></dt><dd><a href="<?= $escaper->escapeUrl($block->getUrl('*/*/view', ['id' => $delivery['replay_of']])) ?>">#<?= (int)$delivery['replay_of'] ?></a></dd></div>
+            <?php endif; ?>
+            <?php if ($delivery['submission_id'] !== null): ?>
+                <div><dt><?= $escaper->escapeHtml(__('Submission')) ?></dt><dd>
+                    <?php if ($block->canOpenSubmissions()): ?>
+                        <a href="<?= $escaper->escapeUrl($block->getSubmissionUrl((int)$delivery['submission_id'])) ?>">#<?= (int)$delivery['submission_id'] ?></a>
+                    <?php else: ?>
+                        #<?= (int)$delivery['submission_id'] ?>
+                    <?php endif; ?>
+                </dd></div>
+            <?php endif; ?>
+        </dl>
+    </section>
+
+    <section class="ffb-rules-card" aria-labelledby="ffb-attempts-title">
+        <h2 class="ffb-rules-title" id="ffb-attempts-title"><?= $escaper->escapeHtml(__('Attempts')) ?></h2>
+        <?php if (!$detail['attempts']): ?>
+            <p class="ffb-rules-empty"><?= $escaper->escapeHtml(__('No attempt was made yet.')) ?></p>
+        <?php else: ?>
+            <div class="ffb-rules-scroll" role="region" tabindex="0" aria-labelledby="ffb-attempts-title">
+                <table class="ffb-rules-table ffb-admin-webhook-table ffb-admin-delivery-table ffb-admin-delivery-attempts">
+                    <caption class="ffb-admin-visually-hidden"><?= $escaper->escapeHtml(__('Attempts of this delivery')) ?></caption>
+                    <thead>
+                    <tr>
+                        <th scope="col"><?= $escaper->escapeHtml(__('Started (UTC)')) ?></th>
+                        <th scope="col"><?= $escaper->escapeHtml(__('HTTP status')) ?></th>
+                        <th scope="col"><?= $escaper->escapeHtml(__('Error')) ?></th>
+                        <th scope="col"><?= $escaper->escapeHtml(__('Error number')) ?></th>
+                        <th scope="col"><?= $escaper->escapeHtml(__('Duration (ms)')) ?></th>
+                        <th scope="col"><?= $escaper->escapeHtml(__('Connected address')) ?></th>
+                        <th scope="col"><?= $escaper->escapeHtml(__('Redirected to')) ?></th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <?php foreach ($detail['attempts'] as $attempt): ?>
+                        <tr>
+                            <th scope="row" class="ffb-admin-nowrap"><?= $escaper->escapeHtml($attempt['started_at']) ?></th>
+                            <td class="ffb-admin-nowrap"><?= $attempt['code'] === null ? '-' : (int)$attempt['code'] ?></td>
+                            <td class="ffb-admin-wrap"><?php if ($attempt['error'] === null): ?>-<?php else: ?><?= $escaper->escapeHtml(\Furan\FormBuilder\Model\Webhook\DeliveryStatus::errorLabel($attempt['error'])) ?> <span class="ffb-rules-hint ffb-rules-mono"><?= $escaper->escapeHtml($attempt['error']) ?></span><?php endif; ?></td>
+                            <td class="ffb-admin-nowrap"><?= $attempt['errno'] === null ? '-' : (int)$attempt['errno'] ?></td>
+                            <td class="ffb-admin-nowrap"><?= (int)$attempt['duration_ms'] ?></td>
+                            <td class="ffb-admin-nowrap ffb-rules-mono"><?= $attempt['connected_ip'] === null ? '-' : $escaper->escapeHtml($attempt['connected_ip']) ?></td>
+                            <td class="ffb-admin-wrap ffb-rules-mono"><?= $attempt['location'] === null ? '-' : $escaper->escapeHtml($attempt['location']) ?></td>
+                        </tr>
+                        <?php if (!empty($attempt['excerpt'])): ?>
+                            <tr>
+                                <td colspan="7">
+                                    <p class="ffb-rules-hint"><?= $escaper->escapeHtml(__('Response excerpt (first 1 KB, debug option, kept for 7 days)')) ?></p>
+                                    <pre class="ffb-admin-webhook-excerpt"><?= $escaper->escapeHtml($attempt['excerpt']) ?></pre>
+                                </td>
+                            </tr>
+                        <?php endif; ?>
+                    <?php endforeach; ?>
+                    </tbody>
+                </table>
+            </div>
+        <?php endif; ?>
+    </section>
+
+    <?php if ($block->canReplay()): ?>
+    <section class="ffb-rules-card" aria-labelledby="ffb-replay-title">
+        <h2 class="ffb-rules-title" id="ffb-replay-title"><?= $escaper->escapeHtml(__('Replay')) ?></h2>
+        <p class="ffb-admin-webhook-note"><?= $escaper->escapeHtml(__('A replay is queued as a new delivery and sends the submission\'s current data, not the original bytes. The original delivery is not changed.')) ?></p>
+        <div class="ffb-admin-webhook-actions">
+            <form method="post" action="<?= $escaper->escapeUrl($block->getRedeliverUrl()) ?>">
+                <input type="hidden" name="form_key" value="<?= /* @noEscape */ $formKey ?>">
+                <input type="hidden" name="delivery_id" value="<?= (int)$delivery['id'] ?>">
+                <button type="submit" class="ffb-rules-btn ffb-rules-btn-primary" aria-describedby="ffb-redeliver-hint"><?= $escaper->escapeHtml(__('Redeliver')) ?></button>
+                <p class="ffb-rules-hint" id="ffb-redeliver-hint"><?= $escaper->escapeHtml(__('Keeps the same webhook id, so a receiver that already processed it can ignore it.')) ?></p>
+            </form>
+            <form method="post" action="<?= $escaper->escapeUrl($block->getResendUrl()) ?>">
+                <input type="hidden" name="form_key" value="<?= /* @noEscape */ $formKey ?>">
+                <input type="hidden" name="delivery_id" value="<?= (int)$delivery['id'] ?>">
+                <button type="submit" class="ffb-rules-btn" aria-describedby="ffb-resend-hint"><?= $escaper->escapeHtml(__('Resend as new')) ?></button>
+                <p class="ffb-rules-hint" id="ffb-resend-hint"><?= $escaper->escapeHtml(__('Uses a new webhook id, so the receiver processes it again. At most 30 replays every 10 minutes.')) ?></p>
+            </form>
+        </div>
+    </section>
+    <?php endif; ?>
+<?php endif; ?>
+</div>

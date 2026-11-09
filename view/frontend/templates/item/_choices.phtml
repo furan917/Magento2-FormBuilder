@@ -1,0 +1,22 @@
+<?php
+/** @var \Magento\Framework\View\Element\Template $block */
+/** @var \Magento\Framework\Escaper $escaper */
+$form = $block->getData('parent_block');
+extract($form->getItemContext((array)$block->getData('item'), $escaper), EXTR_SKIP);
+/** @var string $inputType */
+$default = (string)($item['default'] ?? '');
+$isMulti = $inputType === 'checkbox';
+?>
+<?= /* @noEscape */ $form->renderPartial($block, 'item/_open.phtml', ['group' => true]) ?>
+<?php foreach ((array)($item['options'] ?? []) as $index => $option): ?>
+    <label class="ffb-option"><input<?= /* @noEscape */ $attrs([
+        'class' => 'ffb-choice',
+        'type' => $inputType,
+        'id' => $controlId . '-' . $index,
+        'name' => $base['name'] . ($isMulti ? '[]' : ''),
+        'value' => (string)($option['value'] ?? ''),
+        'required' => !$isMulti && $required,
+        'checked' => $default !== '' && (string)($option['value'] ?? '') === $default,
+    ]) ?>><span><?= $escaper->escapeHtml((string)($option['label'] ?? '')) ?></span></label>
+<?php endforeach; ?>
+<?= /* @noEscape */ $form->renderPartial($block, 'item/_close.phtml', ['group' => true]) ?>

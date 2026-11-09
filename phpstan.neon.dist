@@ -1,0 +1,21 @@
+parameters:
+    level: 8
+    phpVersion: 80100
+    paths:
+        - Api
+        - Block
+        - Console
+        - Controller
+        - Model
+        - Observer
+        - Plugin
+        - Ui
+        - ViewModel
+    excludePaths:
+        analyseAndScan:
+            - Test
+    bootstrapFiles:
+        - ../../../../app/autoload.php
+    scanDirectories:
+        - ../../../../generated/code
+    treatPhpDocTypesAsCertain: false

@@ -1,0 +1,11 @@
+<?xml version="1.0"?>
+<page xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:View/Layout/etc/page_configuration.xsd">
+    <head>
+        <css src="Furan_FormBuilder::css/rules.css"/>
+    </head>
+    <body>
+        <referenceContainer name="content">
+            <block class="Furan\FormBuilder\Block\Adminhtml\FieldGroup\Index" name="furan_formbuilder_fieldgroup_index" template="Furan_FormBuilder::field_group/index.phtml"/>
+        </referenceContainer>
+    </body>
+</page>

@@ -1,0 +1,10 @@
+<?php
+/** @var \Magento\Framework\View\Element\Template $block */
+/** @var \Magento\Framework\Escaper $escaper */
+$form = $block->getData('parent_block');
+extract($form->getItemContext((array)$block->getData('item'), $escaper), EXTR_SKIP);
+$accept = $form->getFileAccept($settings);
+?>
+<?= /* @noEscape */ $form->renderPartial($block, 'item/_open.phtml', ['group' => false]) ?>
+    <input<?= /* @noEscape */ $attrs(['type' => 'file'] + array_replace($base, ['name' => 'files[' . $name . ']']) + ['accept' => $accept]) ?>>
+<?= /* @noEscape */ $form->renderPartial($block, 'item/_close.phtml', ['group' => false]) ?>

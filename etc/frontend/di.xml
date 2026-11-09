@@ -1,0 +1,57 @@
+<?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:ObjectManager/etc/config.xsd">
+    <type name="Magento\Framework\App\RouterList">
+        <arguments>
+            <argument name="routerList" xsi:type="array">
+                <item name="furan_formbuilder" xsi:type="array">
+                    <item name="class" xsi:type="string">Furan\FormBuilder\Controller\Router</item>
+                    <item name="disable" xsi:type="boolean">false</item>
+                    <item name="sortOrder" xsi:type="string">35</item>
+                </item>
+            </argument>
+        </arguments>
+    </type>
+    <type name="Magento\Framework\App\Request\ValidatorInterface">
+        <plugin name="furan_formbuilder_storefront_switch" type="Furan\FormBuilder\Plugin\StorefrontSwitchBeforeValidation"/>
+    </type>
+    <!-- Outside the customer account plugin (no sortOrder), which returns nothing for guests. -->
+    <type name="Furan\FormBuilder\Controller\Account\Claim">
+        <plugin name="furan_formbuilder_guest_account_result" type="Furan\FormBuilder\Plugin\GuestAccountResult" sortOrder="-100"/>
+    </type>
+    <type name="Furan\FormBuilder\Controller\Account\Delete">
+        <plugin name="furan_formbuilder_guest_account_result" type="Furan\FormBuilder\Plugin\GuestAccountResult" sortOrder="-100"/>
+    </type>
+    <type name="Furan\FormBuilder\Controller\Account\DeleteAll">
+        <plugin name="furan_formbuilder_guest_account_result" type="Furan\FormBuilder\Plugin\GuestAccountResult" sortOrder="-100"/>
+    </type>
+    <type name="Furan\FormBuilder\Controller\Account\Edit">
+        <plugin name="furan_formbuilder_guest_account_result" type="Furan\FormBuilder\Plugin\GuestAccountResult" sortOrder="-100"/>
+    </type>
+    <type name="Furan\FormBuilder\Controller\Account\Export">
+        <plugin name="furan_formbuilder_guest_account_result" type="Furan\FormBuilder\Plugin\GuestAccountResult" sortOrder="-100"/>
+    </type>
+    <type name="Furan\FormBuilder\Controller\Account\Reply">
+        <plugin name="furan_formbuilder_guest_account_result" type="Furan\FormBuilder\Plugin\GuestAccountResult" sortOrder="-100"/>
+    </type>
+    <type name="Furan\FormBuilder\Controller\Account\Submission">
+        <plugin name="furan_formbuilder_guest_account_result" type="Furan\FormBuilder\Plugin\GuestAccountResult" sortOrder="-100"/>
+    </type>
+    <type name="Furan\FormBuilder\Controller\Account\Submissions">
+        <plugin name="furan_formbuilder_guest_account_result" type="Furan\FormBuilder\Plugin\GuestAccountResult" sortOrder="-100"/>
+    </type>
+    <type name="Magento\Csp\Api\CspRendererInterface">
+        <plugin name="furan_formbuilder_map_policies" type="Furan\FormBuilder\Plugin\Csp\MapPagePolicies"/>
+    </type>
+    <type name="Furan\FormBuilder\Observer\OfferClaim">
+        <arguments>
+            <argument name="claimMailer" xsi:type="object">Furan\FormBuilder\Model\Claim\ClaimMailer\Proxy</argument>
+            <argument name="mailQueue" xsi:type="object">Furan\FormBuilder\Model\Mail\MailQueue\Proxy</argument>
+        </arguments>
+    </type>
+    <type name="Furan\FormBuilder\Controller\Router">
+        <arguments>
+            <argument name="formRepository" xsi:type="object">Furan\FormBuilder\Api\FormRepositoryInterface\Proxy</argument>
+            <argument name="pageResource" xsi:type="object">Magento\Cms\Model\ResourceModel\Page\Proxy</argument>
+        </arguments>
+    </type>
+</config>

@@ -1,0 +1,58 @@
+<?php
+/** @var \Magento\Framework\View\Element\Template $block */
+/** @var \Magento\Framework\Escaper $escaper */
+$form = $block->getData('parent_block');
+extract($form->getItemContext((array)$block->getData('item'), $escaper), EXTR_SKIP);
+/** @var string $inputType */
+$suggest = $suggest ?? false;
+$extra = [];
+$prefix = in_array($inputType, ['text', 'number'], true) ? trim((string)($settings['prefix'] ?? '')) : '';
+$suffix = in_array($inputType, ['text', 'number'], true) ? trim((string)($settings['suffix'] ?? '')) : '';
+$grouped = $prefix !== '' || $suffix !== '';
+$listId = $controlId . '-list';
+if ($suggest) {
+    $extra += ['list' => $listId];
+}
+$minLength = $ruleValue('min_length');
+$maxLength = $ruleValue('max_length');
+if (in_array($inputType, ['text', 'email', 'tel', 'url'], true)) {
+    $extra += ['minlength' => $minLength === null ? null : (int)$minLength, 'maxlength' => $maxLength === null ? null : (int)$maxLength];
+}
+if ($inputType === 'number') {
+    $extra += ['min' => $ruleValue('min'), 'max' => $ruleValue('max'), 'step' => $settings['step'] ?? 'any'];
+}
+if ($inputType === 'date') {
+    $extra += ['min' => $ruleValue('min_date'), 'max' => $ruleValue('max_date')];
+}
+if ($inputType === 'datetime-local') {
+    $minDate = $ruleValue('min_date');
+    $maxDate = $ruleValue('max_date');
+    $extra += ['min' => $minDate === null ? null : $minDate . 'T00:00', 'max' => $maxDate === null ? null : $maxDate . 'T23:59'];
+}
+?>
+<?= /* @noEscape */ $form->renderPartial($block, 'item/_open.phtml', ['group' => false]) ?>
+<?php if ($grouped): ?>
+    <div class="ffb-input-group">
+<?php if ($prefix !== ''): ?>
+        <span class="ffb-affix ffb-prefix"><?= $escaper->escapeHtml($prefix) ?></span>
+<?php endif; ?>
+<?php endif; ?>
+    <input<?= /* @noEscape */ $attrs(['type' => $inputType] + $base + $extra + [
+        'placeholder' => $item['placeholder'] ?? '',
+        'autocomplete' => $item['autocomplete'] ?? '',
+        'value' => $item['default'] ?? '',
+    ]) ?>>
+<?php if ($grouped): ?>
+<?php if ($suffix !== ''): ?>
+        <span class="ffb-affix ffb-suffix"><?= $escaper->escapeHtml($suffix) ?></span>
+<?php endif; ?>
+    </div>
+<?php endif; ?>
+<?php if ($suggest): ?>
+    <datalist id="<?= $escaper->escapeHtmlAttr($listId) ?>">
+<?php foreach ((array)($item['options'] ?? []) as $option): ?>
+        <option value="<?= $escaper->escapeHtmlAttr((string)($option['label'] ?? '')) ?>"></option>
+<?php endforeach; ?>
+    </datalist>
+<?php endif; ?>
+<?= /* @noEscape */ $form->renderPartial($block, 'item/_close.phtml', ['group' => false]) ?>

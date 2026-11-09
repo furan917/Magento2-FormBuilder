@@ -1,0 +1,65 @@
+<?php
+declare(strict_types=1);
+
+use Furan\FormBuilder\Block\Account\Submissions;
+use Magento\Framework\Escaper;
+
+/** @var Submissions $block */
+/** @var Escaper $escaper */
+$page = $block->getPage();
+$olderUrl = $block->getOlderUrl();
+?>
+<link rel="stylesheet" href="<?= $escaper->escapeUrl($block->getViewFileUrl('Furan_FormBuilder::css/account.css')) ?>">
+<div class="ffb-account ffb-account-submissions">
+<?php if ($page['rows']): ?>
+    <div class="ffb-account-privacy">
+        <form method="post" action="<?= $escaper->escapeUrl($block->getExportUrl()) ?>" class="ffb-account-export">
+            <?= $block->getBlockHtml('formkey') ?>
+            <button type="submit" class="action"><span><?= $escaper->escapeHtml(__('Download my data')) ?></span></button>
+        </form>
+        <form method="post" action="<?= $escaper->escapeUrl($block->getDeleteAllUrl()) ?>" class="ffb-account-delete-all">
+            <?= $block->getBlockHtml('formkey') ?>
+            <label>
+                <input type="checkbox" name="confirm" value="1" required>
+                <span><?= $escaper->escapeHtml(__('I want to delete all my submissions')) ?></span>
+            </label>
+            <button type="submit" class="action delete"><span><?= $escaper->escapeHtml(__('Delete all my submissions')) ?></span></button>
+            <?php if ($block->hasOneResponseAnswers()): ?>
+                <p class="ffb-account-note"><?= $escaper->escapeHtml(__('Forms that take one answer per customer stay answered after you delete your submissions.')) ?></p>
+            <?php endif; ?>
+        </form>
+    </div>
+<?php endif; ?>
+<?php if (!$page['rows']): ?>
+    <p class="ffb-account-empty"><?= $escaper->escapeHtml(__('You have not sent any submissions yet.')) ?></p>
+<?php else: ?>
+    <table class="data table ffb-account-table">
+        <caption class="table-caption"><?= $escaper->escapeHtml(__('My submissions')) ?></caption>
+        <thead>
+            <tr>
+                <th scope="col"><?= $escaper->escapeHtml(__('Date')) ?></th>
+                <th scope="col"><?= $escaper->escapeHtml(__('Form')) ?></th>
+                <th scope="col"><?= $escaper->escapeHtml(__('Reference')) ?></th>
+                <th scope="col"><?= $escaper->escapeHtml(__('Summary')) ?></th>
+                <th scope="col"><?= $escaper->escapeHtml(__('Status')) ?></th>
+                <th scope="col"><?= $escaper->escapeHtml(__('View')) ?></th>
+            </tr>
+        </thead>
+        <tbody>
+        <?php foreach ($page['rows'] as $row): ?>
+            <tr>
+                <td data-th="<?= $escaper->escapeHtmlAttr(__('Date')) ?>"><?= $escaper->escapeHtml($block->formatDate((string)$row['created_at'], \IntlDateFormatter::MEDIUM, true)) ?></td>
+                <td data-th="<?= $escaper->escapeHtmlAttr(__('Form')) ?>"><?= $escaper->escapeHtml($row['form_title']) ?></td>
+                <td data-th="<?= $escaper->escapeHtmlAttr(__('Reference')) ?>"><?= $escaper->escapeHtml(($row['reference'] ?? '') !== '' ? $row['reference'] : "\u{2014}") ?></td>
+                <td data-th="<?= $escaper->escapeHtmlAttr(__('Summary')) ?>"><?= $escaper->escapeHtml($row['summary']) ?></td>
+                <td data-th="<?= $escaper->escapeHtmlAttr(__('Status')) ?>"><span class="ffb-account-status ffb-account-status-<?= (int)$row['status'] ?>"><?= $escaper->escapeHtml($block->getStatusLabel((int)$row['status'])) ?></span></td>
+                <td class="ffb-account-cell-view" data-th="<?= $escaper->escapeHtmlAttr(__('View')) ?>"><a href="<?= $escaper->escapeUrl($block->getViewUrl((int)$row['submission_id'])) ?>"><?= $escaper->escapeHtml(__('View')) ?></a></td>
+            </tr>
+        <?php endforeach; ?>
+        </tbody>
+    </table>
+    <?php if ($olderUrl !== null): ?>
+        <p class="ffb-account-older"><a href="<?= $escaper->escapeUrl($olderUrl) ?>"><?= $escaper->escapeHtml(__('Older')) ?></a></p>
+    <?php endif; ?>
+<?php endif; ?>
+</div>

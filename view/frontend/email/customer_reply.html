@@ -1,0 +1,19 @@
+<!--@subject {{var subject}} @-->
+<!--@vars {
+"var subject":"Subject",
+"var body_html|raw":"Customer Reply Text (pre-escaped HTML)",
+"var submission_id":"Submission ID",
+"var reference":"Submission Reference",
+"var admin_url":"Submission URL in the Admin"
+} @-->
+
+{{template config_path="design/email/header_template"}}
+
+<p>{{trans "Submission #%id" id=$submission_id}}</p>
+<p>{{trans "Reference: %reference" reference=$reference}}</p>
+
+{{var body_html|raw}}
+
+<p><a href="{{var admin_url}}">{{trans "View the submission in the Admin"}}</a></p>
+
+{{template config_path="design/email/footer_template"}}

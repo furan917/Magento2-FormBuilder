@@ -1,0 +1,32 @@
+<?php
+/** @var \Magento\Framework\View\Element\Template $block */
+/** @var \Magento\Framework\Escaper $escaper */
+$form = $block->getData('parent_block');
+extract($form->getItemContext((array)$block->getData('item'), $escaper), EXTR_SKIP);
+$min = min(1, max(0, (int)($settings['min'] ?? 1)));
+$max = min(10, max(2, (int)($settings['max'] ?? 5)));
+$lowLabel = trim((string)($settings['low_label'] ?? ''));
+$highLabel = trim((string)($settings['high_label'] ?? ''));
+$default = (string)($item['default'] ?? '');
+?>
+<?= /* @noEscape */ $form->renderPartial($block, 'item/_open.phtml', ['group' => true]) ?>
+    <div class="ffb-scale" role="radiogroup">
+<?php if ($lowLabel !== ''): ?>
+        <span class="ffb-scale-label ffb-scale-low"><?= $escaper->escapeHtml($lowLabel) ?></span>
+<?php endif; ?>
+<?php for ($i = $min; $i <= $max; $i++): ?>
+        <label class="ffb-option"><input<?= /* @noEscape */ $attrs([
+            'class' => 'ffb-choice',
+            'type' => 'radio',
+            'id' => $controlId . '-' . ($i - $min),
+            'name' => $base['name'],
+            'value' => (string)$i,
+            'required' => $required,
+            'checked' => $default === (string)$i,
+        ]) ?>><span><?= (int)$i ?></span></label>
+<?php endfor; ?>
+<?php if ($highLabel !== ''): ?>
+        <span class="ffb-scale-label ffb-scale-high"><?= $escaper->escapeHtml($highLabel) ?></span>
+<?php endif; ?>
+    </div>
+<?= /* @noEscape */ $form->renderPartial($block, 'item/_close.phtml', ['group' => true]) ?>

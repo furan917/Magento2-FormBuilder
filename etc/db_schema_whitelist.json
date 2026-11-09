@@ -1,0 +1,621 @@
+{
+    "furan_formbuilder_form": {
+        "column": {
+            "form_id": true,
+            "identifier": true,
+            "title": true,
+            "is_active": true,
+            "schema_json": true,
+            "settings_json": true,
+            "created_at": true,
+            "updated_at": true,
+            "purge_requested_at": true,
+            "open_from": true,
+            "close_at": true
+        },
+        "index": {
+            "FURAN_FORMBUILDER_FORM_OPEN_FROM": true,
+            "FURAN_FORMBUILDER_FORM_CLOSE_AT": true
+        },
+        "constraint": {
+            "PRIMARY": true,
+            "FURAN_FORMBUILDER_FORM_IDENTIFIER": true
+        }
+    },
+    "furan_formbuilder_form_store": {
+        "column": {
+            "form_id": true,
+            "store_id": true
+        },
+        "index": {
+            "FURAN_FORMBUILDER_FORM_STORE_STORE_ID": true
+        },
+        "constraint": {
+            "PRIMARY": true,
+            "FURAN_FORMBUILDER_FORM_STORE_FORM_ID_FURAN_FORMBUILDER_FORM_FORM_ID": true,
+            "FURAN_FORMBUILDER_FORM_STORE_STORE_ID_STORE_STORE_ID": true,
+            "FK_BC2676A4454AED8F32B3A907825415C3": true
+        }
+    },
+    "furan_formbuilder_form_translation": {
+        "column": {
+            "form_id": true,
+            "store_id": true,
+            "content": true
+        },
+        "index": {
+            "FURAN_FORMBUILDER_FORM_TRANSLATION_STORE_ID": true
+        },
+        "constraint": {
+            "PRIMARY": true,
+            "FURAN_FORMBUILDER_FORM_TRANSLATION_FORM_ID_FURAN_FORMBUILDER_FORM_FORM_ID": true,
+            "FURAN_FORMBUILDER_FORM_TRANSLATION_STORE_ID_STORE_STORE_ID": true,
+            "FK_2B19B284C115462322C55D52927C2DD5": true
+        }
+    },
+    "furan_formbuilder_submission": {
+        "column": {
+            "submission_id": true,
+            "form_id": true,
+            "store_id": true,
+            "customer_id": true,
+            "payload_json": true,
+            "summary": true,
+            "remote_ip": true,
+            "is_read": true,
+            "created_at": true,
+            "customer_group_id": true,
+            "email_hash": true,
+            "email_hash_version": true,
+            "status": true,
+            "updated_at": true,
+            "context_json": true,
+            "thread_token_version": true,
+            "reference": true
+        },
+        "index": {
+            "FURAN_FORMBUILDER_SUBMISSION_FORM_ID_CREATED_AT": true,
+            "FURAN_FORMBUILDER_SUBMISSION_FORM_ID_IS_READ": true,
+            "FURAN_FORMBUILDER_SUBMISSION_CREATED_AT": true,
+            "FURAN_FORMBUILDER_SUBMISSION_CUSTOMER_ID_SUBMISSION_ID": true,
+            "FURAN_FORMBUILDER_SUBMISSION_EMAIL_HASH_CUSTOMER_ID": true,
+            "FURAN_FORMBUILDER_SUBMISSION_FORM_ID_STATUS_SUBMISSION_ID": true,
+            "FURAN_FORMBUILDER_SUBMISSION_STATUS_SUBMISSION_ID": true,
+            "FURAN_FORMBUILDER_SUBMISSION_FORM_ID_SUBMISSION_ID": true,
+            "FURAN_FORMBUILDER_SUBMISSION_IS_READ_SUBMISSION_ID": true,
+            "FURAN_FORMBUILDER_SUBMISSION_EMAIL_HASH_SUBMISSION_ID": true
+        },
+        "constraint": {
+            "PRIMARY": true,
+            "FURAN_FORMBUILDER_SUBMISSION_FORM_ID_FURAN_FORMBUILDER_FORM_FORM_ID": true,
+            "FURAN_FORMBUILDER_SUBMISSION_STORE_ID_STORE_STORE_ID": true,
+            "FURAN_FORMBUILDER_SUBMISSION_CUSTOMER_ID_CUSTOMER_ENTITY_ENTITY_ID": true,
+            "FURAN_FORMBUILDER_SUBMISSION_REFERENCE": true,
+            "FK_E3A0E2B51B71DFA8B217FB2F05E4F953": true,
+            "FURAN_FORMBUILDER_SUBMISSION_CSTR_ID_CSTR_ENTT_ENTT_ID": true
+        }
+    },
+    "furan_formbuilder_file": {
+        "column": {
+            "file_id": true,
+            "path": true,
+            "submission_id": true,
+            "created_at": true
+        },
+        "index": {
+            "FURAN_FORMBUILDER_FILE_SUBMISSION_ID_CREATED_AT": true,
+            "FURAN_FORMBUILDER_FILE_SUBMISSION_ID": true
+        },
+        "constraint": {
+            "PRIMARY": true,
+            "FURAN_FORMBUILDER_FILE_PATH": true,
+            "FURAN_FORMBUILDER_FILE_SUBMISSION_ID_FURAN_FORMBUILDER_SUBMISSION_SUBMISSION_ID": true,
+            "FK_685B6F42AF0DDC70E715413064587B0C": true
+        }
+    },
+    "furan_formbuilder_rule": {
+        "column": {
+            "rule_id": true,
+            "code": true,
+            "label": true,
+            "pattern": true,
+            "message": true,
+            "example": true,
+            "created_at": true,
+            "updated_at": true
+        },
+        "constraint": {
+            "PRIMARY": true,
+            "FURAN_FORMBUILDER_RULE_CODE": true
+        }
+    },
+    "furan_formbuilder_field_group": {
+        "column": {
+            "group_id": true,
+            "name": true,
+            "description": true,
+            "fields_json": true,
+            "translations_json": true,
+            "created_at": true,
+            "updated_at": true
+        },
+        "constraint": {
+            "PRIMARY": true,
+            "FURAN_FORMBUILDER_FIELD_GROUP_NAME": true
+        }
+    },
+    "furan_formbuilder_respondent": {
+        "column": {
+            "form_id": true,
+            "respondent_key": true,
+            "submission_id": true
+        },
+        "index": {
+            "FURAN_FORMBUILDER_RESPONDENT_SUBMISSION_ID": true,
+            "FURAN_FORMBUILDER_RESPONDENT_RESPONDENT_KEY": true
+        },
+        "constraint": {
+            "PRIMARY": true,
+            "FURAN_FORMBUILDER_RESPONDENT_FORM_ID_FURAN_FORMBUILDER_FORM_FORM_ID": true,
+            "FURAN_FORMBUILDER_RESPONDENT_SUBMISSION_ID_FURAN_FORMBUILDER_SUBMISSION_SUBMISSION_ID": true,
+            "FK_6E53BD9132BAB22DF6C5256F8361ADC7": true,
+            "FK_567B0CFC99BD28E3FE9E00B72E9072C8": true
+        }
+    },
+    "furan_formbuilder_message": {
+        "column": {
+            "message_id": true,
+            "submission_id": true,
+            "author": true,
+            "admin_user_id": true,
+            "body": true,
+            "emailed_at": true,
+            "created_at": true
+        },
+        "index": {
+            "FURAN_FORMBUILDER_MESSAGE_SUBMISSION_ID_MESSAGE_ID": true
+        },
+        "constraint": {
+            "PRIMARY": true,
+            "FURAN_FORMBUILDER_MESSAGE_SUBMISSION_ID_FURAN_FORMBUILDER_SUBMISSION_SUBMISSION_ID": true,
+            "FK_0FEE3DDDB92E9BB16A7E9746AC07A5F1": true
+        }
+    },
+    "furan_formbuilder_draft": {
+        "column": {
+            "form_id": true,
+            "customer_id": true,
+            "store_id": true,
+            "payload_json": true,
+            "updated_at": true
+        },
+        "index": {
+            "FURAN_FORMBUILDER_DRAFT_CUSTOMER_ID": true,
+            "FURAN_FORMBUILDER_DRAFT_STORE_ID": true,
+            "FURAN_FORMBUILDER_DRAFT_UPDATED_AT": true,
+            "FURAN_FORMBUILDER_DRAFT_STORE_ID_UPDATED_AT": true
+        },
+        "constraint": {
+            "PRIMARY": true,
+            "FURAN_FORMBUILDER_DRAFT_FORM_ID_FURAN_FORMBUILDER_FORM_FORM_ID": true,
+            "FURAN_FORMBUILDER_DRAFT_CUSTOMER_ID_CUSTOMER_ENTITY_ENTITY_ID": true,
+            "FURAN_FORMBUILDER_DRAFT_STORE_ID_STORE_STORE_ID": true
+        }
+    },
+    "furan_formbuilder_stat_field": {
+        "column": {
+            "field_id": true,
+            "form_id": true,
+            "field_key": true,
+            "kind": true,
+            "bucket_step": true
+        },
+        "constraint": {
+            "PRIMARY": true,
+            "FURAN_FORMBUILDER_STAT_FIELD_FORM_ID_FURAN_FORMBUILDER_FORM_FORM_ID": true,
+            "FURAN_FORMBUILDER_STAT_FIELD_FORM_ID_FIELD_KEY": true,
+            "FK_E0312959DB746559E43036937C0067AB": true
+        }
+    },
+    "furan_formbuilder_stat_day": {
+        "column": {
+            "form_id": true,
+            "grain": true,
+            "is_rollup": true,
+            "period": true,
+            "store_id": true,
+            "customer_group_id": true,
+            "submissions": true
+        },
+        "constraint": {
+            "PRIMARY": true,
+            "FURAN_FORMBUILDER_STAT_DAY_FORM_ID_FURAN_FORMBUILDER_FORM_FORM_ID": true,
+            "FK_7758CD6A8471ED80F54326D55A53495B": true
+        }
+    },
+    "furan_formbuilder_stat_value": {
+        "column": {
+            "field_id": true,
+            "grain": true,
+            "is_rollup": true,
+            "period": true,
+            "store_id": true,
+            "customer_group_id": true,
+            "value_key": true,
+            "hits": true
+        },
+        "constraint": {
+            "PRIMARY": true,
+            "FURAN_FORMBUILDER_STAT_VALUE_FIELD_ID_FURAN_FORMBUILDER_STAT_FIELD_FIELD_ID": true,
+            "FK_F494BC199BD0A66BB17DFBACA4A6D840": true
+        }
+    },
+    "furan_formbuilder_stat_number": {
+        "column": {
+            "field_id": true,
+            "grain": true,
+            "is_rollup": true,
+            "period": true,
+            "store_id": true,
+            "customer_group_id": true,
+            "n": true,
+            "total": true
+        },
+        "constraint": {
+            "PRIMARY": true,
+            "FURAN_FORMBUILDER_STAT_NUMBER_FIELD_ID_FURAN_FORMBUILDER_STAT_FIELD_FIELD_ID": true,
+            "FK_5D5F1ABDDD12ABA335928554C078AB95": true
+        }
+    },
+    "furan_formbuilder_stat_label": {
+        "column": {
+            "field_id": true,
+            "value_key": true,
+            "label": true
+        },
+        "constraint": {
+            "PRIMARY": true,
+            "FURAN_FORMBUILDER_STAT_LABEL_FIELD_ID_FURAN_FORMBUILDER_STAT_FIELD_FIELD_ID": true,
+            "FK_3483336F0A50702B3F4C68CFA2A75C80": true
+        }
+    },
+    "furan_formbuilder_stat_journal": {
+        "column": {
+            "journal_id": true,
+            "form_id": true,
+            "deltas": true,
+            "created_at": true
+        },
+        "index": {
+            "FURAN_FORMBUILDER_STAT_JOURNAL_FORM_ID_JOURNAL_ID": true
+        },
+        "constraint": {
+            "PRIMARY": true,
+            "FURAN_FORMBUILDER_STAT_JOURNAL_FORM_ID_FURAN_FORMBUILDER_FORM_FORM_ID": true,
+            "FK_D93F8D6D74AB7C094063F749A71678E3": true
+        }
+    },
+    "furan_formbuilder_stat_stage_day": {
+        "column": {
+            "form_id": true,
+            "rebuild_id": true,
+            "grain": true,
+            "is_rollup": true,
+            "period": true,
+            "store_id": true,
+            "customer_group_id": true,
+            "submissions": true
+        },
+        "constraint": {
+            "PRIMARY": true,
+            "FURAN_FORMBUILDER_STAT_STAGE_DAY_FORM_ID_FURAN_FORMBUILDER_FORM_FORM_ID": true,
+            "FK_8AFD6A37F7166C3367F4E1E80A15EF66": true
+        }
+    },
+    "furan_formbuilder_stat_stage_value": {
+        "column": {
+            "form_id": true,
+            "rebuild_id": true,
+            "field_id": true,
+            "grain": true,
+            "is_rollup": true,
+            "period": true,
+            "store_id": true,
+            "customer_group_id": true,
+            "value_key": true,
+            "hits": true
+        },
+        "constraint": {
+            "PRIMARY": true,
+            "FURAN_FORMBUILDER_STAT_STAGE_VALUE_FORM_ID_FURAN_FORMBUILDER_FORM_FORM_ID": true,
+            "FK_AB3E855966F3F89194FF9FEC1AEBFFEE": true
+        }
+    },
+    "furan_formbuilder_stat_stage_number": {
+        "column": {
+            "form_id": true,
+            "rebuild_id": true,
+            "field_id": true,
+            "grain": true,
+            "is_rollup": true,
+            "period": true,
+            "store_id": true,
+            "customer_group_id": true,
+            "n": true,
+            "total": true
+        },
+        "constraint": {
+            "PRIMARY": true,
+            "FURAN_FORMBUILDER_STAT_STAGE_NUMBER_FORM_ID_FURAN_FORMBUILDER_FORM_FORM_ID": true,
+            "FK_C3B1BCC938AB435A7BCF32E9743A0407": true
+        }
+    },
+    "furan_formbuilder_stat_stage_label": {
+        "column": {
+            "form_id": true,
+            "rebuild_id": true,
+            "field_id": true,
+            "value_key": true,
+            "label": true
+        },
+        "constraint": {
+            "PRIMARY": true,
+            "FURAN_FORMBUILDER_STAT_STAGE_LABEL_FORM_ID_FURAN_FORMBUILDER_FORM_FORM_ID": true,
+            "FK_90EF82D3CDC2103F78841C4B78E544E9": true
+        }
+    },
+    "furan_formbuilder_stat_stage_journal": {
+        "column": {
+            "form_id": true,
+            "rebuild_id": true,
+            "journal_id": true,
+            "deltas": true
+        },
+        "constraint": {
+            "PRIMARY": true,
+            "FURAN_FORMBUILDER_STAT_STAGE_JOURNAL_FORM_ID_FURAN_FORMBUILDER_FORM_FORM_ID": true,
+            "FK_FB6477E1CAF826BE490B2C16CD475384": true
+        }
+    },
+    "furan_formbuilder_stat_state": {
+        "column": {
+            "form_id": true,
+            "rebuilding": true,
+            "rebuild_started_at": true,
+            "needs_rebuild": true,
+            "rebuild_id": true,
+            "rebuild_requested": true,
+            "rebuild_requested_at": true
+        },
+        "constraint": {
+            "PRIMARY": true,
+            "FURAN_FORMBUILDER_STAT_STATE_FORM_ID_FURAN_FORMBUILDER_FORM_FORM_ID": true,
+            "FK_0FF88AAED6CB8864383596CFA4C884B4": true
+        }
+    },
+    "furan_formbuilder_counter": {
+        "column": {
+            "counter_key": true,
+            "hits": true,
+            "expires_at": true
+        },
+        "index": {
+            "FURAN_FORMBUILDER_COUNTER_EXPIRES_AT": true
+        },
+        "constraint": {
+            "PRIMARY": true
+        }
+    },
+    "furan_formbuilder_action_retry": {
+        "column": {
+            "retry_id": true,
+            "submission_id": true,
+            "action_code": true,
+            "attempt": true,
+            "due_at": true,
+            "last_error": true,
+            "created_at": true,
+            "is_edit": true
+        },
+        "index": {
+            "FURAN_FORMBUILDER_ACTION_RETRY_DUE_AT_RETRY_ID": true
+        },
+        "constraint": {
+            "PRIMARY": true,
+            "FURAN_FORMBUILDER_ACTION_RETRY_SUBMISSION_ID_ACTION_CODE": true,
+            "FURAN_FORMBUILDER_ACTION_RETRY_SUBMISSION_ID_FURAN_FORMBUILDER_SUBMISSION_SUBMISSION_ID": true,
+            "FK_201B70716883A2A02AD761E0FF1141AD": true
+        }
+    },
+    "furan_formbuilder_webhook": {
+        "column": {
+            "endpoint_id": true,
+            "name": true,
+            "url": true,
+            "is_active": true,
+            "scope_type": true,
+            "scope_ids": true,
+            "all_forms": true,
+            "form_ids": true,
+            "events": true,
+            "field_mode": true,
+            "fields": true,
+            "include_personal": true,
+            "debug_responses": true,
+            "secret_enc": true,
+            "previous_secret_enc": true,
+            "previous_expires_at": true,
+            "disabled_reason": true,
+            "failing_since": true,
+            "consecutive_failures": true,
+            "circuit_open_until": true,
+            "slot0_until": true,
+            "slot1_until": true,
+            "purge_requested_at": true,
+            "created_at": true,
+            "updated_at": true
+        },
+        "index": {
+            "FURAN_FORMBUILDER_WEBHOOK_IS_ACTIVE": true
+        },
+        "constraint": {
+            "PRIMARY": true
+        }
+    },
+    "furan_formbuilder_webhook_audit": {
+        "column": {
+            "audit_id": true,
+            "endpoint_id": true,
+            "admin_user_id": true,
+            "action": true,
+            "detail": true,
+            "created_at": true
+        },
+        "index": {
+            "FURAN_FORMBUILDER_WEBHOOK_AUDIT_ENDPOINT_ID_AUDIT_ID": true
+        },
+        "constraint": {
+            "PRIMARY": true
+        }
+    },
+    "furan_formbuilder_webhook_delivery": {
+        "column": {
+            "delivery_id": true,
+            "endpoint_id": true,
+            "submission_id": true,
+            "event": true,
+            "event_data": true,
+            "webhook_id": true,
+            "replay_of": true,
+            "admin_user_id": true,
+            "status": true,
+            "attempts": true,
+            "next_attempt_at": true,
+            "last_status_code": true,
+            "last_error": true,
+            "created_at": true,
+            "updated_at": true,
+            "delivered_at": true
+        },
+        "index": {
+            "FURAN_FORMBUILDER_WEBHOOK_DELIVERY_STATUS_NEXT_ATTEMPT_AT_DELIVERY_ID": true,
+            "FURAN_FORMBUILDER_WEBHOOK_DELIVERY_STATUS_ENDPOINT_ID_NEXT_ATTEMPT_AT_DELIVERY_ID": true,
+            "IDX_25F25FBABDB053AD9D88B66E28249A98": true,
+            "IDX_A562A8E6FEDCDF243EAD138A055340A7": true,
+            "FURAN_FORMBUILDER_WEBHOOK_DELIVERY_ENDPOINT_ID_DELIVERY_ID": true,
+            "FURAN_FORMBUILDER_WEBHOOK_DELIVERY_ENDPOINT_ID_STATUS_DELIVERY_ID": true,
+            "FURAN_FORMBUILDER_WEBHOOK_DELIVERY_ENDPOINT_ID_STS_DELIVERY_ID": true,
+            "FURAN_FORMBUILDER_WEBHOOK_DELIVERY_SUBMISSION_ID": true,
+            "FURAN_FORMBUILDER_WEBHOOK_DELIVERY_CREATED_AT_DELIVERY_ID": true,
+            "FURAN_FORMBUILDER_WEBHOOK_DELIVERY_WEBHOOK_ID": true
+        },
+        "constraint": {
+            "PRIMARY": true,
+            "FURAN_FORMBUILDER_WEBHOOK_DELIVERY_ENDPOINT_ID_FURAN_FORMBUILDER_WEBHOOK_ENDPOINT_ID": true,
+            "FK_7F939654C157A4124175FAA58B9915E3": true,
+            "FURAN_FORMBUILDER_WEBHOOK_DELIVERY_SUBMISSION_ID_FURAN_FORMBUILDER_SUBMISSION_SUBMISSION_ID": true,
+            "FK_BB55B169B82FA5394D00744BA3D43976": true
+        }
+    },
+    "furan_formbuilder_webhook_attempt": {
+        "column": {
+            "attempt_id": true,
+            "delivery_id": true,
+            "started_at": true,
+            "duration_ms": true,
+            "status_code": true,
+            "error_class": true,
+            "errno": true,
+            "connected_ip": true,
+            "location": true,
+            "retry_after": true
+        },
+        "index": {
+            "FURAN_FORMBUILDER_WEBHOOK_ATTEMPT_DELIVERY_ID_ATTEMPT_ID": true
+        },
+        "constraint": {
+            "PRIMARY": true,
+            "FURAN_FORMBUILDER_WEBHOOK_ATTEMPT_DELIVERY_ID_FURAN_FORMBUILDER_WEBHOOK_DELIVERY_DELIVERY_ID": true,
+            "FK_34D39514AB2A49DC6884B3B12882952C": true
+        }
+    },
+    "furan_formbuilder_webhook_attempt_debug": {
+        "column": {
+            "attempt_id": true,
+            "excerpt": true,
+            "created_at": true
+        },
+        "index": {
+            "FURAN_FORMBUILDER_WEBHOOK_ATTEMPT_DEBUG_CREATED_AT": true
+        },
+        "constraint": {
+            "PRIMARY": true,
+            "FURAN_FORMBUILDER_WEBHOOK_ATTEMPT_DEBUG_ATTEMPT_ID_FURAN_FORMBUILDER_WEBHOOK_ATTEMPT_ATTEMPT_ID": true,
+            "FK_BD951895C15CA2118184C379A571EE52": true
+        }
+    },
+    "furan_formbuilder_webhook_recipient": {
+        "column": {
+            "submission_id": true,
+            "endpoint_id": true,
+            "host": true,
+            "first_delivered_at": true
+        },
+        "constraint": {
+            "PRIMARY": true,
+            "FK_846E92B163CA87FE5B6332EE3657D932": true,
+            "FURAN_FORMBUILDER_WEBHOOK_RECIPIENT_SUBMISSION_ID": true
+        }
+    },
+    "furan_formbuilder_field_group_form": {
+        "column": {
+            "group_id": true,
+            "form_id": true
+        },
+        "index": {
+            "FURAN_FORMBUILDER_FIELD_GROUP_FORM_FORM_ID": true
+        },
+        "constraint": {
+            "PRIMARY": true,
+            "FURAN_FORMBUILDER_FIELD_GROUP_FORM_GROUP_ID_FURAN_FORMBUILDER_FIELD_GROUP_GROUP_ID": true,
+            "FURAN_FORMBUILDER_FIELD_GROUP_FORM_FORM_ID_FURAN_FORMBUILDER_FORM_FORM_ID": true,
+            "FK_334941B12072BD10198F96D167AB66D8": true,
+            "FK_0D22C5ECA35FF092F415EA1DA2C93E39": true
+        }
+    },
+    "furan_formbuilder_saved_rule_form": {
+        "column": {
+            "code": true,
+            "form_id": true
+        },
+        "index": {
+            "FURAN_FORMBUILDER_SAVED_RULE_FORM_FORM_ID": true
+        },
+        "constraint": {
+            "PRIMARY": true,
+            "FK_315A44C12594BE3D46827F53DBBA92C0": true,
+            "FK_09F39C26BBEA5B757570ED7D38FA2215": true,
+            "FURAN_FORMBUILDER_SAVED_RULE_FORM_CODE_FURAN_FORMBUILDER_RULE_CODE": true,
+            "FURAN_FORMBUILDER_SAVED_RULE_FORM_FORM_ID_FURAN_FORMBUILDER_FORM_FORM_ID": true
+        }
+    },
+    "furan_formbuilder_privacy_pending": {
+        "column": {
+            "submission_id": true,
+            "customer_id": true,
+            "mode": true,
+            "attempts": true,
+            "next_attempt_at": true,
+            "created_at": true
+        },
+        "index": {
+            "FURAN_FORMBUILDER_PRIVACY_PENDING_NEXT_ATTEMPT_AT_SUBMISSION_ID": true,
+            "FURAN_FORMBUILDER_PRIVACY_PENDING_CUSTOMER_ID_SUBMISSION_ID": true
+        },
+        "constraint": {
+            "PRIMARY": true,
+            "FK_100B2F41C312F8319BBF37CBB0087E36": true,
+            "FURAN_FORMBUILDER_PRIVACY_PENDING_SUBMISSION_ID_FURAN_FORMBUILDER_SUBMISSION_SUBMISSION_ID": true
+        }
+    }
+}

@@ -1,0 +1,281 @@
+<?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:ObjectManager/etc/config.xsd">
+    <preference for="Furan\FormBuilder\Api\Data\FormInterface" type="Furan\FormBuilder\Model\Form"/>
+    <preference for="Furan\FormBuilder\Api\Data\SubmissionInterface" type="Furan\FormBuilder\Model\Submission"/>
+    <preference for="Furan\FormBuilder\Api\FormRepositoryInterface" type="Furan\FormBuilder\Model\FormRepository"/>
+    <preference for="Furan\FormBuilder\Api\FormManagementInterface" type="Furan\FormBuilder\Model\Form\FormWriter"/>
+    <preference for="Furan\FormBuilder\Api\WebhookTransportInterface" type="Furan\FormBuilder\Model\Webhook\WebhookTransport"/>
+    <preference for="Furan\FormBuilder\Api\SubmissionRepositoryInterface" type="Furan\FormBuilder\Model\SubmissionRepository"/>
+    <preference for="Furan\FormBuilder\Api\Data\FormSearchResultsInterface" type="Furan\FormBuilder\Model\FormSearchResults"/>
+    <preference for="Furan\FormBuilder\Api\Data\SubmissionSearchResultsInterface" type="Furan\FormBuilder\Model\SubmissionSearchResults"/>
+    <preference for="Furan\FormBuilder\Api\ActionRetrySchedulerInterface" type="Furan\FormBuilder\Model\Action\RetryScheduler"/>
+
+    <type name="Furan\FormBuilder\Model\FieldType\Pool">
+        <arguments>
+            <argument name="types" xsi:type="array">
+                <item name="text" xsi:type="object">Furan\FormBuilder\Model\FieldType\Text</item>
+                <item name="textarea" xsi:type="object">Furan\FormBuilder\Model\FieldType\Textarea</item>
+                <item name="email" xsi:type="object">Furan\FormBuilder\Model\FieldType\Email</item>
+                <item name="tel" xsi:type="object">Furan\FormBuilder\Model\FieldType\Tel</item>
+                <item name="url" xsi:type="object">Furan\FormBuilder\Model\FieldType\Url</item>
+                <item name="number" xsi:type="object">Furan\FormBuilder\Model\FieldType\Number</item>
+                <item name="date" xsi:type="object">Furan\FormBuilder\Model\FieldType\Date</item>
+                <item name="time" xsi:type="object">Furan\FormBuilder\Model\FieldType\Time</item>
+                <item name="datetime" xsi:type="object">Furan\FormBuilder\Model\FieldType\DateTime</item>
+                <item name="color" xsi:type="object">Furan\FormBuilder\Model\FieldType\Color</item>
+                <item name="hidden" xsi:type="object">Furan\FormBuilder\Model\FieldType\Hidden</item>
+                <item name="select" xsi:type="object">Furan\FormBuilder\Model\FieldType\Select</item>
+                <item name="multiselect" xsi:type="object">Furan\FormBuilder\Model\FieldType\Multiselect</item>
+                <item name="radio" xsi:type="object">Furan\FormBuilder\Model\FieldType\Radio</item>
+                <item name="checkboxes" xsi:type="object">Furan\FormBuilder\Model\FieldType\Checkboxes</item>
+                <item name="checkbox" xsi:type="object">Furan\FormBuilder\Model\FieldType\Checkbox</item>
+                <item name="country" xsi:type="object">Furan\FormBuilder\Model\FieldType\Country</item>
+                <item name="rating" xsi:type="object">Furan\FormBuilder\Model\FieldType\Rating</item>
+                <item name="range" xsi:type="object">Furan\FormBuilder\Model\FieldType\Range</item>
+                <item name="file" xsi:type="object">Furan\FormBuilder\Model\FieldType\File</item>
+                <item name="consent" xsi:type="object">Furan\FormBuilder\Model\FieldType\Consent</item>
+                <item name="toggle" xsi:type="object">Furan\FormBuilder\Model\FieldType\Toggle</item>
+                <item name="newsletter" xsi:type="object">Furan\FormBuilder\Model\FieldType\Newsletter</item>
+                <item name="scale" xsi:type="object">Furan\FormBuilder\Model\FieldType\Scale</item>
+                <item name="cards" xsi:type="object">Furan\FormBuilder\Model\FieldType\Cards</item>
+                <item name="month" xsi:type="object">Furan\FormBuilder\Model\FieldType\Month</item>
+                <item name="matrix" xsi:type="object">Furan\FormBuilder\Model\FieldType\Matrix</item>
+                <item name="suggest" xsi:type="object">Furan\FormBuilder\Model\FieldType\Suggest</item>
+                <item name="list" xsi:type="object">Furan\FormBuilder\Model\FieldType\ItemList</item>
+                <item name="address" xsi:type="object">Furan\FormBuilder\Model\FieldType\Address</item>
+                <item name="date_range" xsi:type="object">Furan\FormBuilder\Model\FieldType\DateRange</item>
+                <item name="map" xsi:type="object">Furan\FormBuilder\Model\FieldType\Map</item>
+            </argument>
+        </arguments>
+    </type>
+    <type name="Furan\FormBuilder\Model\Schema\SchemaMigrator">
+        <arguments>
+            <argument name="migrations" xsi:type="array"/>
+        </arguments>
+    </type>
+    <type name="Furan\FormBuilder\Model\Condition\OperatorPool">
+        <arguments>
+            <argument name="operators" xsi:type="array">
+                <item name="equals" xsi:type="object">Furan\FormBuilder\Model\Condition\Operator\Equals</item>
+                <item name="not_equals" xsi:type="object">Furan\FormBuilder\Model\Condition\Operator\NotEquals</item>
+                <item name="contains" xsi:type="object">Furan\FormBuilder\Model\Condition\Operator\Contains</item>
+                <item name="not_contains" xsi:type="object">Furan\FormBuilder\Model\Condition\Operator\NotContains</item>
+                <item name="starts_with" xsi:type="object">Furan\FormBuilder\Model\Condition\Operator\StartsWith</item>
+                <item name="ends_with" xsi:type="object">Furan\FormBuilder\Model\Condition\Operator\EndsWith</item>
+                <item name="is_empty" xsi:type="object">Furan\FormBuilder\Model\Condition\Operator\IsEmpty</item>
+                <item name="not_empty" xsi:type="object">Furan\FormBuilder\Model\Condition\Operator\NotEmpty</item>
+                <item name="greater_than" xsi:type="object">Furan\FormBuilder\Model\Condition\Operator\GreaterThan</item>
+                <item name="less_than" xsi:type="object">Furan\FormBuilder\Model\Condition\Operator\LessThan</item>
+                <item name="greater_or_equal" xsi:type="object">Furan\FormBuilder\Model\Condition\Operator\GreaterOrEqual</item>
+                <item name="less_or_equal" xsi:type="object">Furan\FormBuilder\Model\Condition\Operator\LessOrEqual</item>
+                <item name="is_one_of" xsi:type="object">Furan\FormBuilder\Model\Condition\Operator\IsOneOf</item>
+                <item name="is_not_one_of" xsi:type="object">Furan\FormBuilder\Model\Condition\Operator\IsNotOneOf</item>
+            </argument>
+        </arguments>
+    </type>
+    <type name="Furan\FormBuilder\Model\Condition\ActionPool">
+        <arguments>
+            <argument name="actions" xsi:type="array">
+                <item name="show" xsi:type="object">Furan\FormBuilder\Model\Condition\Action\Show</item>
+                <item name="hide" xsi:type="object">Furan\FormBuilder\Model\Condition\Action\Hide</item>
+                <item name="require" xsi:type="object">Furan\FormBuilder\Model\Condition\Action\RequireField</item>
+                <item name="set_value" xsi:type="object">Furan\FormBuilder\Model\Condition\Action\SetValue</item>
+                <item name="hide_options" xsi:type="object">Furan\FormBuilder\Model\Condition\Action\HideOptions</item>
+            </argument>
+        </arguments>
+    </type>
+    <type name="Furan\FormBuilder\Model\Prefill\Sources">
+        <arguments>
+            <argument name="sources" xsi:type="array">
+                <item name="customer.firstname" xsi:type="object">Furan\FormBuilder\Model\Prefill\Source\CustomerFirstname</item>
+                <item name="customer.middlename" xsi:type="object">Furan\FormBuilder\Model\Prefill\Source\CustomerMiddlename</item>
+                <item name="customer.lastname" xsi:type="object">Furan\FormBuilder\Model\Prefill\Source\CustomerLastname</item>
+                <item name="customer.prefix" xsi:type="object">Furan\FormBuilder\Model\Prefill\Source\CustomerPrefix</item>
+                <item name="customer.suffix" xsi:type="object">Furan\FormBuilder\Model\Prefill\Source\CustomerSuffix</item>
+                <item name="customer.taxvat" xsi:type="object">Furan\FormBuilder\Model\Prefill\Source\CustomerTaxvat</item>
+                <item name="customer.gender" xsi:type="object">Furan\FormBuilder\Model\Prefill\Source\CustomerGender</item>
+                <item name="address.billing.company" xsi:type="object">Furan\FormBuilder\Model\Prefill\Source\AddressBillingCompany</item>
+                <item name="customer.email" xsi:type="object">Furan\FormBuilder\Model\Prefill\Source\CustomerEmail</item>
+                <item name="customer.dob" xsi:type="object">Furan\FormBuilder\Model\Prefill\Source\CustomerDob</item>
+                <item name="address.billing.telephone" xsi:type="object">Furan\FormBuilder\Model\Prefill\Source\AddressBillingTelephone</item>
+                <item name="address.billing" xsi:type="object">Furan\FormBuilder\Model\Prefill\Source\AddressBilling</item>
+                <item name="address.shipping" xsi:type="object">Furan\FormBuilder\Model\Prefill\Source\AddressShipping</item>
+                <item name="product.name" xsi:type="object">Furan\FormBuilder\Model\Prefill\Source\ProductName</item>
+                <item name="product.sku" xsi:type="object">Furan\FormBuilder\Model\Prefill\Source\ProductSku</item>
+                <item name="product.url" xsi:type="object">Furan\FormBuilder\Model\Prefill\Source\ProductUrl</item>
+                <item name="product.price" xsi:type="object">Furan\FormBuilder\Model\Prefill\Source\ProductPrice</item>
+            </argument>
+        </arguments>
+    </type>
+    <type name="Furan\FormBuilder\Model\Validation\RulePool">
+        <arguments>
+            <argument name="rules" xsi:type="array">
+                <item name="min_length" xsi:type="object">Furan\FormBuilder\Model\Validation\Rule\MinLength</item>
+                <item name="max_length" xsi:type="object">Furan\FormBuilder\Model\Validation\Rule\MaxLength</item>
+                <item name="pattern" xsi:type="object">Furan\FormBuilder\Model\Validation\Rule\Pattern</item>
+                <item name="alpha" xsi:type="object">Furan\FormBuilder\Model\Validation\Rule\Alpha</item>
+                <item name="alphanumeric" xsi:type="object">Furan\FormBuilder\Model\Validation\Rule\Alphanumeric</item>
+                <item name="numeric" xsi:type="object">Furan\FormBuilder\Model\Validation\Rule\NumericRule</item>
+                <item name="integer" xsi:type="object">Furan\FormBuilder\Model\Validation\Rule\Integer</item>
+                <item name="email" xsi:type="object">Furan\FormBuilder\Model\Validation\Rule\Email</item>
+                <item name="url" xsi:type="object">Furan\FormBuilder\Model\Validation\Rule\Url</item>
+                <item name="phone" xsi:type="object">Furan\FormBuilder\Model\Validation\Rule\Phone</item>
+                <item name="min" xsi:type="object">Furan\FormBuilder\Model\Validation\Rule\Min</item>
+                <item name="max" xsi:type="object">Furan\FormBuilder\Model\Validation\Rule\Max</item>
+                <item name="min_date" xsi:type="object">Furan\FormBuilder\Model\Validation\Rule\MinDate</item>
+                <item name="max_date" xsi:type="object">Furan\FormBuilder\Model\Validation\Rule\MaxDate</item>
+                <item name="matches" xsi:type="object">Furan\FormBuilder\Model\Validation\Rule\Matches</item>
+                <item name="preset" xsi:type="object">Furan\FormBuilder\Model\Validation\Rule\Preset</item>
+                <item name="min_selected" xsi:type="object">Furan\FormBuilder\Model\Validation\Rule\MinSelected</item>
+                <item name="max_selected" xsi:type="object">Furan\FormBuilder\Model\Validation\Rule\MaxSelected</item>
+            </argument>
+        </arguments>
+    </type>
+    <type name="Furan\FormBuilder\Model\Spam\SpamGuard">
+        <arguments>
+            <argument name="checks" xsi:type="array">
+                <item name="honeypot" xsi:type="object">Furan\FormBuilder\Model\Spam\Honeypot</item>
+                <item name="time_trap" xsi:type="object">Furan\FormBuilder\Model\Spam\TimeTrap</item>
+                <item name="rate_limit" xsi:type="object">Furan\FormBuilder\Model\Spam\RateLimiter</item>
+                <item name="recaptcha" xsi:type="object">Furan\FormBuilder\Model\Spam\ReCaptchaCheck</item>
+            </argument>
+        </arguments>
+    </type>
+    <type name="Furan\FormBuilder\Model\Customer\Impersonation">
+        <arguments>
+            <argument name="customerSession" xsi:type="object">Magento\Customer\Model\Session\Proxy</argument>
+        </arguments>
+    </type>
+    <type name="Furan\FormBuilder\Model\Action\SubmissionActionPool">
+        <arguments>
+            <argument name="actions" xsi:type="array">
+                <item name="notification" xsi:type="object">Furan\FormBuilder\Model\Email\NotificationAction</item>
+                <item name="autoresponder" xsi:type="object">Furan\FormBuilder\Model\Email\AutoresponderAction</item>
+                <item name="newsletter" xsi:type="object">Furan\FormBuilder\Model\Newsletter\SubscribeAction</item>
+            </argument>
+        </arguments>
+    </type>
+
+    <type name="Magento\Framework\Console\CommandListInterface">
+        <arguments>
+            <argument name="commands" xsi:type="array">
+                <item name="furan_formbuilder_export" xsi:type="object">Furan\FormBuilder\Console\Command\ExportCommand</item>
+                <item name="furan_formbuilder_import" xsi:type="object">Furan\FormBuilder\Console\Command\ImportCommand</item>
+                <item name="furan_formbuilder_submissions_rehash" xsi:type="object">Furan\FormBuilder\Console\Command\RehashSubmissionsCommand</item>
+                <item name="furan_formbuilder_webhooks_reencrypt" xsi:type="object">Furan\FormBuilder\Console\Command\WebhookReencryptCommand</item>
+                <item name="furan_formbuilder_analytics_rebuild" xsi:type="object">Furan\FormBuilder\Console\Command\RebuildStatsCommand</item>
+            </argument>
+        </arguments>
+    </type>
+
+    <type name="Furan\FormBuilder\Model\ResourceModel\Form\Grid\Collection">
+        <arguments>
+            <argument name="mainTable" xsi:type="string">furan_formbuilder_form</argument>
+            <argument name="resourceModel" xsi:type="string">Furan\FormBuilder\Model\ResourceModel\Form</argument>
+        </arguments>
+    </type>
+    <type name="Magento\Framework\View\Element\UiComponent\DataProvider\CollectionFactory">
+        <arguments>
+            <argument name="collections" xsi:type="array">
+                <item name="furan_formbuilder_form_listing_data_source" xsi:type="string">Furan\FormBuilder\Model\ResourceModel\Form\Grid\Collection</item>
+                <item name="furan_formbuilder_submission_listing_data_source" xsi:type="string">Furan\FormBuilder\Model\ResourceModel\Submission\Grid\Collection</item>
+            </argument>
+        </arguments>
+    </type>
+    <type name="Furan\FormBuilder\Model\ResourceModel\Submission\Grid\Collection">
+        <arguments>
+            <argument name="mainTable" xsi:type="string">furan_formbuilder_submission</argument>
+            <argument name="resourceModel" xsi:type="string">Furan\FormBuilder\Model\ResourceModel\Submission</argument>
+        </arguments>
+    </type>
+
+    <type name="Furan\FormBuilder\Console\Command\ExportCommand">
+        <arguments>
+            <argument name="formRepository" xsi:type="object">Furan\FormBuilder\Api\FormRepositoryInterface\Proxy</argument>
+            <argument name="exporter" xsi:type="object">Furan\FormBuilder\Model\Definition\Exporter\Proxy</argument>
+            <argument name="formResource" xsi:type="object">Furan\FormBuilder\Model\ResourceModel\Form\Proxy</argument>
+        </arguments>
+    </type>
+    <type name="Furan\FormBuilder\Console\Command\ImportCommand">
+        <arguments>
+            <argument name="importer" xsi:type="object">Furan\FormBuilder\Model\Definition\Importer\Proxy</argument>
+        </arguments>
+    </type>
+
+    <type name="Furan\FormBuilder\Console\Command\RehashSubmissionsCommand">
+        <arguments>
+            <argument name="rehasher" xsi:type="object">Furan\FormBuilder\Model\Submission\Rehasher\Proxy</argument>
+        </arguments>
+    </type>
+
+    <type name="Furan\FormBuilder\Console\Command\WebhookReencryptCommand">
+        <arguments>
+            <argument name="reencrypter" xsi:type="object">Furan\FormBuilder\Model\Webhook\SecretReencrypter\Proxy</argument>
+        </arguments>
+    </type>
+
+    <type name="Furan\FormBuilder\Console\Command\RebuildStatsCommand">
+        <arguments>
+            <argument name="rebuilder" xsi:type="object">Furan\FormBuilder\Model\Stats\Rebuilder\Proxy</argument>
+        </arguments>
+    </type>
+    <!-- The interface has no global preference; core wires ResourceConnection the same way. -->
+    <type name="Furan\FormBuilder\Model\Stats\Rebuilder">
+        <arguments>
+            <argument name="connectionFactory" xsi:type="object">Magento\Framework\App\ResourceConnection\ConnectionFactory</argument>
+        </arguments>
+    </type>
+
+    <type name="Magento\Sitemap\Model\ItemProvider\Composite">
+        <arguments>
+            <argument name="itemProviders" xsi:type="array">
+                <item name="furanFormProvider" xsi:type="object">Furan\FormBuilder\Model\Seo\SitemapItems</item>
+            </argument>
+        </arguments>
+    </type>
+    <type name="Furan\FormBuilder\Model\Seo\SitemapItems">
+        <arguments>
+            <argument name="configReader" xsi:type="object">Magento\Sitemap\Model\ItemProvider\CmsPageConfigReader</argument>
+        </arguments>
+    </type>
+    <type name="Magento\Config\Model\Config\TypePool">
+        <arguments>
+            <argument name="sensitive" xsi:type="array">
+                <item name="furan_formbuilder/maps/google_api_key" xsi:type="string">1</item>
+            </argument>
+        </arguments>
+    </type>
+
+    <type name="Furan\FormBuilder\Model\FieldType\Address">
+        <arguments>
+            <argument name="urls" xsi:type="object">Furan\FormBuilder\Model\Url\StorefrontUrls\Proxy</argument>
+        </arguments>
+    </type>
+    <type name="Furan\FormBuilder\Model\FieldType\Map">
+        <arguments>
+            <argument name="urls" xsi:type="object">Furan\FormBuilder\Model\Url\StorefrontUrls\Proxy</argument>
+        </arguments>
+    </type>
+    <type name="Furan\FormBuilder\Model\Newsletter\NewsletterBridge">
+        <arguments>
+            <argument name="customers" xsi:type="object">Magento\Customer\Api\CustomerRepositoryInterface\Proxy</argument>
+        </arguments>
+    </type>
+
+    <!-- UrlFactory builds UrlInterface, which is the backend Url in adminhtml: forms are opened on the storefront. -->
+    <virtualType name="Furan\FormBuilder\Model\Url\FrontendUrlFactory" type="Magento\Framework\UrlFactory">
+        <arguments>
+            <argument name="instanceName" xsi:type="string">Magento\Framework\Url</argument>
+        </arguments>
+    </virtualType>
+    <type name="Furan\FormBuilder\Model\Seo\FormUrls">
+        <arguments>
+            <argument name="urlFactory" xsi:type="object">Furan\FormBuilder\Model\Url\FrontendUrlFactory</argument>
+        </arguments>
+    </type>
+    <type name="Furan\FormBuilder\Model\Admin\PreviewLink">
+        <arguments>
+            <argument name="urlFactory" xsi:type="object">Furan\FormBuilder\Model\Url\FrontendUrlFactory</argument>
+        </arguments>
+    </type>
+</config>

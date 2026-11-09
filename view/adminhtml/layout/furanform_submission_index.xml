@@ -1,0 +1,19 @@
+<?xml version="1.0"?>
+<page xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:View/Layout/etc/page_configuration.xsd">
+    <update handle="styles"/>
+    <body>
+        <referenceContainer name="content">
+            <block name="furan_formbuilder_submission_grid_notice" template="Furan_FormBuilder::submission/grid-notice.phtml">
+                <arguments>
+                    <argument name="view_model" xsi:type="object">Furan\FormBuilder\ViewModel\Submission\GridNotice</argument>
+                </arguments>
+            </block>
+            <block name="furan_formbuilder_submission_analytics_link" template="Furan_FormBuilder::submission/analytics-link.phtml">
+                <arguments>
+                    <argument name="view_model" xsi:type="object">Furan\FormBuilder\ViewModel\Submission\AnalyticsLink</argument>
+                </arguments>
+            </block>
+            <uiComponent name="furan_formbuilder_submission_listing"/>
+        </referenceContainer>
+    </body>
+</page>

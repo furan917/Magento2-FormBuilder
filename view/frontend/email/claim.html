@@ -1,0 +1,14 @@
+<!--@subject {{trans "Claim your form submissions"}} @-->
+<!--@vars {
+"var customer_name":"Customer Name",
+"var claim_url":"Claim URL"
+} @-->
+
+{{template config_path="design/email/header_template"}}
+
+<p>{{trans "Hello %name," name=$customer_name}}</p>
+<p>{{trans "You submitted forms as a guest with the email address of your account. Use the link below to add those submissions to your account."}}</p>
+<p><a href="{{var claim_url}}">{{trans "Add my submissions to my account"}}</a></p>
+<p>{{trans "This link is valid for 7 days. If you did not expect this email, you can ignore it."}}</p>
+
+{{template config_path="design/email/footer_template"}}

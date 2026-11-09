@@ -1,0 +1,16 @@
+<?php
+/** @var \Magento\Framework\DataObject $block */
+/** @var \Magento\Framework\Escaper $escaper */
+$item = $block->getData('item');
+$width = in_array($item['width'] ?? '', ['full', 'two_thirds', 'half', 'third'], true) ? $item['width'] : 'full';
+$style = in_array($item['style'] ?? '', ['info', 'success', 'warning'], true) ? $item['style'] : 'info';
+$title = trim((string)($item['title'] ?? ''));
+?>
+<div class="ffb-item ffb-content ffb-content-notice ffb-w-<?= $escaper->escapeHtmlAttr($width) ?>" data-ffb-item="<?= $escaper->escapeHtmlAttr($item['id'] ?? '') ?>">
+    <div class="ffb-notice ffb-notice-<?= $escaper->escapeHtmlAttr($style) ?>" role="note">
+<?php if ($title !== ''): ?>
+        <p class="ffb-notice-title"><?= $escaper->escapeHtml($title) ?></p>
+<?php endif; ?>
+        <p class="ffb-notice-text"><?= /* @noEscape */ nl2br($escaper->escapeHtml((string)($item['text'] ?? '')), false) ?></p>
+    </div>
+</div>

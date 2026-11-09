@@ -1,0 +1,53 @@
+<?php
+/** @var \Furan\FormBuilder\Block\Adminhtml\FieldGroup\Index $block */
+/** @var \Magento\Framework\Escaper $escaper */
+$list = $block->getListing();
+?>
+<div class="ffb-rules">
+    <section class="ffb-rules-card" aria-labelledby="ffb-groups-title">
+        <div class="ffb-rules-head">
+            <div>
+                <h2 class="ffb-rules-title" id="ffb-groups-title"><?= $escaper->escapeHtml(__('Your field groups')) ?></h2>
+                <p class="ffb-rules-muted"><?= $escaper->escapeHtml(__('A group is a set of fields you can add to any form in one step. Each form gets its own copy, so changing or deleting a group never changes a form that already has it.')) ?></p>
+            </div>
+        </div>
+        <?php if (!$list['rows']): ?>
+            <p class="ffb-rules-empty"><?= $escaper->escapeHtml(__('No field groups yet. Use "Save as group" on a field or section.')) ?></p>
+        <?php else: ?>
+            <div class="ffb-rules-scroll">
+                <table class="ffb-rules-table">
+                    <thead>
+                    <tr>
+                        <th scope="col"><?= $escaper->escapeHtml(__('Name')) ?></th>
+                        <th scope="col"><?= $escaper->escapeHtml(__('Description')) ?></th>
+                        <th scope="col"><?= $escaper->escapeHtml(__('Used in')) ?></th>
+                        <th scope="col"><?= $escaper->escapeHtml(__('Updated')) ?></th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <?php foreach ($list['rows'] as $group): ?>
+                        <tr>
+                            <td><a class="ffb-rules-name" href="<?= $escaper->escapeUrl($group['url']) ?>"><?= $escaper->escapeHtml($group['name']) ?></a></td>
+                            <td class="ffb-rules-muted"><?= $escaper->escapeHtml($group['description']) ?></td>
+                            <td class="ffb-rules-nowrap"><?= $escaper->escapeHtml($group['forms'] === 1 ? __('1 form') : __('%1 forms', $group['forms'])) ?></td>
+                            <td class="ffb-rules-muted ffb-rules-nowrap"><?= $escaper->escapeHtml($block->formatUpdated($group['updated_at'])) ?></td>
+                        </tr>
+                    <?php endforeach; ?>
+                    </tbody>
+                </table>
+            </div>
+        <?php endif; ?>
+        <?php if (!$block->isFirstPage() || $list['next'] !== null): ?>
+            <nav class="ffb-rules-pager" aria-label="<?= $escaper->escapeHtmlAttr(__('Field group pages')) ?>">
+                <span class="ffb-rules-pages">
+                    <?php if (!$block->isFirstPage()): ?>
+                        <a class="ffb-rules-btn" href="<?= $escaper->escapeUrl($block->getFirstUrl()) ?>"><?= $escaper->escapeHtml(__('Back to the first page')) ?></a>
+                    <?php endif; ?>
+                    <?php if ($list['next'] !== null): ?>
+                        <a class="ffb-rules-btn" href="<?= $escaper->escapeUrl($block->getNextUrl()) ?>"><?= $escaper->escapeHtml(__('Next')) ?></a>
+                    <?php endif; ?>
+                </span>
+            </nav>
+        <?php endif; ?>
+    </section>
+</div>

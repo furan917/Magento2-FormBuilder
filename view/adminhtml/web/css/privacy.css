@@ -1,0 +1,28 @@
+.ffb-privacy { --ffb-privacy-ink: #1b1b1b; --ffb-privacy-muted: #6b6b6b; --ffb-privacy-line: #e3e3e3; color: #303030; font-size: 14px; line-height: 1.5; }
+.ffb-privacy *, .ffb-privacy *::before, .ffb-privacy *::after { box-sizing: border-box; }
+.ffb-privacy-intro { margin: 0 0 20px; color: var(--ffb-privacy-muted); }
+.ffb-privacy-grid { display: grid; grid-template-columns: 1fr; gap: 20px; }
+@media (min-width: 1100px) { .ffb-privacy-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+.ffb-privacy-card { display: flex; flex-direction: column; background: #fff; border: 1px solid var(--ffb-privacy-line); border-radius: 16px; padding: 20px 24px; min-width: 0; }
+.ffb-privacy-title { margin: 0 0 4px; font-size: 18px; font-weight: 600; }
+.ffb-privacy-note { flex: 1 0 auto; margin: 0 0 16px; color: var(--ffb-privacy-muted); max-width: 70ch; }
+.ffb-privacy-label { display: block; margin-bottom: 4px; font-weight: 600; }
+.ffb-privacy-row { display: flex; flex-wrap: wrap; gap: 8px; }
+.ffb-privacy-input { flex: 1 1 220px; min-width: 0; min-height: 40px; padding: 8px 12px; border: 1px solid #c2c2c2; border-radius: 8px; font: inherit; color: inherit; background: #fff; }
+.ffb-privacy-input:focus { border-color: #007bdb; box-shadow: 0 0 0 1px #007bdb; outline: 0; }
+.ffb-privacy-btn {
+  display: inline-flex; align-items: center; min-height: 40px; padding: 8px 20px; border: 1px solid transparent; border-radius: 32px;
+  background: transparent; color: var(--ffb-privacy-ink); font: inherit; font-weight: 500; line-height: 1.2; cursor: pointer; white-space: nowrap; box-shadow: none;
+}
+.ffb-privacy-btn:focus-visible { outline: 2px solid #007bdb; outline-offset: 2px; }
+.ffb-privacy-btn-primary { background: var(--ffb-privacy-ink); border-color: var(--ffb-privacy-ink); color: #fff; }
+.ffb-privacy-btn-primary:hover, .ffb-privacy-btn-primary:focus { background: #000; color: #fff; }
+.ffb-privacy-danger { display: flex; flex-wrap: wrap; gap: 12px 16px; align-items: center; justify-content: space-between; margin-top: 20px; padding: 14px 16px; border: 1px solid #f3c7c7; border-radius: 12px; background: #fdf6f6; }
+.ffb-privacy-confirm { display: flex; gap: 8px; align-items: flex-start; flex: 1 1 260px; margin: 0; font-weight: 400; }
+.ffb-privacy-confirm input { margin-top: 3px; flex: none; }
+.ffb-privacy-btn-danger { background: #fff; border-color: #c62828; color: #c62828; }
+.ffb-privacy-btn-danger:hover, .ffb-privacy-btn-danger:focus { background: #c62828; color: #fff; }
+.ffb-privacy-danger:has(input[name="confirm"]:not(:checked)) .ffb-privacy-btn-danger { opacity: .45; pointer-events: none; }
+.ffb-privacy-preview { margin-bottom: 20px; border-color: #f3c7c7; }
+.ffb-privacy-forms { margin: 0 0 4px; padding-left: 20px; }
+.ffb-privacy-forms li { margin: 2px 0; }

@@ -1,0 +1,25 @@
+<?php
+/** @var \Magento\Framework\View\Element\Template $block */
+/** @var \Magento\Framework\Escaper $escaper */
+$form = $block->getData('parent_block');
+extract($form->getItemContext((array)$block->getData('item'), $escaper), EXTR_SKIP);
+$maxItems = max(2, min(20, (int)($settings['max_items'] ?? 5)));
+$addLabel = trim((string)($settings['add_label'] ?? ''));
+?>
+<?= /* @noEscape */ $form->renderPartial($block, 'item/_open.phtml', ['group' => true]) ?>
+    <div class="ffb-list" data-ffb-list data-ffb-list-max="<?= (int)$maxItems ?>"
+         data-ffb-list-item="<?= $escaper->escapeHtmlAttr(__('Item %1', '%1')) ?>"
+         data-ffb-list-remove-label="<?= $escaper->escapeHtmlAttr(__('Remove item %1', '%1')) ?>">
+        <ol class="ffb-list-items">
+            <li class="ffb-list-row" data-ffb-list-row>
+                <input<?= /* @noEscape */ $attrs(['type' => 'text'] + ['name' => $base['name'] . '[]', 'required' => false] + $base + [
+                    'maxlength' => 255,
+                    'placeholder' => $item['placeholder'] ?? '',
+                    'aria-label' => (string)__('Item %1', 1),
+                ]) ?>>
+                <button type="button" class="ffb-list-remove" data-ffb-list-remove hidden aria-label="<?= $escaper->escapeHtmlAttr(__('Remove item %1', 1)) ?>">&times;</button>
+            </li>
+        </ol>
+        <button type="button" class="ffb-list-add" data-ffb-list-add><?= $escaper->escapeHtml($addLabel !== '' ? $addLabel : __('Add another')) ?></button>
+    </div>
+<?= /* @noEscape */ $form->renderPartial($block, 'item/_close.phtml', ['group' => true]) ?>

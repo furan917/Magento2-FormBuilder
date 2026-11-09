@@ -1,0 +1,67 @@
+{
+    "name": "furan/magento-form-builder",
+    "description": "Drag-and-drop form builder for Magento 2 and Mage-OS",
+    "keywords": [
+        "magento2",
+        "mage-os",
+        "form builder",
+        "forms",
+        "hyva"
+    ],
+    "type": "magento2-module",
+    "homepage": "https://github.com/furan917/magento2-formbuilder",
+    "support": {
+        "issues": "https://github.com/furan917/magento2-formbuilder/issues",
+        "source": "https://github.com/furan917/magento2-formbuilder"
+    },
+    "authors": [
+        {
+            "name": "Francis Gallagher"
+        }
+    ],
+    "license": [
+        "MIT"
+    ],
+    "config": {
+        "sort-packages": true
+    },
+    "require": {
+        "php": "^8.1",
+        "ext-fileinfo": "*",
+        "ext-json": "*",
+        "ext-mbstring": "*",
+        "ext-zip": "*",
+        "magento/framework": "^103.0",
+        "magento/framework-message-queue": "*",
+        "magento/module-backend": "*",
+        "magento/module-catalog": "*",
+        "magento/module-cms": "*",
+        "magento/module-config": "*",
+        "magento/module-cron": "*",
+        "magento/module-csp": "*",
+        "magento/module-customer": "*",
+        "magento/module-directory": "*",
+        "magento/module-email": "*",
+        "magento/module-sitemap": "*",
+        "magento/module-store": "*",
+        "magento/module-ui": "*",
+        "magento/module-widget": "*"
+    },
+    "autoload": {
+        "files": [
+            "registration.php"
+        ],
+        "psr-4": {
+            "Furan\\FormBuilder\\": ""
+        }
+    },
+    "suggest": {
+        "magento/module-re-captcha-frontend-ui": "Enables reCAPTCHA on Form Builder forms",
+        "magento/module-re-captcha-version-2-checkbox": "reCAPTCHA v2 checkbox for Form Builder forms",
+        "magento/module-re-captcha-version-2-invisible": "reCAPTCHA v2 invisible for Form Builder forms",
+        "magento/module-re-captcha-version-3-invisible": "reCAPTCHA v3 for Form Builder forms",
+        "magento/module-newsletter": "Adds a newsletter sign-up field to Form Builder forms",
+        "magento/module-sales": "Shows order figures on the submission customer card",
+        "magento/module-user": "Admin user type in docblocks"
+    }
+}

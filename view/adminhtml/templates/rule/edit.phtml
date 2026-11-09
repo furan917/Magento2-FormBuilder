@@ -1,0 +1,106 @@
+<?php
+/** @var \Furan\FormBuilder\Block\Adminhtml\Rule\Edit $block */
+/** @var \Magento\Framework\Escaper $escaper */
+$values = $block->getValues();
+$usage = $block->getUsage();
+$isNew = $block->isNew();
+$canSave = $block->canSave();
+$readonly = $canSave ? '' : ' readonly';
+?>
+<div class="ffb-rules ffb-rule-edit">
+    <form id="ffb-rule-form" class="ffb-rules-card ffb-rule-main" method="post" action="<?= $escaper->escapeUrl($block->getSaveUrl()) ?>" data-ffb-rule-form>
+        <input type="hidden" name="form_key" value="<?= $escaper->escapeHtmlAttr($block->getFormKey()) ?>">
+        <?php if (!$isNew): ?>
+            <input type="hidden" name="id" value="<?= (int)$block->getRuleId() ?>">
+        <?php endif; ?>
+        <div class="ffb-rule-field">
+            <label for="ffb-rule-label"><?= $escaper->escapeHtml(__('Name')) ?></label>
+            <input id="ffb-rule-label" name="label" type="text" maxlength="128" required value="<?= $escaper->escapeHtmlAttr($values['label']) ?>" data-ffb-rule-label<?= /* @noEscape */ $readonly ?>>
+            <p class="ffb-rules-hint"><?= $escaper->escapeHtml(__('Shown in the "Add rule" list in the form builder.')) ?></p>
+        </div>
+        <div class="ffb-rule-field">
+            <label for="ffb-rule-code"><?= $escaper->escapeHtml(__('Code')) ?></label>
+            <?php if ($isNew): ?>
+                <input id="ffb-rule-code" name="code" type="text" maxlength="63" required pattern="[a-z][a-z0-9_]{1,62}" value="<?= $escaper->escapeHtmlAttr($values['code']) ?>" data-ffb-rule-code>
+                <p class="ffb-rules-hint"><?= $escaper->escapeHtml(__('Lowercase letters, numbers and underscores. Forms store this code, so it cannot be changed later.')) ?></p>
+            <?php else: ?>
+                <input id="ffb-rule-code" type="text" readonly value="<?= $escaper->escapeHtmlAttr($values['code']) ?>">
+                <p class="ffb-rules-hint"><?= $escaper->escapeHtml(__('Forms store this code, so it cannot be changed.')) ?></p>
+            <?php endif; ?>
+        </div>
+        <div class="ffb-rule-field">
+            <label for="ffb-rule-pattern"><?= $escaper->escapeHtml(__('Pattern')) ?></label>
+            <input id="ffb-rule-pattern" name="pattern" type="text" maxlength="256" required spellcheck="false" autocomplete="off" class="ffb-rules-mono" value="<?= $escaper->escapeHtmlAttr($values['pattern']) ?>" data-ffb-rule-pattern<?= /* @noEscape */ $readonly ?>>
+            <p class="ffb-rules-hint"><?= $escaper->escapeHtml(__('A regular expression matched against the whole answer. It is case-sensitive, so use [A-Za-z] for letters in either case.')) ?></p>
+            <p class="ffb-rules-error" data-ffb-rule-pattern-error hidden></p>
+        </div>
+        <div class="ffb-rule-field">
+            <label for="ffb-rule-message"><?= $escaper->escapeHtml(__('Error message')) ?></label>
+            <input id="ffb-rule-message" name="message" type="text" maxlength="255" value="<?= $escaper->escapeHtmlAttr($values['message']) ?>" placeholder="<?= $escaper->escapeHtmlAttr(__('Please match the requested format.')) ?>"<?= /* @noEscape */ $readonly ?>>
+            <p class="ffb-rules-hint"><?= $escaper->escapeHtml(__('Shown to customers when the answer does not match. Say what a valid answer looks like.')) ?></p>
+        </div>
+        <div class="ffb-rule-field">
+            <label for="ffb-rule-example"><?= $escaper->escapeHtml(__('Example of a valid answer')) ?></label>
+            <input id="ffb-rule-example" name="example" type="text" maxlength="128" value="<?= $escaper->escapeHtmlAttr($values['example']) ?>" data-ffb-rule-example<?= /* @noEscape */ $readonly ?>>
+            <p class="ffb-rules-hint"><?= $escaper->escapeHtml(__('Optional. Checked against the pattern when you save, and shown next to the rule in the form builder.')) ?></p>
+        </div>
+        <div class="ffb-rule-actions">
+            <a class="ffb-rules-btn ffb-rules-btn-back" href="<?= $escaper->escapeUrl($block->getBackUrl()) ?>"><?= $escaper->escapeHtml(__('Back')) ?></a>
+            <span class="ffb-rule-spacer"></span>
+            <?php if ($canSave): ?>
+                <button type="submit" name="back" value="edit" class="ffb-rules-btn ffb-rules-btn-outline"><?= $escaper->escapeHtml(__('Save and continue editing')) ?></button>
+                <button type="submit" class="ffb-rules-btn ffb-rules-btn-primary"><?= $escaper->escapeHtml(__('Save rule')) ?></button>
+            <?php else: ?>
+                <span class="ffb-rules-muted"><?= $escaper->escapeHtml(__('You can view this rule but not change it.')) ?></span>
+            <?php endif; ?>
+        </div>
+    </form>
+
+    <aside class="ffb-rule-side">
+        <section class="ffb-rules-card">
+            <h2 class="ffb-rules-title"><?= $escaper->escapeHtml(__('Try it')) ?></h2>
+            <label class="ffb-rules-hint" for="ffb-rule-samples"><?= $escaper->escapeHtml(__('Type answers to test, one per line.')) ?></label>
+            <textarea id="ffb-rule-samples" class="ffb-rules-mono" rows="5" spellcheck="false" data-ffb-rule-samples><?= $escaper->escapeHtml($values['example']) ?></textarea>
+            <ul class="ffb-rule-results" data-ffb-rule-results aria-live="polite"></ul>
+        </section>
+        <?php if (!$isNew): ?>
+            <section class="ffb-rules-card">
+                <h2 class="ffb-rules-title"><?= $escaper->escapeHtml(__('Used by')) ?></h2>
+                <?php if (!$usage): ?>
+                    <p class="ffb-rules-muted"><?= $escaper->escapeHtml(__('No forms use this rule yet.')) ?></p>
+                <?php else: ?>
+                    <ul class="ffb-rule-usage">
+                        <?php foreach ($usage as $form): ?>
+                            <?php $formUrl = $block->getFormEditUrl($form['id']); ?>
+                            <li>
+                                <?php if ($formUrl !== ''): ?>
+                                    <a href="<?= $escaper->escapeUrl($formUrl) ?>"><?= $escaper->escapeHtml($form['title']) ?></a>
+                                <?php else: ?>
+                                    <?= $escaper->escapeHtml($form['title']) ?>
+                                <?php endif; ?>
+                            </li>
+                        <?php endforeach; ?>
+                    </ul>
+                <?php endif; ?>
+                <?php if ($canSave): ?>
+                <form method="post" action="<?= $escaper->escapeUrl($block->getDeleteUrl()) ?>" class="ffb-rule-delete" data-ffb-rule-delete>
+                    <input type="hidden" name="form_key" value="<?= $escaper->escapeHtmlAttr($block->getFormKey()) ?>">
+                    <?php if ($usage): ?>
+                        <button type="submit" class="ffb-rules-btn ffb-rules-btn-danger" disabled><?= $escaper->escapeHtml(__('Delete rule')) ?></button>
+                        <p class="ffb-rules-hint"><?= $escaper->escapeHtml(__('Remove the rule from these forms before deleting it.')) ?></p>
+                    <?php else: ?>
+                        <button type="button" class="ffb-rules-btn ffb-rules-btn-danger" data-ffb-rule-delete-ask><?= $escaper->escapeHtml(__('Delete rule')) ?></button>
+                        <span class="ffb-rule-confirm" data-ffb-rule-delete-confirm hidden>
+                            <?= $escaper->escapeHtml(__('Delete this rule?')) ?>
+                            <button type="submit" class="ffb-rules-btn ffb-rules-btn-danger"><?= $escaper->escapeHtml(__('Delete')) ?></button>
+                            <button type="button" class="ffb-rules-btn" data-ffb-rule-delete-cancel><?= $escaper->escapeHtml(__('Cancel')) ?></button>
+                        </span>
+                    <?php endif; ?>
+                </form>
+                <?php endif; ?>
+            </section>
+        <?php endif; ?>
+    </aside>
+</div>
+<script src="<?= $escaper->escapeUrl($block->getViewFileUrl('Furan_FormBuilder::js/pattern-safety.js')) ?>" defer></script>
+<script src="<?= $escaper->escapeUrl($block->getViewFileUrl('Furan_FormBuilder::js/rule-editor.js')) ?>" defer></script>

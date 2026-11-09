@@ -1,0 +1,15 @@
+<?xml version="1.0"?>
+<page xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:View/Layout/etc/page_configuration.xsd">
+    <head>
+        <css src="Furan_FormBuilder::css/builder.css"/>
+    </head>
+    <body>
+        <referenceContainer name="content">
+            <block class="Furan\FormBuilder\Block\Adminhtml\FieldGroup\Edit" name="furan_formbuilder_fieldgroup_edit" template="Furan_FormBuilder::field_group/edit.phtml">
+                <arguments>
+                    <argument name="editor" xsi:type="object">Furan\FormBuilder\ViewModel\FieldGroupEditor</argument>
+                </arguments>
+            </block>
+        </referenceContainer>
+    </body>
+</page>

@@ -1,0 +1,201 @@
+<?php
+/** @var \Furan\FormBuilder\Block\Adminhtml\Webhook\Edit $block */
+/** @var \Magento\Framework\Escaper $escaper */
+$values = $block->getValues();
+$readOnly = $block->isReadOnly();
+$locked = !$readOnly && $block->isReceiverLocked();
+$canPersonal = $block->canChangePersonal();
+$secret = $block->getRevealedSecret();
+$id = $block->getEndpointId();
+$ro = $readOnly ? ' readonly' : '';
+$roReceiver = ($readOnly || $locked) ? ' readonly' : '';
+$offReceiver = ($readOnly || $locked) ? ' disabled' : '';
+$scopeType = (string)$values['scope_type'];
+$disabledReason = $block->getDisabledReasonLabel();
+$websites = $block->getWebsiteOptions();
+$stores = $block->getStoreOptions();
+$forms = $block->getFormOptions();
+$formKey = $escaper->escapeHtmlAttr($block->getFormKey());
+$hasAside = !$readOnly && !$block->isNew();
+$offActive = $readOnly || ($locked && empty($values['is_active'])) ? ' disabled' : '';
+$offDebug = $readOnly || ($locked && empty($values['debug_responses'])) ? ' disabled' : '';
+?>
+<div class="ffb-rules ffb-rule-edit<?= $hasAside ? '' : ' ffb-rule-edit-single' ?>">
+    <div class="ffb-rules-card ffb-rule-main">
+        <?php if ($secret !== null): ?>
+            <section class="ffb-admin-webhook-reveal" aria-labelledby="ffb-webhook-secret-title" tabindex="-1" data-ffb-secret-section>
+                <h2 class="ffb-rules-title" id="ffb-webhook-secret-title"><?= $escaper->escapeHtml(__('New signing secret, shown once')) ?></h2>
+                <input class="ffb-admin-webhook-secret" type="text" id="ffb-webhook-secret-value" readonly autocomplete="off" spellcheck="false" aria-labelledby="ffb-webhook-secret-title" aria-describedby="ffb-webhook-secret-hint" value="<?= $escaper->escapeHtmlAttr($secret) ?>">
+                <p class="ffb-rules-hint" id="ffb-webhook-secret-hint"><?= $escaper->escapeHtml(__('Copy this secret now. It is shown only once and cannot be shown again; if you lose it, roll it.')) ?></p>
+                <button type="button" class="ffb-rules-btn" data-ffb-copy-secret="ffb-webhook-secret-value" data-ffb-copied="<?= $escaper->escapeHtmlAttr(__('Copied')) ?>" hidden><?= $escaper->escapeHtml(__('Copy secret')) ?></button>
+                <span class="ffb-rules-hint" role="status" data-ffb-copy-status></span>
+            </section>
+        <?php endif; ?>
+        <p class="ffb-admin-webhook-note"><?= $escaper->escapeHtml(__('Data leaves Magento when it is sent to the receiver. Erasure requests in Magento do not reach the receiver, so it must handle them itself.')) ?></p>
+        <?php if ($disabledReason !== ''): ?>
+            <p class="ffb-admin-webhook-note"><?= $escaper->escapeHtml($disabledReason) ?></p>
+        <?php endif; ?>
+        <?php if ($locked): ?>
+            <p class="ffb-admin-webhook-note"><?= $escaper->escapeHtml(__('This endpoint sends personal data. Only admins who may send personal data can change its URL, websites or store views, forms, fields, events, debug responses or turn it back on.')) ?></p>
+        <?php endif; ?>
+        <?php if ($readOnly): ?>
+            <p class="ffb-rules-muted"><?= $escaper->escapeHtml(__('You can view this endpoint but not change it. Only the scheme and host of the URL are shown.')) ?></p>
+        <?php else: ?>
+        <form id="ffb-webhook-form" class="ffb-rule-main" method="post" action="<?= $escaper->escapeUrl($block->getSaveUrl()) ?>" autocomplete="off">
+            <input type="hidden" name="form_key" value="<?= /* @noEscape */ $formKey ?>">
+            <input type="hidden" name="id" value="<?= (int)$id ?>">
+        <?php endif; ?>
+            <div class="ffb-rule-field">
+                <label for="ffb-webhook-name"><?= $escaper->escapeHtml(__('Name')) ?></label>
+                <input id="ffb-webhook-name" name="name" type="text" maxlength="120" required<?= /* @noEscape */ $block->getFieldAria('name') ?> value="<?= $escaper->escapeHtmlAttr((string)$values['name']) ?>"<?= /* @noEscape */ $ro ?>>
+                <?= /* @noEscape */ $block->getFieldErrorHtml('name') ?>
+            </div>
+            <div class="ffb-rule-field">
+                <label for="ffb-webhook-url"><?= $escaper->escapeHtml(__('URL')) ?></label>
+                <input id="ffb-webhook-url" name="url" type="text" inputmode="url" maxlength="2048" required<?= /* @noEscape */ $block->getFieldAria('url', 'ffb-webhook-url-hint') ?> value="<?= $escaper->escapeHtmlAttr((string)$values['url']) ?>"<?= /* @noEscape */ $roReceiver ?>>
+                <p class="ffb-rules-hint" id="ffb-webhook-url-hint"><?= $escaper->escapeHtml(__('Must be https and resolve to a public address. It is checked when you save and again at every send.')) ?></p>
+                <?= /* @noEscape */ $block->getFieldErrorHtml('url') ?>
+            </div>
+            <div class="ffb-rule-field">
+                <label class="ffb-admin-webhook-check"><input type="checkbox" name="is_active" value="1"<?= /* @noEscape */ $block->getFieldAria('is_active') ?><?= !empty($values['is_active']) ? ' checked' : '' ?><?= /* @noEscape */ $offActive ?>> <?= $escaper->escapeHtml(__('Active')) ?></label>
+                <?= /* @noEscape */ $block->getFieldErrorHtml('is_active') ?>
+            </div>
+            <fieldset class="ffb-rule-field ffb-admin-webhook-fieldset"<?= /* @noEscape */ $block->getFieldAria('events', '', false) ?>>
+                <legend><?= $escaper->escapeHtml(__('Events')) ?></legend>
+                <div class="ffb-admin-webhook-checks">
+                    <?php foreach ($block->getEventOptions() as $code => $label): ?>
+                        <label class="ffb-admin-webhook-check"><input type="checkbox" name="events[]" value="<?= $escaper->escapeHtmlAttr($code) ?>"<?= in_array($code, (array)$values['events'], true) ? ' checked' : '' ?><?= /* @noEscape */ $offReceiver ?>> <?= $escaper->escapeHtml($label) ?></label>
+                    <?php endforeach; ?>
+                </div>
+                <?= /* @noEscape */ $block->getFieldErrorHtml('events') ?>
+            </fieldset>
+            <fieldset class="ffb-rule-field ffb-admin-webhook-fieldset"<?= /* @noEscape */ $block->getFieldAria('scope', 'ffb-webhook-scope-hint', false) ?>>
+                <legend><?= $escaper->escapeHtml(__('Scope')) ?></legend>
+                <div class="ffb-admin-webhook-checks">
+                    <label class="ffb-admin-webhook-check"><input type="radio" name="scope_type" value="store" data-ffb-scope-type<?= $scopeType === 'store' ? ' checked' : '' ?><?= /* @noEscape */ $offReceiver ?>> <?= $escaper->escapeHtml(__('Store views')) ?></label>
+                    <label class="ffb-admin-webhook-check"><input type="radio" name="scope_type" value="website" data-ffb-scope-type<?= $scopeType === 'website' ? ' checked' : '' ?><?= /* @noEscape */ $offReceiver ?>> <?= $escaper->escapeHtml(__('Websites')) ?></label>
+                </div>
+                <p class="ffb-rules-hint" id="ffb-webhook-scope-hint"><?= $escaper->escapeHtml(__('Only the checkboxes of the chosen scope are used. A submission is matched by the store view it was made in.')) ?></p>
+                <?= /* @noEscape */ $block->getFieldErrorHtml('scope') ?>
+            </fieldset>
+            <fieldset class="ffb-rule-field ffb-admin-webhook-fieldset" data-ffb-scope-panel="website">
+                <legend><?= $escaper->escapeHtml(__('Websites')) ?></legend>
+                <div class="ffb-admin-webhook-checks">
+                    <?php foreach ($websites as $wid => $label): ?>
+                        <label class="ffb-admin-webhook-check"><input type="checkbox" name="website_ids[]" value="<?= (int)$wid ?>"<?= ($scopeType === 'website' && in_array($wid, array_map('intval', (array)$values['scope_ids']), true)) ? ' checked' : '' ?><?= /* @noEscape */ $offReceiver ?>> <?= $escaper->escapeHtml($label) ?></label>
+                    <?php endforeach; ?>
+                </div>
+            </fieldset>
+            <fieldset class="ffb-rule-field ffb-admin-webhook-fieldset" data-ffb-scope-panel="store">
+                <legend><?= $escaper->escapeHtml(__('Store views')) ?></legend>
+                <div class="ffb-admin-webhook-checks">
+                    <?php foreach ($stores as $sid => $label): ?>
+                        <label class="ffb-admin-webhook-check"><input type="checkbox" name="store_ids[]" value="<?= (int)$sid ?>"<?= ($scopeType === 'store' && in_array($sid, array_map('intval', (array)$values['scope_ids']), true)) ? ' checked' : '' ?><?= /* @noEscape */ $offReceiver ?>> <?= $escaper->escapeHtml($label) ?></label>
+                    <?php endforeach; ?>
+                </div>
+            </fieldset>
+            <fieldset class="ffb-rule-field ffb-admin-webhook-fieldset"<?= /* @noEscape */ $block->getFieldAria('forms', 'ffb-webhook-forms-hint', false) ?>>
+                <legend><?= $escaper->escapeHtml(__('Forms')) ?></legend>
+                <label class="ffb-admin-webhook-check"><input type="checkbox" name="all_forms" value="1"<?= !empty($values['all_forms']) ? ' checked' : '' ?><?= /* @noEscape */ $offReceiver ?>> <?= $escaper->escapeHtml(__('All forms, including forms created later')) ?></label>
+                <div class="ffb-admin-webhook-checks">
+                    <?php foreach ($forms as $fid => $label): ?>
+                        <label class="ffb-admin-webhook-check"><input type="checkbox" name="form_ids[]" value="<?= (int)$fid ?>"<?= in_array($fid, array_map('intval', (array)$values['form_ids']), true) ? ' checked' : '' ?><?= /* @noEscape */ $offReceiver ?>> <?= $escaper->escapeHtml($label) ?></label>
+                    <?php endforeach; ?>
+                </div>
+                <p class="ffb-rules-hint" id="ffb-webhook-forms-hint"><?= $escaper->escapeHtml(__('Choose at least one form, or all forms.')) ?></p>
+                <?= /* @noEscape */ $block->getFieldErrorHtml('forms') ?>
+            </fieldset>
+            <div class="ffb-rule-field">
+                <label for="ffb-webhook-field-mode"><?= $escaper->escapeHtml(__('Fields to send')) ?></label>
+                <select id="ffb-webhook-field-mode" data-ffb-field-mode name="<?= $offReceiver === '' ? 'field_mode' : 'field_mode_display' ?>"<?= /* @noEscape */ $offReceiver ?>>
+                    <option value="all"<?= $values['field_mode'] === 'all' ? ' selected' : '' ?>><?= $escaper->escapeHtml(__('All non-personal fields')) ?></option>
+                    <option value="selected"<?= $values['field_mode'] === 'selected' ? ' selected' : '' ?>><?= $escaper->escapeHtml(__('Only the fields listed below')) ?></option>
+                </select>
+            </div>
+            <div class="ffb-rule-field">
+                <label for="ffb-webhook-fields"><?= $escaper->escapeHtml(__('Field names')) ?></label>
+                <textarea id="ffb-webhook-fields" name="fields" rows="3" data-ffb-field-names<?= /* @noEscape */ $block->getFieldAria('fields', 'ffb-webhook-fields-hint') ?><?= /* @noEscape */ $roReceiver ?>><?= $escaper->escapeHtml((string)$values['fields']) ?></textarea>
+                <p class="ffb-rules-hint" id="ffb-webhook-fields-hint"><?= $escaper->escapeHtml(__('One field name per line, as set in the form builder. Used only when "Only the fields listed below" is chosen.')) ?></p>
+                <?= /* @noEscape */ $block->getFieldErrorHtml('fields') ?>
+            </div>
+            <div class="ffb-rule-field">
+                <label class="ffb-admin-webhook-check"><input type="checkbox" name="include_personal" value="1" aria-describedby="ffb-webhook-personal-hint"<?= !empty($values['include_personal']) ? ' checked' : '' ?><?= $canPersonal ? '' : ' disabled' ?>> <?= $escaper->escapeHtml(__('Include personal data')) ?></label>
+                <p class="ffb-rules-hint" id="ffb-webhook-personal-hint"><?= $escaper->escapeHtml($canPersonal ? __('Adds fields that hold personal data and the customer id. Admins are notified when this is turned on.') : __('Only admins with the permission to send personal data can change this.')) ?></p>
+            </div>
+            <div class="ffb-rule-field">
+                <label class="ffb-admin-webhook-check"><input type="checkbox" name="debug_responses" value="1"<?= /* @noEscape */ $block->getFieldAria('debug_responses', 'ffb-webhook-debug-hint') ?><?= !empty($values['debug_responses']) ? ' checked' : '' ?><?= /* @noEscape */ $offDebug ?>> <?= $escaper->escapeHtml(__('Keep a short excerpt of the receiver responses for 7 days')) ?></label>
+                <p class="ffb-rules-hint" id="ffb-webhook-debug-hint"><?= $escaper->escapeHtml(__('Helps with debugging; the excerpt can contain whatever the receiver replies.')) ?></p>
+                <?= /* @noEscape */ $block->getFieldErrorHtml('debug_responses') ?>
+            </div>
+            <?php if ($locked): ?>
+                <input type="hidden" name="scope_type" value="<?= $escaper->escapeHtmlAttr($scopeType) ?>">
+                <?php foreach ((array)$values['events'] as $event): ?>
+                    <input type="hidden" name="events[]" value="<?= $escaper->escapeHtmlAttr((string)$event) ?>">
+                <?php endforeach; ?>
+                <input type="hidden" name="field_mode" value="<?= $escaper->escapeHtmlAttr((string)$values['field_mode']) ?>">
+                <?php if (!empty($values['all_forms'])): ?>
+                    <input type="hidden" name="all_forms" value="1">
+                <?php endif; ?>
+                <?php foreach ((array)$values['form_ids'] as $fid): ?>
+                    <input type="hidden" name="form_ids[]" value="<?= (int)$fid ?>">
+                <?php endforeach; ?>
+                <?php foreach ((array)$values['scope_ids'] as $sid): ?>
+                    <input type="hidden" name="<?= $scopeType === 'website' ? 'website_ids' : 'store_ids' ?>[]" value="<?= (int)$sid ?>">
+                <?php endforeach; ?>
+            <?php endif; ?>
+            <div class="ffb-rule-actions">
+                <a class="ffb-rules-btn ffb-rules-btn-back" href="<?= $escaper->escapeUrl($block->getBackUrl()) ?>"><?= $escaper->escapeHtml(__('Back')) ?></a>
+                <?php if (!$block->isNew()): ?>
+                    <a class="ffb-rules-btn" href="<?= $escaper->escapeUrl($block->getDeliveryLogUrl()) ?>"><?= $escaper->escapeHtml(__('Delivery log')) ?></a>
+                <?php endif; ?>
+                <span class="ffb-rule-spacer"></span>
+                <?php if (!$readOnly): ?>
+                    <button type="submit" class="ffb-rules-btn ffb-rules-btn-primary"><?= $escaper->escapeHtml(__('Save endpoint')) ?></button>
+                <?php endif; ?>
+            </div>
+        <?php if (!$readOnly): ?>
+        </form>
+        <?php endif; ?>
+    </div>
+
+    <?php if ($hasAside): ?>
+    <aside class="ffb-rule-side">
+        <section class="ffb-rules-card">
+            <h2 class="ffb-rules-title"><?= $escaper->escapeHtml(__('Signing secret')) ?></h2>
+            <details class="ffb-admin-group-delete">
+            <summary class="ffb-rules-btn ffb-rules-btn-danger"><?= $escaper->escapeHtml(__('Roll secret')) ?></summary>
+            <form method="post" action="<?= $escaper->escapeUrl($block->getRotateUrl()) ?>">
+                <input type="hidden" name="form_key" value="<?= /* @noEscape */ $formKey ?>">
+                <input type="hidden" name="id" value="<?= (int)$id ?>">
+                <div class="ffb-rule-field">
+                    <label for="ffb-webhook-window"><?= $escaper->escapeHtml(__('Keep the old secret valid for (hours)')) ?></label>
+                    <input id="ffb-webhook-window" name="window_hours" type="number" min="0" max="72" value="24" aria-describedby="ffb-webhook-window-hint">
+                    <p class="ffb-rules-hint" id="ffb-webhook-window-hint"><?= $escaper->escapeHtml(__('0 to 72. During this time every delivery is signed with both secrets, so the receiver can switch over. The new secret is shown once. With 0 hours the old secret stops working at once.')) ?></p>
+                </div>
+                <button type="submit" class="ffb-rules-btn ffb-rules-btn-danger"><?= $escaper->escapeHtml(__('Roll the secret now')) ?></button>
+            </form>
+            </details>
+        </section>
+        <section class="ffb-rules-card">
+            <h2 class="ffb-rules-title"><?= $escaper->escapeHtml(__('Test event')) ?></h2>
+            <form method="post" action="<?= $escaper->escapeUrl($block->getTestSendUrl()) ?>">
+                <input type="hidden" name="form_key" value="<?= /* @noEscape */ $formKey ?>">
+                <input type="hidden" name="id" value="<?= (int)$id ?>">
+                <p class="ffb-rules-hint"><?= $escaper->escapeHtml(__('Sends a webhook.test event with no submission data, also while the endpoint is inactive. At most 10 every 10 minutes. The result appears in the delivery log.')) ?></p>
+                <button type="submit" class="ffb-rules-btn ffb-rules-btn-primary"><?= $escaper->escapeHtml(__('Send test event')) ?></button>
+            </form>
+        </section>
+        <section class="ffb-rules-card">
+            <details class="ffb-admin-group-delete">
+                <summary class="ffb-rules-btn ffb-rules-btn-danger"><?= $escaper->escapeHtml(__('Delete endpoint')) ?></summary>
+                <form method="post" action="<?= $escaper->escapeUrl($block->getDeleteUrl()) ?>">
+                    <input type="hidden" name="form_key" value="<?= /* @noEscape */ $formKey ?>">
+                    <input type="hidden" name="id" value="<?= (int)$id ?>">
+                    <p class="ffb-rules-hint"><?= $escaper->escapeHtml(__('The endpoint stops receiving data now and its delivery history is removed in the background.')) ?></p>
+                    <button type="submit" class="ffb-rules-btn ffb-rules-btn-danger"><?= $escaper->escapeHtml(__('Delete this endpoint')) ?></button>
+                </form>
+            </details>
+        </section>
+    </aside>
+    <?php endif; ?>
+</div>

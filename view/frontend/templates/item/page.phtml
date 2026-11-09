@@ -1,0 +1,17 @@
+<?php
+/** @var \Magento\Framework\DataObject $block */
+/** @var \Magento\Framework\Escaper $escaper */
+$form = $block->getData('parent_block');
+$page = $block->getData('item');
+$title = trim((string)($page['title'] ?? ''));
+?>
+<section class="ffb-page" data-ffb-page="<?= $escaper->escapeHtmlAttr($page['id'] ?? '') ?>" data-ffb-item="<?= $escaper->escapeHtmlAttr($page['id'] ?? '') ?>">
+<?php if ($title !== '' && !$form->repeatsPageHeading($title)): ?>
+    <h2 class="ffb-page-title"><?= $escaper->escapeHtml($title) ?></h2>
+<?php endif; ?>
+    <div class="ffb-grid">
+<?php foreach ($page['items'] ?? [] as $item): ?>
+        <?= /* @noEscape */ $form->renderItem($item) ?>
+<?php endforeach; ?>
+    </div>
+</section>

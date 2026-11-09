@@ -1,0 +1,107 @@
+<?php
+declare(strict_types=1);
+
+use Furan\FormBuilder\Block\Account\Submission;
+use Magento\Framework\Escaper;
+
+/** @var Submission $block */
+/** @var Escaper $escaper */
+$view = $block->getView();
+?>
+<link rel="stylesheet" href="<?= $escaper->escapeUrl($block->getViewFileUrl('Furan_FormBuilder::css/account.css')) ?>">
+<?php if ($view !== null): ?>
+    <div class="ffb-account ffb-account-submission">
+        <h2 class="ffb-account-submission-title"><?= $escaper->escapeHtml($view['title']) ?></h2>
+        <dl class="ffb-account-submission-meta">
+            <dt><?= $escaper->escapeHtml(__('Submitted')) ?></dt>
+            <dd><?= $escaper->escapeHtml($block->formatDate($view['created_at'], \IntlDateFormatter::MEDIUM, true)) ?></dd>
+            <?php if (($view['reference'] ?? '') !== ''): ?>
+                <dt><?= $escaper->escapeHtml(__('Reference')) ?></dt>
+                <dd><?= $escaper->escapeHtml($view['reference']) ?></dd>
+            <?php endif; ?>
+            <dt><?= $escaper->escapeHtml(__('Status')) ?></dt>
+            <dd><span class="ffb-account-status ffb-account-status-<?= (int)$view['status'] ?>"><?= $escaper->escapeHtml($view['status_label']) ?></span></dd>
+        </dl>
+        <?php foreach ($view['groups'] as $group): ?>
+            <?php if ($group['title'] !== ''): ?>
+                <h3 class="ffb-account-page-title"><?= $escaper->escapeHtml($group['title']) ?></h3>
+            <?php endif; ?>
+            <?php foreach ($group['sections'] as $section): ?>
+                <?php if ($section['title'] !== ''): ?>
+                    <h4 class="ffb-account-section-title"><?= $escaper->escapeHtml($section['title']) ?></h4>
+                <?php endif; ?>
+                <dl class="ffb-account-answers">
+                    <?php foreach ($section['entries'] as $entry): ?>
+                        <dt><?= $escaper->escapeHtml($entry['label']) ?></dt>
+                        <dd>
+                            <?php foreach ($entry['values'] as $value): ?>
+                                <div><?= $escaper->escapeHtml($value) ?></div>
+                            <?php endforeach; ?>
+                        </dd>
+                    <?php endforeach; ?>
+                </dl>
+            <?php endforeach; ?>
+        <?php endforeach; ?>
+        <div class="ffb-account-thread" id="ffb-thread">
+            <h3 class="ffb-account-thread-title"><?= $escaper->escapeHtml(__('Conversation')) ?></h3>
+            <?php if ($view['earlier'] || $view['before'] !== null): ?>
+                <p class="ffb-account-thread-paging">
+                    <?php if ($view['earlier'] && $view['thread']): ?>
+                        <span><?= $escaper->escapeHtml(__('Showing %1 messages. Earlier messages are hidden.', count($view['thread']))) ?></span>
+                        <a href="<?= $escaper->escapeUrl($block->getEarlierUrl((int)$view['thread'][0]['message_id'])) ?>"><?= $escaper->escapeHtml(__('Show earlier messages')) ?></a>
+                    <?php endif; ?>
+                    <?php if ($view['before'] !== null): ?>
+                        <a href="<?= $escaper->escapeUrl($block->getLatestUrl()) ?>"><?= $escaper->escapeHtml(__('Show latest messages')) ?></a>
+                    <?php endif; ?>
+                </p>
+            <?php endif; ?>
+            <?php foreach ($view['thread'] as $message): ?>
+                <div class="ffb-account-message ffb-account-message-<?= $escaper->escapeHtmlAttr($message['author'] === 'customer' ? 'customer' : 'store') ?>">
+                    <p class="ffb-account-message-meta">
+                        <strong><?= $escaper->escapeHtml($message['author_name']) ?></strong>
+                        <?= $escaper->escapeHtml($block->formatDate($message['created_at'], \IntlDateFormatter::MEDIUM, true)) ?>
+                    </p>
+                    <?php // phpcs:ignore Magento2.Security.LanguageConstruct -- MessageRenderer escapes everything it outputs ?>
+                    <div class="ffb-account-message-body"><?= /* @noEscape */ $block->renderMessage($message) ?></div>
+                </div>
+            <?php endforeach; ?>
+            <?php if ($view['can_reply']): ?>
+                <form class="ffb-account-reply" method="post" action="<?= $escaper->escapeUrl($block->getReplyUrl()) ?>" data-ffb-reply>
+                    <?= $block->getBlockHtml('formkey') ?>
+                    <label for="ffb-account-reply-body"><?= $escaper->escapeHtml(__('Your reply')) ?></label>
+                    <textarea id="ffb-account-reply-body" name="body" rows="4" maxlength="10000" data-ffb-max="5000" required data-ffb-reply-body aria-describedby="ffb-account-reply-count"></textarea>
+                    <p class="ffb-account-reply-count" id="ffb-account-reply-count" data-ffb-reply-count data-ffb-left="<?= $escaper->escapeHtmlAttr(__('%1 characters left')) ?>" hidden></p>
+                    <p class="ffb-account-sr-only" data-ffb-reply-live aria-live="polite"></p>
+                    <button type="submit" class="action primary"><span><?= $escaper->escapeHtml(__('Send reply')) ?></span></button>
+                </form>
+            <?php elseif ($view['reply_state'] === 'full'): ?>
+                <p class="ffb-account-note"><?= $escaper->escapeHtml(__('This conversation has reached its message limit. To ask something new, please contact us again.')) ?></p>
+            <?php elseif ($view['reply_state'] === 'off' && $view['thread']): ?>
+                <p class="ffb-account-note"><?= $escaper->escapeHtml(__('Replies are closed for this form.')) ?></p>
+            <?php endif; ?>
+        </div>
+        <?php if ($view['edit_closed']): ?>
+            <p class="ffb-account-note"><?= $escaper->escapeHtml(__('This form is closed, so answers can no longer be changed.')) ?></p>
+        <?php endif; ?>
+        <?php if ($view['can_edit'] || $view['can_delete']): ?>
+            <div class="ffb-account-actions">
+                <?php if ($view['can_edit']): ?>
+                    <a class="action edit" href="<?= $escaper->escapeUrl($block->getEditUrl()) ?>"><?= $escaper->escapeHtml(__('Edit')) ?></a>
+                <?php endif; ?>
+                <?php if ($view['can_delete']): ?>
+                    <form class="ffb-account-delete" method="post" action="<?= $escaper->escapeUrl($block->getDeleteUrl()) ?>" data-ffb-confirm="<?= $escaper->escapeHtmlAttr($view['one_response']
+                        ? __('Delete this submission? This cannot be undone. It still counts as your answer, so you will not be able to answer this form again.')
+                        : __('Delete this submission? This cannot be undone.')) ?>">
+                        <?= $block->getBlockHtml('formkey') ?>
+                        <button type="submit" class="action delete"><span><?= $escaper->escapeHtml(__('Delete')) ?></span></button>
+                    </form>
+                <?php endif; ?>
+            </div>
+        <?php endif; ?>
+        <p class="ffb-account-back"><a href="<?= $escaper->escapeUrl($block->getBackUrl()) ?>"><?= $escaper->escapeHtml(__('Back to my submissions')) ?></a></p>
+    </div>
+<?php endif; ?>
+<script src="<?= $escaper->escapeUrl($block->getViewFileUrl('Furan_FormBuilder::js/ffb-account.js')) ?>" defer></script>
+<?php if ($view !== null && $view['can_reply']): ?>
+    <script src="<?= $escaper->escapeUrl($block->getViewFileUrl('Furan_FormBuilder::js/ffb-reply.js')) ?>" defer></script>
+<?php endif; ?>

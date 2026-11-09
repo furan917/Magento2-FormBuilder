@@ -1,0 +1,10 @@
+<?php
+/** @var \Magento\Framework\Escaper $escaper */
+/** @var \Magento\Framework\View\Element\Template $block */
+if (!$block->getData('inactive')) {
+    return;
+}
+?>
+<div class="message notice ffb-preview-notice" role="status">
+    <div><?= $escaper->escapeHtml(__('Preview: this form is not active. Answers cannot be sent.')) ?></div>
+</div>

@@ -1,0 +1,12 @@
+<?php
+/** @var \Magento\Framework\View\Element\Template $block */
+/** @var \Magento\Framework\Escaper $escaper */
+$form = $block->getData('parent_block');
+extract($form->getItemContext((array)$block->getData('item'), $escaper), EXTR_SKIP);
+/** @var bool $group */
+?>
+<?php if ($help !== ''): ?>
+    <p class="ffb-help" id="<?= $escaper->escapeHtmlAttr($helpId) ?>"><?= $escaper->escapeHtml($help) ?></p>
+<?php endif; ?>
+    <p class="ffb-error" id="<?= $escaper->escapeHtmlAttr($errorId) ?>" data-ffb-error hidden></p>
+<?= $group ? '</fieldset>' : '</div>' ?>

@@ -1,0 +1,459 @@
+[
+  {
+    "address": "8.8.8.8",
+    "expected": true,
+    "note": "public"
+  },
+  {
+    "address": "1.1.1.1",
+    "expected": true,
+    "note": "public"
+  },
+  {
+    "address": "2606:4700::1",
+    "expected": true,
+    "note": "public"
+  },
+  {
+    "address": "192.31.196.1",
+    "expected": true,
+    "note": "public"
+  },
+  {
+    "address": "100.63.255.255",
+    "expected": true,
+    "note": "public"
+  },
+  {
+    "address": "100.128.0.1",
+    "expected": true,
+    "note": "public"
+  },
+  {
+    "address": "172.32.0.1",
+    "expected": true,
+    "note": "public"
+  },
+  {
+    "address": "2a00:1450:4009::1",
+    "expected": true,
+    "note": "public"
+  },
+  {
+    "address": "2606:4700::1111",
+    "expected": true,
+    "note": "public"
+  },
+  {
+    "address": "::ffff:8.8.8.8",
+    "expected": true,
+    "note": "public"
+  },
+  {
+    "address": "::ffff:808:808",
+    "expected": true,
+    "note": "public"
+  },
+  {
+    "address": "0:0:0:0:0:ffff:8.8.8.8",
+    "expected": true,
+    "note": "public"
+  },
+  {
+    "address": "127.0.0.1",
+    "expected": false,
+    "note": "blocked"
+  },
+  {
+    "address": "127.255.255.254",
+    "expected": false,
+    "note": "blocked"
+  },
+  {
+    "address": "0.0.0.0",
+    "expected": false,
+    "note": "blocked"
+  },
+  {
+    "address": "0.1.2.3",
+    "expected": false,
+    "note": "blocked"
+  },
+  {
+    "address": "10.0.0.1",
+    "expected": false,
+    "note": "blocked"
+  },
+  {
+    "address": "172.16.0.1",
+    "expected": false,
+    "note": "blocked"
+  },
+  {
+    "address": "172.31.255.255",
+    "expected": false,
+    "note": "blocked"
+  },
+  {
+    "address": "192.168.1.1",
+    "expected": false,
+    "note": "blocked"
+  },
+  {
+    "address": "100.64.0.1",
+    "expected": false,
+    "note": "blocked"
+  },
+  {
+    "address": "100.100.100.200",
+    "expected": false,
+    "note": "blocked"
+  },
+  {
+    "address": "169.254.169.254",
+    "expected": false,
+    "note": "blocked"
+  },
+  {
+    "address": "192.0.0.192",
+    "expected": false,
+    "note": "blocked"
+  },
+  {
+    "address": "192.0.0.8",
+    "expected": false,
+    "note": "blocked"
+  },
+  {
+    "address": "198.18.0.1",
+    "expected": false,
+    "note": "blocked"
+  },
+  {
+    "address": "198.19.255.255",
+    "expected": false,
+    "note": "blocked"
+  },
+  {
+    "address": "198.51.100.7",
+    "expected": false,
+    "note": "blocked"
+  },
+  {
+    "address": "203.0.113.9",
+    "expected": false,
+    "note": "blocked"
+  },
+  {
+    "address": "192.0.2.1",
+    "expected": false,
+    "note": "blocked"
+  },
+  {
+    "address": "192.88.99.1",
+    "expected": false,
+    "note": "blocked"
+  },
+  {
+    "address": "224.0.0.1",
+    "expected": false,
+    "note": "blocked"
+  },
+  {
+    "address": "239.255.255.250",
+    "expected": false,
+    "note": "blocked"
+  },
+  {
+    "address": "240.0.0.1",
+    "expected": false,
+    "note": "blocked"
+  },
+  {
+    "address": "255.255.255.255",
+    "expected": false,
+    "note": "blocked"
+  },
+  {
+    "address": "::",
+    "expected": false,
+    "note": "blocked"
+  },
+  {
+    "address": "::1",
+    "expected": false,
+    "note": "blocked"
+  },
+  {
+    "address": "::ffff:127.0.0.1",
+    "expected": false,
+    "note": "blocked"
+  },
+  {
+    "address": "::ffff:7f00:1",
+    "expected": false,
+    "note": "blocked"
+  },
+  {
+    "address": "0:0:0:0:0:ffff:127.0.0.1",
+    "expected": false,
+    "note": "blocked"
+  },
+  {
+    "address": "::ffff:10.0.0.1",
+    "expected": false,
+    "note": "blocked"
+  },
+  {
+    "address": "::ffff:169.254.169.254",
+    "expected": false,
+    "note": "blocked"
+  },
+  {
+    "address": "::127.0.0.1",
+    "expected": false,
+    "note": "blocked"
+  },
+  {
+    "address": "::7f00:1",
+    "expected": false,
+    "note": "blocked"
+  },
+  {
+    "address": "::8.8.8.8",
+    "expected": false,
+    "note": "blocked"
+  },
+  {
+    "address": "::808:808",
+    "expected": false,
+    "note": "blocked"
+  },
+  {
+    "address": "::ffff:0:7f00:1",
+    "expected": false,
+    "note": "blocked"
+  },
+  {
+    "address": "::ffff:0:8.8.8.8",
+    "expected": false,
+    "note": "blocked"
+  },
+  {
+    "address": "3fff::1",
+    "expected": false,
+    "note": "blocked"
+  },
+  {
+    "address": "3fff:fff::1",
+    "expected": false,
+    "note": "blocked"
+  },
+  {
+    "address": "5f00::1",
+    "expected": false,
+    "note": "blocked"
+  },
+  {
+    "address": "100:0:0:1::1",
+    "expected": false,
+    "note": "blocked"
+  },
+  {
+    "address": "100::1",
+    "expected": false,
+    "note": "blocked"
+  },
+  {
+    "address": "fd00:ec2::254",
+    "expected": false,
+    "note": "blocked"
+  },
+  {
+    "address": "fc00::1",
+    "expected": false,
+    "note": "blocked"
+  },
+  {
+    "address": "fd12:3456::1",
+    "expected": false,
+    "note": "blocked"
+  },
+  {
+    "address": "fe80::1",
+    "expected": false,
+    "note": "blocked"
+  },
+  {
+    "address": "fe80::1%eth0",
+    "expected": false,
+    "note": "blocked"
+  },
+  {
+    "address": "fec0::1",
+    "expected": false,
+    "note": "blocked"
+  },
+  {
+    "address": "ff02::1",
+    "expected": false,
+    "note": "blocked"
+  },
+  {
+    "address": "2001:db8::1",
+    "expected": false,
+    "note": "blocked"
+  },
+  {
+    "address": "2001::1",
+    "expected": false,
+    "note": "blocked"
+  },
+  {
+    "address": "2001:1::1",
+    "expected": false,
+    "note": "blocked"
+  },
+  {
+    "address": "2002:7f00:1::",
+    "expected": false,
+    "note": "blocked"
+  },
+  {
+    "address": "2002:808:808::",
+    "expected": false,
+    "note": "blocked"
+  },
+  {
+    "address": "64:ff9b::7f00:1",
+    "expected": false,
+    "note": "blocked"
+  },
+  {
+    "address": "64:ff9b:1::7f00:1",
+    "expected": false,
+    "note": "blocked"
+  },
+  {
+    "address": "64:ff9b:1::808:808",
+    "expected": false,
+    "note": "blocked"
+  },
+  {
+    "address": "4000::1",
+    "expected": false,
+    "note": "blocked"
+  },
+  {
+    "address": "8000::1",
+    "expected": false,
+    "note": "blocked"
+  },
+  {
+    "address": "e000::1",
+    "expected": false,
+    "note": "blocked"
+  },
+  {
+    "address": "not-an-ip",
+    "expected": false,
+    "note": "blocked"
+  },
+  {
+    "address": "",
+    "expected": false,
+    "note": "blocked"
+  },
+  {
+    "address": "0177.0.0.1",
+    "expected": false,
+    "note": "blocked"
+  },
+  {
+    "address": "2130706433",
+    "expected": false,
+    "note": "blocked"
+  },
+  {
+    "address": "0x7f.1",
+    "expected": false,
+    "note": "blocked"
+  },
+  {
+    "address": "127.1",
+    "expected": false,
+    "note": "blocked"
+  },
+  {
+    "address": "[::1]",
+    "expected": false,
+    "note": "blocked"
+  },
+  {
+    "address": "1.1.1.1.",
+    "expected": false,
+    "note": "blocked"
+  },
+  {
+    "address": " 8.8.8.8",
+    "expected": false,
+    "note": "blocked"
+  },
+  {
+    "address": "8.8.8.8 ",
+    "expected": false,
+    "note": "blocked"
+  },
+  {
+    "address": "1.1.1.1/32",
+    "expected": false,
+    "note": "blocked"
+  },
+  {
+    "address": "64:ff9b::808:808",
+    "expected": false,
+    "note": "NAT64 of 8.8.8.8, blocked by default"
+  },
+  {
+    "address": "64:ff9b::808:808",
+    "expected": true,
+    "nat64": true,
+    "note": "NAT64 of 8.8.8.8, decoded and public"
+  },
+  {
+    "address": "64:ff9b::7f00:1",
+    "expected": false,
+    "nat64": true,
+    "note": "NAT64 of 127.0.0.1 stays blocked"
+  },
+  {
+    "address": "64:ff9b::a9fe:a9fe",
+    "expected": false,
+    "nat64": true,
+    "note": "NAT64 of 169.254.169.254 stays blocked"
+  },
+  {
+    "address": "64:ff9b::a00:1",
+    "expected": false,
+    "nat64": true,
+    "note": "NAT64 of 10.0.0.1 stays blocked"
+  },
+  {
+    "address": "64:ff9b:1::808:808",
+    "expected": false,
+    "nat64": true,
+    "note": "local-use NAT64 never decoded"
+  },
+  {
+    "address": "::ffff:0:808:808",
+    "expected": false,
+    "nat64": true,
+    "note": "translated never allowed by nat64 flag"
+  },
+  {
+    "address": "::808:808",
+    "expected": false,
+    "nat64": true,
+    "note": "compatible never allowed by nat64 flag"
+  }
+]

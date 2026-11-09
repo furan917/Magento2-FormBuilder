@@ -1,0 +1,161 @@
+/*
+ * Every selector sits under .ffb-account (also on the guest .ffb-thread page) with at least two
+ * classes, so Luma and Hyvä/Tailwind preflight rules cannot win and no important flags are needed.
+ * Luma classes stay on the markup and are only normalised here. Themes override --ffb-* on .ffb-account.
+ */
+.ffb-account, .ffb-thread {
+  --ffb-accent: #1d5fd1;
+  --ffb-on-accent: #fff;
+  --ffb-text: #1f2328;
+  --ffb-muted: #59636e;
+  --ffb-border: #d0d7de;
+  --ffb-border-strong: #8c959f;
+  --ffb-surface: #fff;
+  --ffb-surface-alt: #f6f8fa;
+  --ffb-error: #c62828;
+  --ffb-success: #1a7f37;
+  --ffb-warning: #9a6700;
+  --ffb-star: #f2a516;
+  --ffb-radius: 8px;
+  --ffb-control-h: 2.75em;
+  --ffb-gap: 1.25em;
+  --ffb-ring: rgba(29, 95, 209, 0.25);
+  --ffb-tint: #eef3fc;
+}
+@supports (color: color-mix(in srgb, red, blue)) {
+  .ffb-account, .ffb-thread {
+    --ffb-ring: color-mix(in srgb, var(--ffb-accent) 28%, transparent);
+    --ffb-tint: color-mix(in srgb, var(--ffb-accent) 8%, var(--ffb-surface));
+  }
+}
+
+/* Headings */
+.ffb-account .ffb-account-submission-title { margin: 0 0 0.5em; font-size: 1.7em; font-weight: 700; line-height: 1.25; }
+.ffb-account .ffb-account-page-title { margin: 1.5em 0 0.5em; font-size: 1.3em; font-weight: 700; line-height: 1.3; }
+.ffb-account .ffb-account-section-title { margin: 1.25em 0 0.5em; font-size: 1.1em; font-weight: 600; line-height: 1.3; }
+.ffb-account .ffb-account-thread-title { margin: 0 0 0.75em; font-size: 1.3em; font-weight: 700; line-height: 1.3; }
+
+/* Links */
+.ffb-account a:not(.action) { color: var(--ffb-accent); text-decoration: underline; text-underline-offset: 0.15em; }
+.ffb-account a:not(.action):hover { text-decoration-thickness: 2px; }
+.ffb-account a:not(.action):focus-visible { outline: 2px solid var(--ffb-accent); outline-offset: 2px; border-radius: 2px; }
+
+/* Buttons: secondary by default, primary and danger by the Luma modifier classes */
+.ffb-account .action {
+  -webkit-appearance: none;
+  appearance: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  min-height: 44px;
+  margin: 0;
+  padding: 0.5em 1.2em;
+  border: 1px solid var(--ffb-accent);
+  border-radius: var(--ffb-radius);
+  background: var(--ffb-surface);
+  background-image: none;
+  box-shadow: none;
+  color: var(--ffb-accent);
+  font: inherit;
+  font-weight: 600;
+  line-height: 1.3;
+  text-decoration: none;
+  text-shadow: none;
+  cursor: pointer;
+  transition: background-color 0.15s ease, border-color 0.15s ease;
+}
+.ffb-account .action:hover { background: var(--ffb-tint); }
+.ffb-account .action:focus-visible { outline: 3px solid var(--ffb-accent); outline-offset: 2px; box-shadow: 0 0 0 5px var(--ffb-ring); }
+.ffb-account .action:disabled { opacity: 0.6; cursor: not-allowed; }
+.ffb-account .action.primary { background: var(--ffb-accent); color: var(--ffb-on-accent); }
+.ffb-account .action.primary:hover { background: var(--ffb-accent); filter: brightness(0.9); }
+.ffb-account .action.delete { border-color: var(--ffb-error); color: var(--ffb-error); }
+.ffb-account .action.delete:hover { background: var(--ffb-surface-alt); }
+
+/* Status pills */
+.ffb-account .ffb-account-status { display: inline-block; padding: 0.1em 0.7em; border: 1px solid var(--ffb-border); border-radius: 1em; background: var(--ffb-surface-alt); color: var(--ffb-text); font-size: 0.9em; line-height: 1.5; white-space: nowrap; }
+.ffb-account .ffb-account-status-0, .ffb-account .ffb-account-status-1 { border-color: #1a4e8a; background: #e8f1fb; color: #1a4e8a; }
+.ffb-account .ffb-account-status-2 { border-color: #1a6b36; background: #e9f6ee; color: #1a6b36; }
+
+/* Submission details */
+.ffb-account .ffb-account-submission-meta { display: grid; grid-template-columns: max-content 1fr; gap: 0.25rem 1rem; margin: 0 0 1.5rem; }
+.ffb-account .ffb-account-submission-meta dt { font-weight: 600; }
+.ffb-account .ffb-account-submission-meta dd { margin: 0; }
+.ffb-account .ffb-account-answers { display: grid; grid-template-columns: minmax(8rem, 1fr) 2fr; gap: 0.5rem 1.5rem; margin: 0 0 1.5rem; padding-bottom: 1rem; border-bottom: 1px solid var(--ffb-border); }
+.ffb-account .ffb-account-answers dt { font-weight: 600; }
+.ffb-account .ffb-account-answers dd { margin: 0; overflow-wrap: anywhere; }
+
+/* Conversation */
+.ffb-account .ffb-account-thread { margin: 0 0 1.5rem; }
+.ffb-account .ffb-account-message { max-width: 40rem; margin: 0 0 0.75rem; padding: 0.75rem 1rem; border: 1px solid var(--ffb-border); border-radius: var(--ffb-radius); background: var(--ffb-surface-alt); }
+.ffb-account .ffb-account-message-customer { margin-left: auto; background: var(--ffb-tint); }
+.ffb-account .ffb-account-message-meta { margin: 0 0 0.25rem; font-size: 0.9em; }
+.ffb-account .ffb-account-message-meta strong { margin-right: 0.5rem; }
+.ffb-account .ffb-account-message-body { margin: 0; overflow-wrap: anywhere; }
+.ffb-account .ffb-account-message-body p, .ffb-account .ffb-account-message-body ul, .ffb-account .ffb-account-message-body ol { margin: 0 0 0.5rem; }
+.ffb-account .ffb-account-message-body ul { padding-left: 1.5em; list-style: disc; }
+.ffb-account .ffb-account-message-body ol { padding-left: 1.5em; list-style: decimal; }
+.ffb-account .ffb-account-message-body li { margin: 0 0 0.25em; }
+.ffb-account .ffb-account-message-body > :last-child { margin-bottom: 0; }
+.ffb-account .ffb-account-thread-paging { display: flex; flex-wrap: wrap; gap: 0.25rem 1rem; margin: 0 0 0.75rem; color: var(--ffb-muted); font-size: 0.9em; }
+
+/* Reply box */
+.ffb-account .ffb-account-reply { display: grid; gap: 0.5rem; max-width: 40rem; }
+.ffb-account .ffb-account-reply label { font-weight: 600; }
+.ffb-account .ffb-account-reply .action { justify-self: start; }
+.ffb-account .ffb-account-reply textarea { box-sizing: border-box; width: 100%; min-height: 6em; padding: 0.6em 0.75em; border: 1px solid var(--ffb-border-strong); border-radius: var(--ffb-radius); background: var(--ffb-surface); color: var(--ffb-text); font: inherit; line-height: 1.5; resize: vertical; }
+.ffb-account .ffb-account-reply textarea:focus-visible { border-color: var(--ffb-accent); outline: 3px solid var(--ffb-accent); outline-offset: 1px; box-shadow: 0 0 0 5px var(--ffb-ring); }
+.ffb-account .ffb-account-reply-count { margin: 0; color: var(--ffb-muted); font-size: 0.85em; text-align: right; }
+.ffb-account .ffb-account-reply-count.is-near { color: #8a4b00; }
+.ffb-account .ffb-account-reply-count.is-over { color: #b3261e; font-weight: 600; }
+.ffb-account .ffb-account-sr-only { position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
+.ffb-account .ffb-account-note { flex-basis: 100%; margin: 0; color: var(--ffb-muted); font-size: 0.9em; }
+
+/* Edit and delete actions, export and delete-all */
+.ffb-account .ffb-account-actions { display: flex; flex-wrap: wrap; gap: 0.75rem; align-items: center; margin: 0 0 1rem; padding-top: 1rem; border-top: 1px solid var(--ffb-border); }
+.ffb-account .ffb-account-actions form { margin: 0; }
+.ffb-account .ffb-account-privacy { display: flex; flex-wrap: wrap; gap: 1rem 2rem; align-items: center; justify-content: space-between; margin: 0 0 1.5rem; }
+.ffb-account .ffb-account-privacy form { margin: 0; }
+.ffb-account .ffb-account-delete-all { display: flex; flex-wrap: wrap; gap: 0.5rem 1rem; align-items: center; }
+.ffb-account .ffb-account-delete-all label { display: inline-flex; gap: 0.4rem; align-items: center; margin: 0; }
+.ffb-account .ffb-account-delete-all input[type="checkbox"] { accent-color: var(--ffb-accent); }
+
+/* My submissions table */
+.ffb-account .ffb-account-table { width: 100%; margin: 0 0 1rem; border-collapse: collapse; }
+.ffb-account .ffb-account-table caption { position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
+.ffb-account .ffb-account-table th { padding: 0.75em 1em; border-bottom: 2px solid var(--ffb-border-strong); font-weight: 600; text-align: left; }
+.ffb-account .ffb-account-table td { padding: 0.75em 1em; border-top: 0; border-bottom: 1px solid var(--ffb-border); vertical-align: top; overflow-wrap: anywhere; }
+.ffb-account .ffb-account-empty { margin: 0 0 1rem; color: var(--ffb-muted); }
+.ffb-account .ffb-account-older { margin: 0 0 1rem; }
+.ffb-account .ffb-account-back { margin: 0 0 1rem; }
+
+@media (max-width: 640px) {
+  .ffb-account .ffb-account-answers { grid-template-columns: 1fr; gap: 0.15rem; }
+  .ffb-account .ffb-account-answers dd { margin-bottom: 0.6rem; }
+  .ffb-account .ffb-account-message { max-width: none; }
+  .ffb-account .ffb-account-table thead { position: absolute; width: 1px; height: 1px; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); }
+  .ffb-account .ffb-account-table tr { display: block; margin: 0 0 1rem; border: 1px solid var(--ffb-border); border-radius: var(--ffb-radius); }
+  .ffb-account .ffb-account-table td { display: grid; grid-template-columns: 6.5em 1fr; gap: 0.5em; padding: 0.5em 0.75em; border-top: 0; border-bottom: 1px solid var(--ffb-border); }
+  .ffb-account .ffb-account-table td:last-child { border-bottom: 0; }
+  .ffb-account .ffb-account-table td::before { content: attr(data-th); color: var(--ffb-muted); font-weight: 600; }
+  .ffb-account .ffb-account-table td > .ffb-account-status { justify-self: start; align-self: start; }
+  .ffb-account .ffb-account-table td.ffb-account-cell-view { display: block; }
+  .ffb-account .ffb-account-table td.ffb-account-cell-view::before { display: none; }
+}
+
+/* Guest reply page: one readable column aligned with the page title, no sidebar offset. */
+.ffb-thread { box-sizing: border-box; width: 100%; max-width: 760px; margin: 0; }
+.ffb-thread .ffb-account-message { max-width: 85%; }
+.ffb-thread .ffb-account-reply { max-width: none; }
+.ffb-thread .ffb-account-reply textarea { width: 100%; box-sizing: border-box; }
+@media (max-width: 768px) {
+  .ffb-thread .ffb-account-message { max-width: none; margin-left: 0; }
+}
+@media (max-width: 640px) {
+  .ffb-thread .ffb-account-reply .action { justify-self: stretch; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ffb-account .action { transition: none; }
+}

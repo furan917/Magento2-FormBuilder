@@ -1,0 +1,237 @@
+<?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Config:etc/system_file.xsd">
+    <system>
+        <tab id="furan" translate="label" sortOrder="900">
+            <label>Furan</label>
+        </tab>
+        <section id="furan_formbuilder" translate="label" sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="1">
+            <label>Form Builder</label>
+            <tab>furan</tab>
+            <resource>Furan_FormBuilder::config</resource>
+            <group id="general" translate="label" sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="1">
+                <label>General</label>
+                <field id="enabled" translate="label comment" type="select" sortOrder="5" showInDefault="1" showInWebsite="1" showInStore="1" canRestore="1">
+                    <label>Enable Forms</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                    <backend_model>Furan\FormBuilder\Model\Config\Backend\Enabled</backend_model>
+                    <comment>No takes every form offline in this scope straight away: form pages, embedded forms, submitting, uploads, drafts and the customer "My submissions" pages. The page cache is flushed on change. Saved submissions stay in the admin. From the command line: bin/magento config:set furan_formbuilder/general/enabled 0 (add --scope=websites --scope-code=base for one website).</comment>
+                </field>
+                <field id="route_prefix" translate="label comment" type="text" sortOrder="10" showInDefault="1">
+                    <label>URL Prefix</label>
+                    <comment>Forms are available at /{prefix}/{form identifier}. Lowercase letters, digits and hyphens, at most 32 characters.</comment>
+                    <validate>required-entry</validate>
+                    <backend_model>Furan\FormBuilder\Model\Config\Backend\RoutePrefix</backend_model>
+                </field>
+                <field id="async_actions" translate="label comment" type="select" sortOrder="15" showInDefault="1" canRestore="1">
+                    <label>Run Submission Actions in the Background</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                    <comment>Notification, autoresponder and other submission actions run in the furan_formbuilder.action queue consumer instead of during the visitor's request. Enable only when queue consumers run; otherwise these actions do not run.</comment>
+                </field>
+            </group>
+            <group id="spam" translate="label" sortOrder="20" showInDefault="1" showInWebsite="1">
+                <label>Spam Protection</label>
+                <field id="min_seconds" translate="label comment" type="text" sortOrder="10" showInDefault="1" showInWebsite="1" canRestore="1">
+                    <label>Minimum Seconds Before Submit</label>
+                    <comment>Submissions faster than this are rejected as automated.</comment>
+                    <validate>validate-digits validate-digits-range digits-range-0-300</validate>
+                </field>
+                <field id="rate_limit" translate="label comment" type="text" sortOrder="20" showInDefault="1" showInWebsite="1" canRestore="1">
+                    <label>Submissions Allowed per Visitor per Form</label>
+                    <comment>0 disables the per visitor limit.</comment>
+                    <validate>validate-digits validate-zero-or-greater</validate>
+                </field>
+                <field id="form_rate_limit" translate="label comment" type="text" sortOrder="25" showInDefault="1" showInWebsite="1" canRestore="1">
+                    <label>Submissions Allowed per Form (all visitors)</label>
+                    <comment>Backstop across all visitors within the window. 0 disables it.</comment>
+                    <validate>validate-digits validate-zero-or-greater</validate>
+                </field>
+                <field id="rate_window_minutes" translate="label" type="text" sortOrder="30" showInDefault="1" showInWebsite="1" canRestore="1">
+                    <label>Rate Limit Window (minutes)</label>
+                    <validate>validate-digits validate-greater-than-zero</validate>
+                </field>
+                <field id="trusted_proxies" translate="label comment" type="textarea" sortOrder="40" showInDefault="1">
+                    <label>Trusted Proxy IPs</label>
+                    <comment>Addresses or CIDR ranges of your load balancers or CDN, one per line. Only requests arriving from these use the X-Forwarded-For client address; leave empty when visitors connect directly.</comment>
+                </field>
+            </group>
+            <group id="uploads" translate="label" sortOrder="30" showInDefault="1">
+                <label>File Uploads</label>
+                <field id="max_size_mb" translate="label comment" type="text" sortOrder="10" showInDefault="1">
+                    <label>Maximum File Size (MB)</label>
+                    <comment>Also capped by the server's upload_max_filesize and post_max_size.</comment>
+                    <validate>validate-digits validate-greater-than-zero</validate>
+                </field>
+                <field id="allowed_extensions" translate="label comment" type="text" sortOrder="20" showInDefault="1">
+                    <label>Allowed Extensions</label>
+                    <comment>Comma separated. Scripts, HTML, SVG and XML are always blocked.</comment>
+                    <backend_model>Furan\FormBuilder\Model\Config\Backend\AllowedExtensions</backend_model>
+                </field>
+                <field id="form_budget_mb" translate="label comment" type="text" sortOrder="30" showInDefault="1">
+                    <label>Upload Budget per Form per Hour (MB)</label>
+                    <comment>Total size of files one form may receive per hour, across all visitors. 0 disables the budget.</comment>
+                    <validate>validate-digits validate-zero-or-greater</validate>
+                </field>
+            </group>
+            <group id="privacy" translate="label" sortOrder="40" showInDefault="1">
+                <label>Privacy</label>
+                <field id="retention_days" translate="label comment" type="text" sortOrder="10" showInDefault="1">
+                    <label>Delete Submissions After (days)</label>
+                    <comment>0 keeps submissions until deleted manually.</comment>
+                    <validate>validate-digits validate-zero-or-greater</validate>
+                </field>
+                <field id="draft_ttl_hours" translate="label comment" type="text" sortOrder="20" showInDefault="1">
+                    <label>Browser Draft Lifetime (hours)</label>
+                    <comment>Browser drafts only (kept in the visitor's browser). Server drafts for logged-in customers use Customers &gt; Server Draft Lifetime (days).</comment>
+                    <validate>validate-digits validate-greater-than-zero</validate>
+                </field>
+                <field id="on_customer_delete" translate="label comment" type="select" sortOrder="30" showInDefault="1">
+                    <label>When a Customer Account Is Deleted</label>
+                    <comment>Anonymise removes personal data and keeps the answers; keep leaves submissions unlinked, and a new account with the same email can claim them; delete removes them.</comment>
+                    <source_model>Furan\FormBuilder\Model\Source\CustomerDeleteBehaviour</source_model>
+                </field>
+            </group>
+            <group id="maps" translate="label" sortOrder="60" showInDefault="1" showInWebsite="1" showInStore="1">
+                <label>Maps</label>
+                <field id="provider" translate="label" type="select" sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="1" canRestore="1">
+                    <label>Map Provider</label>
+                    <source_model>Furan\FormBuilder\Model\Source\MapProvider</source_model>
+                </field>
+                <field id="google_api_key" translate="label comment" type="obscure" sortOrder="20" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Google Maps API Key</label>
+                    <comment>Used only when the provider is Google Maps. The key is public (it is sent to visitors' browsers), so restrict it by HTTP referrer and to the Maps JavaScript API and Places API (New) only. Google Maps needs 'unsafe-eval' and 'unsafe-inline' in the Content Security Policy, which a hardened CSP removes; OpenStreetMap does not.</comment>
+                    <backend_model>Magento\Config\Model\Config\Backend\Encrypted</backend_model>
+                </field>
+                <field id="google_map_id" translate="label comment" type="text" sortOrder="30" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Google Map ID</label>
+                    <comment>Advanced Markers need a real Map ID created in Google Cloud Console (Map Management). Do not use DEMO_MAP_ID on a live store.</comment>
+                </field>
+                <field id="tile_url" translate="label comment" type="text" sortOrder="40" showInDefault="1" showInWebsite="1" showInStore="1" canRestore="1">
+                    <label>OpenStreetMap Tile URL</label>
+                    <comment>Use {z}, {x} and {y} placeholders. The public OpenStreetMap server is for light use only.</comment>
+                    <backend_model>Furan\FormBuilder\Model\Config\Backend\TileUrl</backend_model>
+                </field>
+                <field id="attribution" translate="label" type="text" sortOrder="50" showInDefault="1" showInWebsite="1" showInStore="1" canRestore="1">
+                    <label>Map Attribution</label>
+                    <backend_model>Furan\FormBuilder\Model\Config\Backend\Attribution</backend_model>
+                </field>
+                <field id="max_zoom" translate="label" type="text" sortOrder="60" showInDefault="1" showInWebsite="1" showInStore="1" canRestore="1">
+                    <label>Maximum Zoom</label>
+                    <validate>validate-digits validate-greater-than-zero</validate>
+                </field>
+                <field id="search_enabled" translate="label comment" type="select" sortOrder="70" showInDefault="1" showInWebsite="1" showInStore="1" canRestore="1">
+                    <label>Enable Address Search</label>
+                    <comment>Sends searches through the store to the search endpoint below.</comment>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                </field>
+                <field id="search_endpoint" translate="label" type="text" sortOrder="80" showInDefault="1" showInWebsite="1" showInStore="1" canRestore="1">
+                    <label>Search Endpoint</label>
+                    <backend_model>Furan\FormBuilder\Model\Config\Backend\SearchEndpoint</backend_model>
+                </field>
+            </group>
+            <group id="customers" translate="label" sortOrder="70" showInDefault="1" showInWebsite="1" showInStore="1">
+                <label>Customers</label>
+                <field id="claim_enabled" translate="label comment" type="select" sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="1" canRestore="1">
+                    <label>Offer Guests a Link to Claim Submissions</label>
+                    <comment>Sends a signed email so a guest can attach earlier submissions to their account.</comment>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                </field>
+                <field id="draft_sync" translate="label comment" type="select" sortOrder="20" showInDefault="1" showInWebsite="1" showInStore="1" canRestore="1">
+                    <label>Sync Drafts for Logged-in Customers</label>
+                    <comment>Keeps unfinished answers on the server so they follow the customer between devices.</comment>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                </field>
+                <field id="draft_days" translate="label" type="text" sortOrder="30" showInDefault="1" showInWebsite="1" showInStore="1" canRestore="1">
+                    <label>Server Draft Lifetime (days)</label>
+                    <validate>validate-digits validate-greater-than-zero</validate>
+                </field>
+                <field id="replies_enabled" translate="label comment" type="select" sortOrder="40" showInDefault="1" showInWebsite="1" showInStore="1" canRestore="1">
+                    <label>Allow Customers to Reply</label>
+                    <comment>Customers can answer your replies from My submissions. A form can override this in its Customers settings. You can always reply.</comment>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                </field>
+                <field id="guest_reply_links" translate="label comment" type="select" sortOrder="50" showInDefault="1" showInWebsite="1" showInStore="1" canRestore="1">
+                    <label>Allow Guests to Reply Through a Link</label>
+                    <comment>Your reply emails to guests contain a private link to answer on the website. Needs customer replies to be allowed.</comment>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                </field>
+                <field id="max_thread_messages" translate="label comment" type="text" sortOrder="60" showInDefault="1">
+                    <label>Maximum Messages per Conversation</label>
+                    <comment>When a conversation reaches this many messages, customers and guests can no longer reply; you still can. 0 = unlimited.</comment>
+                    <validate>validate-digits</validate>
+                </field>
+            </group>
+            <group id="analytics" translate="label" sortOrder="80" showInDefault="1">
+                <label>Analytics</label>
+                <field id="enabled" translate="label comment" type="select" sortOrder="10" showInDefault="1">
+                    <label>Enable Analytics Page</label>
+                    <comment>Hides the analytics page only. Submissions are still journaled and folded into the statistics, so re-enabling shows complete data.</comment>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                </field>
+            </group>
+            <group id="email" translate="label" sortOrder="50" showInDefault="1" showInWebsite="1" showInStore="1">
+                <label>Email</label>
+                <field id="sender_identity" translate="label" type="select" sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="1" canRestore="1">
+                    <label>Sender</label>
+                    <source_model>Magento\Config\Model\Config\Source\Email\Identity</source_model>
+                </field>
+                <field id="async" translate="label comment" type="select" sortOrder="20" showInDefault="1" canRestore="1">
+                    <label>Send Claim and Reply Emails in the Background</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                    <comment>Claim emails and customer reply notifications are sent by the furan_formbuilder.mail queue consumer instead of during the visitor's request. Enable only when queue consumers run; otherwise these emails are not sent.</comment>
+                </field>
+                <field id="autoresponder_daily_limit" translate="label comment" type="text" sortOrder="25" showInDefault="1" showInWebsite="1" showInStore="1" canRestore="1">
+                    <label>Confirmation Emails per Day</label>
+                    <comment>Most confirmation (autoresponder) emails one store view sends per day, across all forms. Anyone can type someone else's address into a form, so this protects your sending reputation; you are notified when it is reached. 0 removes the limit.</comment>
+                    <validate>validate-digits validate-zero-or-greater</validate>
+                </field>
+                <field id="reply_to" translate="label comment" type="text" sortOrder="30" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Reply-To for Admin Replies</label>
+                    <validate>validate-email</validate>
+                    <comment>Where customers' email replies to your answers go. Leave empty when nobody reads that mailbox: the email then says that replies are not read and points to the reply page on your website.</comment>
+                </field>
+                <field id="notification_template" translate="label comment" type="select" sortOrder="40" showInDefault="1" showInWebsite="1" showInStore="1" canRestore="1">
+                    <label>New Submission Template</label>
+                    <source_model>Magento\Config\Model\Config\Source\Email\Template</source_model>
+                    <comment>Sent to the form's notification recipients.</comment>
+                </field>
+                <field id="autoresponder_template" translate="label comment" type="select" sortOrder="50" showInDefault="1" showInWebsite="1" showInStore="1" canRestore="1">
+                    <label>Confirmation Template</label>
+                    <source_model>Magento\Config\Model\Config\Source\Email\Template</source_model>
+                    <comment>Sent to the person who submitted the form.</comment>
+                </field>
+                <field id="reply_template" translate="label comment" type="select" sortOrder="60" showInDefault="1" showInWebsite="1" showInStore="1" canRestore="1">
+                    <label>Admin Reply Template</label>
+                    <source_model>Magento\Config\Model\Config\Source\Email\Template</source_model>
+                    <comment>Sent when an admin replies to a submission.</comment>
+                </field>
+                <field id="customer_reply_template" translate="label comment" type="select" sortOrder="70" showInDefault="1" showInWebsite="1" showInStore="1" canRestore="1">
+                    <label>Customer Reply Notification Template</label>
+                    <source_model>Magento\Config\Model\Config\Source\Email\Template</source_model>
+                    <comment>Sent to the notification recipients when a customer replies to a thread.</comment>
+                </field>
+                <field id="claim_template" translate="label comment" type="select" sortOrder="80" showInDefault="1" showInWebsite="1" showInStore="1" canRestore="1">
+                    <label>Claim Submissions Template</label>
+                    <source_model>Magento\Config\Model\Config\Source\Email\Template</source_model>
+                    <comment>Sent when a customer is offered their earlier guest submissions.</comment>
+                </field>
+            </group>
+            <group id="webhooks" translate="label" sortOrder="90" showInDefault="1">
+                <label>Webhooks</label>
+                <field id="retention_days" translate="label comment" type="text" sortOrder="10" showInDefault="1">
+                    <label>Keep Webhook Deliveries (days)</label>
+                    <comment>Finished deliveries and their attempts are deleted after this many days (1 to 365). Pending deliveries are kept. Response excerpts are always deleted after 7 days. Applies to every store.</comment>
+                    <validate>validate-digits validate-digits-range digits-range-1-365</validate>
+                </field>
+            </group>
+        </section>
+        <section id="recaptcha_frontend">
+            <group id="type_for">
+                <field id="furan_formbuilder" translate="label comment" type="select" sortOrder="190" showInDefault="1" showInWebsite="1" showInStore="0" canRestore="1">
+                    <label>Enable for Form Builder Forms</label>
+                    <comment>Applies to every Form Builder form on this website.</comment>
+                    <source_model>Magento\ReCaptchaAdminUi\Model\OptionSource\Type</source_model>
+                </field>
+            </group>
+        </section>
+    </system>
+</config>

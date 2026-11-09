@@ -1,0 +1,12 @@
+<!--@subject {{var subject}} @-->
+<!--@vars {
+"var subject":"Subject",
+"var form_title":"Form Title",
+"var body_html|raw":"Message (pre-escaped HTML)"
+} @-->
+
+{{template config_path="design/email/header_template"}}
+
+<p>{{var body_html|raw}}</p>
+
+{{template config_path="design/email/footer_template"}}

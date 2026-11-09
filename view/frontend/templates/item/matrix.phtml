@@ -1,0 +1,41 @@
+<?php
+/** @var \Magento\Framework\View\Element\Template $block */
+/** @var \Magento\Framework\Escaper $escaper */
+$form = $block->getData('parent_block');
+extract($form->getItemContext((array)$block->getData('item'), $escaper), EXTR_SKIP);
+$rows = array_values((array)($settings['rows'] ?? []));
+$columns = array_values((array)($item['options'] ?? []));
+$requireAll = $required && ($settings['require_all'] ?? true);
+?>
+<?= /* @noEscape */ $form->renderPartial($block, 'item/_open.phtml', ['group' => true]) ?>
+    <div class="ffb-matrix-wrap">
+    <table class="ffb-matrix">
+        <thead>
+            <tr>
+                <td></td>
+<?php foreach ($columns as $c => $column): ?>
+                <th scope="col" id="<?= $escaper->escapeHtmlAttr($controlId . '-c' . $c) ?>"><?= $escaper->escapeHtml((string)($column['label'] ?? '')) ?></th>
+<?php endforeach; ?>
+            </tr>
+        </thead>
+        <tbody>
+<?php foreach ($rows as $r => $row): ?>
+            <tr class="ffb-matrix-row">
+                <th scope="row" id="<?= $escaper->escapeHtmlAttr($controlId . '-r' . $r) ?>"><?= $escaper->escapeHtml((string)$row) ?></th>
+<?php foreach ($columns as $c => $column): ?>
+                <td><input<?= /* @noEscape */ $attrs([
+                    'class' => 'ffb-choice',
+                    'type' => 'radio',
+                    'id' => $controlId . '-' . $r . '-' . $c,
+                    'name' => $base['name'] . '[' . $r . ']',
+                    'value' => (string)($column['value'] ?? ''),
+                    'required' => $requireAll,
+                    'aria-labelledby' => $controlId . '-r' . $r . ' ' . $controlId . '-c' . $c,
+                ]) ?>><label class="ffb-matrix-cell-label" for="<?= $escaper->escapeHtmlAttr($controlId . '-' . $r . '-' . $c) ?>"><?= $escaper->escapeHtml((string)($column['label'] ?? '')) ?></label></td>
+<?php endforeach; ?>
+            </tr>
+<?php endforeach; ?>
+        </tbody>
+    </table>
+    </div>
+<?= /* @noEscape */ $form->renderPartial($block, 'item/_close.phtml', ['group' => true]) ?>

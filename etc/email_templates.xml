@@ -1,0 +1,8 @@
+<?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Email:etc/email_templates.xsd">
+    <template id="furan_formbuilder_email_notification_template" label="Form Builder: New Submission" file="notification.html" type="html" module="Furan_FormBuilder" area="frontend"/>
+    <template id="furan_formbuilder_email_autoresponder_template" label="Form Builder: Autoresponder" file="autoresponder.html" type="html" module="Furan_FormBuilder" area="frontend"/>
+    <template id="furan_formbuilder_email_reply_template" label="Form Builder: Reply" file="reply.html" type="html" module="Furan_FormBuilder" area="frontend"/>
+    <template id="furan_formbuilder_email_customer_reply_template" label="Form Builder: Customer Reply" file="customer_reply.html" type="html" module="Furan_FormBuilder" area="frontend"/>
+    <template id="furan_formbuilder_email_claim_template" label="Form Builder: Claim Submissions" file="claim.html" type="html" module="Furan_FormBuilder" area="frontend"/>
+</config>

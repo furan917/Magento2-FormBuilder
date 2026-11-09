@@ -1,0 +1,16 @@
+<?php
+/** @var \Magento\Framework\View\Element\Template $block */
+/** @var \Magento\Framework\Escaper $escaper */
+$form = $block->getData('parent_block');
+extract($form->getItemContext((array)$block->getData('item'), $escaper), EXTR_SKIP);
+$classes = $group
+    ? $wrapperClass . ' ffb-layout-' . $layout . ($cssClass !== '' ? ' ' . $cssClass : '')
+    : $wrapperClass . ($cssClass !== '' ? ' ' . $cssClass : '');
+?>
+<?php if ($group): ?>
+<fieldset<?= /* @noEscape */ $attrs(['class' => $classes]) ?><?= /* @noEscape */ $dataAttrs ?><?= /* @noEscape */ $attrs(['aria-describedby' => $describedBy]) ?>>
+    <legend class="ffb-label"><?= /* @noEscape */ $labelHtml ?></legend>
+<?php else: ?>
+<div<?= /* @noEscape */ $attrs(['class' => $classes]) ?><?= /* @noEscape */ $dataAttrs ?>>
+    <label class="ffb-label" for="<?= $escaper->escapeHtmlAttr($controlId) ?>"><?= /* @noEscape */ $labelHtml ?></label>
+<?php endif; ?>

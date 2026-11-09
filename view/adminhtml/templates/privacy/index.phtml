@@ -1,0 +1,79 @@
+<?php
+/** @var \Furan\FormBuilder\Block\Adminhtml\Privacy $block */
+/** @var \Magento\Framework\Escaper $escaper */
+$sections = [
+    [
+        'title' => __('By customer account'),
+        'field' => 'customer_id',
+        'label' => __('Customer ID'),
+        'type' => 'number',
+        'note' => __('Covers submissions linked to the account. Older guest submissions under the same email are not touched: look them up by email as well.'),
+    ],
+    [
+        'title' => __('By email address'),
+        'field' => 'email',
+        'label' => __('Email address'),
+        'type' => 'email',
+        'note' => __('Covers every submission made with this address, whether or not it is linked to an account.'),
+    ],
+];
+$preview = $block->getErasePreview();
+?>
+<div class="ffb-privacy">
+    <p class="ffb-privacy-intro"><?= $escaper->escapeHtml(__('Download a copy of a person\'s form data, or erase it for good.')) ?></p>
+    <?php if ($preview !== null): ?>
+        <section class="ffb-privacy-card ffb-privacy-preview" aria-labelledby="ffb-privacy-preview-title">
+            <h2 class="ffb-privacy-title" id="ffb-privacy-preview-title"><?= $escaper->escapeHtml(__('Confirm erase')) ?></h2>
+            <p class="ffb-privacy-note">
+                <?= $escaper->escapeHtml(__('%1 submission(s) match %2.', $preview['total'], $preview['value'])) ?>
+                <?php if ($preview['field'] === 'email' && $preview['accounts'] > 0): ?>
+                    <?= $escaper->escapeHtml(__('%1 customer account(s) use this address: their account submissions, drafts and survey answers are erased too.', $preview['accounts'])) ?>
+                <?php endif; ?>
+            </p>
+            <?php if ($preview['forms'] !== []): ?>
+                <ul class="ffb-privacy-forms">
+                    <?php foreach ($preview['forms'] as $form): ?>
+                        <li><?= $escaper->escapeHtml(__('%1: %2 submission(s)', $form['title'] !== '' ? $form['title'] : '#' . $form['form_id'], $form['count'])) ?></li>
+                    <?php endforeach; ?>
+                </ul>
+            <?php endif; ?>
+            <form method="post" action="<?= $escaper->escapeUrl($block->getUrl('*/*/erase')) ?>">
+                <input type="hidden" name="form_key" value="<?= $escaper->escapeHtmlAttr($block->getFormKey()) ?>">
+                <input type="hidden" name="<?= $escaper->escapeHtmlAttr($preview['field']) ?>" value="<?= $escaper->escapeHtmlAttr($preview['value']) ?>">
+                <div class="ffb-privacy-danger">
+                    <label class="ffb-privacy-confirm">
+                        <input type="checkbox" name="confirm" value="1" required>
+                        <span><?= $escaper->escapeHtml(__('I confirm that this permanently erases the matching submissions, their messages, survey answers and drafts.')) ?></span>
+                    </label>
+                    <a class="ffb-privacy-btn" href="<?= $escaper->escapeUrl($block->getUrl('*/*/')) ?>"><?= $escaper->escapeHtml(__('Cancel')) ?></a>
+                    <button type="submit" class="ffb-privacy-btn ffb-privacy-btn-danger"><?= $escaper->escapeHtml(__('Erase permanently')) ?></button>
+                </div>
+            </form>
+        </section>
+    <?php endif; ?>
+    <div class="ffb-privacy-grid">
+    <?php foreach ($sections as $section): ?>
+        <?php $id = 'ffb-privacy-' . $section['field']; ?>
+        <section class="ffb-privacy-card">
+            <h2 class="ffb-privacy-title"><?= $escaper->escapeHtml($section['title']) ?></h2>
+            <p class="ffb-privacy-note"><?= $escaper->escapeHtml($section['note']) ?></p>
+            <form method="post" action="<?= $escaper->escapeUrl($block->getUrl('*/*/export')) ?>">
+                <input type="hidden" name="form_key" value="<?= $escaper->escapeHtmlAttr($block->getFormKey()) ?>">
+                <label class="ffb-privacy-label" for="<?= $escaper->escapeHtmlAttr($id) ?>"><?= $escaper->escapeHtml($section['label']) ?></label>
+                <div class="ffb-privacy-row">
+                    <input id="<?= $escaper->escapeHtmlAttr($id) ?>" class="ffb-privacy-input"
+                           type="<?= $escaper->escapeHtmlAttr($section['type']) ?>"
+                           name="<?= $escaper->escapeHtmlAttr($section['field']) ?>" required autocomplete="off">
+                    <button type="submit" class="ffb-privacy-btn ffb-privacy-btn-primary"><?= $escaper->escapeHtml(__('Export (zip)')) ?></button>
+                </div>
+                <div class="ffb-privacy-danger">
+                    <span class="ffb-privacy-confirm"><?= $escaper->escapeHtml(__('Erasing shows what matches and asks you to confirm first.')) ?></span>
+                    <button type="submit" class="ffb-privacy-btn ffb-privacy-btn-danger" formaction="<?= $escaper->escapeUrl($block->getUrl('*/*/preview')) ?>">
+                        <?= $escaper->escapeHtml(__('Review and erase')) ?>
+                    </button>
+                </div>
+            </form>
+        </section>
+    <?php endforeach; ?>
+    </div>
+</div>

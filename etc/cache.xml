@@ -1,0 +1,7 @@
+<?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:Cache/etc/cache.xsd">
+    <type name="furan_formbuilder_geo" translate="label,description" instance="Furan\FormBuilder\Model\Map\GeoCache">
+        <label>Form Builder Address Search</label>
+        <description>Address search results from the map provider.</description>
+    </type>
+</config>

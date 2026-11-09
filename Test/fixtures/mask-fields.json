@@ -1,0 +1,14 @@
+[
+  {"type": "text", "mask": "uk_sort_code", "posted": "123456", "stored": "12-34-56"},
+  {"type": "text", "mask": "uk_sort_code", "posted": "12 34 56", "stored": "12-34-56"},
+  {"type": "text", "mask": "uk_sort_code", "posted": "12-34-56", "stored": "12-34-56"},
+  {"type": "text", "mask": "uk_postcode", "posted": " sw1a1aa ", "stored": "SW1A 1AA"},
+  {"type": "text", "mask": "(999) 999-9999", "posted": "5551234567", "stored": "(555) 123-4567"},
+  {"type": "text", "mask": "(999) 999-9999", "posted": "55512", "stored": "(555) 12"},
+  {"type": "text", "mask": "aa-99", "posted": "ab12", "stored": "ab-12"},
+  {"type": "text", "mask": "", "posted": "123456", "stored": "123456"},
+  {"type": "tel", "mask": "uk_phone", "posted": "02079460958", "stored": "020 7946 0958"},
+  {"type": "tel", "mask": "international_phone", "posted": "+44 7700 900123", "stored": "+447700900123"},
+  {"type": "text", "mask": "uk_sort_code", "posted": "", "stored": ""},
+  {"type": "text", "mask": "AA-9999", "posted": "ab1234", "stored": "AB-1234"}
+]

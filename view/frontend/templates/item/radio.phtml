@@ -1,0 +1,7 @@
+<?php
+/** @var \Magento\Framework\View\Element\Template $block */
+/** @var \Magento\Framework\Escaper $escaper */
+$form = $block->getData('parent_block');
+$inputType = 'radio';
+?>
+<?= /* @noEscape */ $form->renderPartial($block, 'item/_choices.phtml', ['inputType' => $inputType]) ?>

@@ -1,0 +1,1132 @@
+[
+ {
+  "name": "consent ticked",
+  "field": {
+   "name": "f",
+   "type": "consent",
+   "required": false,
+   "rules": [],
+   "options": [],
+   "settings": {}
+  },
+  "raw": "yes",
+  "normalized": "yes",
+  "valid": true
+ },
+ {
+  "name": "consent other value",
+  "field": {
+   "name": "f",
+   "type": "consent",
+   "required": false,
+   "rules": [],
+   "options": [],
+   "settings": {}
+  },
+  "raw": "on",
+  "normalized": "on",
+  "valid": false
+ },
+ {
+  "name": "consent required and empty",
+  "field": {
+   "name": "f",
+   "type": "consent",
+   "required": true,
+   "rules": [],
+   "options": [],
+   "settings": {}
+  },
+  "raw": "",
+  "normalized": "",
+  "valid": false
+ },
+ {
+  "name": "toggle default on value",
+  "field": {
+   "name": "f",
+   "type": "toggle",
+   "required": false,
+   "rules": [],
+   "options": [],
+   "settings": {}
+  },
+  "raw": "yes",
+  "normalized": "yes",
+  "valid": true
+ },
+ {
+  "name": "toggle custom on value",
+  "field": {
+   "name": "f",
+   "type": "toggle",
+   "required": false,
+   "rules": [],
+   "options": [],
+   "settings": {
+    "on_value": "1"
+   }
+  },
+  "raw": "1",
+  "normalized": "1",
+  "valid": true
+ },
+ {
+  "name": "toggle wrong on value",
+  "field": {
+   "name": "f",
+   "type": "toggle",
+   "required": false,
+   "rules": [],
+   "options": [],
+   "settings": {
+    "on_value": "1"
+   }
+  },
+  "raw": "yes",
+  "normalized": "yes",
+  "valid": false
+ },
+ {
+  "name": "scale in range",
+  "field": {
+   "name": "f",
+   "type": "scale",
+   "required": false,
+   "rules": [],
+   "options": [],
+   "settings": {
+    "min": 1,
+    "max": 5
+   }
+  },
+  "raw": "5",
+  "normalized": "5",
+  "valid": true
+ },
+ {
+  "name": "scale above range",
+  "field": {
+   "name": "f",
+   "type": "scale",
+   "required": false,
+   "rules": [],
+   "options": [],
+   "settings": {
+    "min": 1,
+    "max": 5
+   }
+  },
+  "raw": "6",
+  "normalized": "6",
+  "valid": false
+ },
+ {
+  "name": "scale zero based nps",
+  "field": {
+   "name": "f",
+   "type": "scale",
+   "required": false,
+   "rules": [],
+   "options": [],
+   "settings": {
+    "min": 0,
+    "max": 10
+   }
+  },
+  "raw": "0",
+  "normalized": "0",
+  "valid": true
+ },
+ {
+  "name": "scale zero when min is one",
+  "field": {
+   "name": "f",
+   "type": "scale",
+   "required": false,
+   "rules": [],
+   "options": [],
+   "settings": {
+    "min": 1,
+    "max": 5
+   }
+  },
+  "raw": "0",
+  "normalized": "0",
+  "valid": false
+ },
+ {
+  "name": "scale not a number",
+  "field": {
+   "name": "f",
+   "type": "scale",
+   "required": false,
+   "rules": [],
+   "options": [],
+   "settings": {
+    "min": 0,
+    "max": 10
+   }
+  },
+  "raw": "x",
+  "normalized": "x",
+  "valid": false
+ },
+ {
+  "name": "month valid",
+  "field": {
+   "name": "f",
+   "type": "month",
+   "required": false,
+   "rules": [],
+   "options": [],
+   "settings": {}
+  },
+  "raw": "2025-12",
+  "normalized": "2025-12",
+  "valid": true
+ },
+ {
+  "name": "month thirteenth",
+  "field": {
+   "name": "f",
+   "type": "month",
+   "required": false,
+   "rules": [],
+   "options": [],
+   "settings": {}
+  },
+  "raw": "2025-13",
+  "normalized": "2025-13",
+  "valid": false
+ },
+ {
+  "name": "month short",
+  "field": {
+   "name": "f",
+   "type": "month",
+   "required": false,
+   "rules": [],
+   "options": [],
+   "settings": {}
+  },
+  "raw": "2025-1",
+  "normalized": "2025-1",
+  "valid": false
+ },
+ {
+  "name": "cards known option",
+  "field": {
+   "name": "f",
+   "type": "cards",
+   "required": false,
+   "rules": [],
+   "options": [
+    {
+     "label": "A",
+     "value": "a",
+     "description": "First"
+    }
+   ],
+   "settings": {}
+  },
+  "raw": "a",
+  "normalized": "a",
+  "valid": true
+ },
+ {
+  "name": "cards unknown option",
+  "field": {
+   "name": "f",
+   "type": "cards",
+   "required": false,
+   "rules": [],
+   "options": [
+    {
+     "label": "A",
+     "value": "a",
+     "description": "First"
+    }
+   ],
+   "settings": {}
+  },
+  "raw": "z",
+  "normalized": "z",
+  "valid": false
+ },
+ {
+  "name": "suggest free text",
+  "field": {
+   "name": "f",
+   "type": "suggest",
+   "required": false,
+   "rules": [],
+   "options": [
+    {
+     "label": "A",
+     "value": "a",
+     "description": "First"
+    }
+   ],
+   "settings": {}
+  },
+  "raw": "  anything at all ",
+  "normalized": "anything at all",
+  "valid": true
+ },
+ {
+  "name": "suggest respects max length",
+  "field": {
+   "name": "f",
+   "type": "suggest",
+   "required": false,
+   "rules": [
+    {
+     "rule": "max_length",
+     "value": 3,
+     "message": ""
+    }
+   ],
+   "options": [
+    {
+     "label": "A",
+     "value": "a",
+     "description": "First"
+    }
+   ],
+   "settings": {}
+  },
+  "raw": "abcd",
+  "normalized": "abcd",
+  "valid": false
+ },
+ {
+  "name": "matrix all answered",
+  "field": {
+   "name": "f",
+   "type": "matrix",
+   "required": true,
+   "rules": [],
+   "options": [
+    {
+     "label": "Good",
+     "value": "g"
+    },
+    {
+     "label": "Bad",
+     "value": "b"
+    }
+   ],
+   "settings": {
+    "rows": [
+     "Speed",
+     "Price"
+    ],
+    "require_all": true
+   }
+  },
+  "raw": {
+   "0": "g",
+   "1": "b"
+  },
+  "normalized": [
+   "Speed: Good",
+   "Price: Bad"
+  ],
+  "valid": true
+ },
+ {
+  "name": "matrix rows come out in row order",
+  "field": {
+   "name": "f",
+   "type": "matrix",
+   "required": false,
+   "rules": [],
+   "options": [
+    {
+     "label": "Good",
+     "value": "g"
+    },
+    {
+     "label": "Bad",
+     "value": "b"
+    }
+   ],
+   "settings": {
+    "rows": [
+     "Speed",
+     "Price"
+    ],
+    "require_all": true
+   }
+  },
+  "raw": {
+   "1": "b",
+   "0": "g"
+  },
+  "normalized": [
+   "Speed: Good",
+   "Price: Bad"
+  ],
+  "valid": true
+ },
+ {
+  "name": "matrix partial when required and require_all",
+  "field": {
+   "name": "f",
+   "type": "matrix",
+   "required": true,
+   "rules": [],
+   "options": [
+    {
+     "label": "Good",
+     "value": "g"
+    },
+    {
+     "label": "Bad",
+     "value": "b"
+    }
+   ],
+   "settings": {
+    "rows": [
+     "Speed",
+     "Price"
+    ],
+    "require_all": true
+   }
+  },
+  "raw": {
+   "1": "b"
+  },
+  "normalized": [
+   "Price: Bad"
+  ],
+  "valid": false
+ },
+ {
+  "name": "matrix partial when optional",
+  "field": {
+   "name": "f",
+   "type": "matrix",
+   "required": false,
+   "rules": [],
+   "options": [
+    {
+     "label": "Good",
+     "value": "g"
+    },
+    {
+     "label": "Bad",
+     "value": "b"
+    }
+   ],
+   "settings": {
+    "rows": [
+     "Speed",
+     "Price"
+    ],
+    "require_all": true
+   }
+  },
+  "raw": {
+   "1": "b"
+  },
+  "normalized": [
+   "Price: Bad"
+  ],
+  "valid": true
+ },
+ {
+  "name": "matrix partial when required without require_all",
+  "field": {
+   "name": "f",
+   "type": "matrix",
+   "required": true,
+   "rules": [],
+   "options": [
+    {
+     "label": "Good",
+     "value": "g"
+    },
+    {
+     "label": "Bad",
+     "value": "b"
+    }
+   ],
+   "settings": {
+    "rows": [
+     "Speed",
+     "Price"
+    ],
+    "require_all": false
+   }
+  },
+  "raw": {
+   "1": "b"
+  },
+  "normalized": [
+   "Price: Bad"
+  ],
+  "valid": true
+ },
+ {
+  "name": "matrix nothing answered and optional",
+  "field": {
+   "name": "f",
+   "type": "matrix",
+   "required": false,
+   "rules": [],
+   "options": [
+    {
+     "label": "Good",
+     "value": "g"
+    },
+    {
+     "label": "Bad",
+     "value": "b"
+    }
+   ],
+   "settings": {
+    "rows": [
+     "Speed",
+     "Price"
+    ],
+    "require_all": true
+   }
+  },
+  "raw": {},
+  "normalized": [],
+  "valid": true
+ },
+ {
+  "name": "matrix nothing answered and required",
+  "field": {
+   "name": "f",
+   "type": "matrix",
+   "required": true,
+   "rules": [],
+   "options": [
+    {
+     "label": "Good",
+     "value": "g"
+    },
+    {
+     "label": "Bad",
+     "value": "b"
+    }
+   ],
+   "settings": {
+    "rows": [
+     "Speed",
+     "Price"
+    ],
+    "require_all": true
+   }
+  },
+  "raw": {},
+  "normalized": [],
+  "valid": false
+ },
+ {
+  "name": "matrix unknown row",
+  "field": {
+   "name": "f",
+   "type": "matrix",
+   "required": false,
+   "rules": [],
+   "options": [
+    {
+     "label": "Good",
+     "value": "g"
+    },
+    {
+     "label": "Bad",
+     "value": "b"
+    }
+   ],
+   "settings": {
+    "rows": [
+     "Speed",
+     "Price"
+    ],
+    "require_all": true
+   }
+  },
+  "raw": {
+   "5": "g"
+  },
+  "normalized": [
+   "\u0000"
+  ],
+  "valid": false
+ },
+ {
+  "name": "matrix non numeric row",
+  "field": {
+   "name": "f",
+   "type": "matrix",
+   "required": false,
+   "rules": [],
+   "options": [
+    {
+     "label": "Good",
+     "value": "g"
+    },
+    {
+     "label": "Bad",
+     "value": "b"
+    }
+   ],
+   "settings": {
+    "rows": [
+     "Speed",
+     "Price"
+    ],
+    "require_all": true
+   }
+  },
+  "raw": {
+   "x": "g"
+  },
+  "normalized": [
+   "\u0000"
+  ],
+  "valid": false
+ },
+ {
+  "name": "matrix padded row key",
+  "field": {
+   "name": "f",
+   "type": "matrix",
+   "required": false,
+   "rules": [],
+   "options": [
+    {
+     "label": "Good",
+     "value": "g"
+    },
+    {
+     "label": "Bad",
+     "value": "b"
+    }
+   ],
+   "settings": {
+    "rows": [
+     "Speed",
+     "Price"
+    ],
+    "require_all": true
+   }
+  },
+  "raw": {
+   "01": "g"
+  },
+  "normalized": [
+   "\u0000"
+  ],
+  "valid": false
+ },
+ {
+  "name": "matrix unknown column",
+  "field": {
+   "name": "f",
+   "type": "matrix",
+   "required": false,
+   "rules": [],
+   "options": [
+    {
+     "label": "Good",
+     "value": "g"
+    },
+    {
+     "label": "Bad",
+     "value": "b"
+    }
+   ],
+   "settings": {
+    "rows": [
+     "Speed",
+     "Price"
+    ],
+    "require_all": true
+   }
+  },
+  "raw": {
+   "0": "zzz"
+  },
+  "normalized": [
+   "\u0000"
+  ],
+  "valid": false
+ },
+ {
+  "name": "matrix valid next to invalid",
+  "field": {
+   "name": "f",
+   "type": "matrix",
+   "required": false,
+   "rules": [],
+   "options": [
+    {
+     "label": "Good",
+     "value": "g"
+    },
+    {
+     "label": "Bad",
+     "value": "b"
+    }
+   ],
+   "settings": {
+    "rows": [
+     "Speed",
+     "Price"
+    ],
+    "require_all": true
+   }
+  },
+  "raw": {
+   "0": "g",
+   "7": "g"
+  },
+  "normalized": [
+   "\u0000"
+  ],
+  "valid": false
+ },
+ {
+  "name": "matrix blank answer is skipped",
+  "field": {
+   "name": "f",
+   "type": "matrix",
+   "required": false,
+   "rules": [],
+   "options": [
+    {
+     "label": "Good",
+     "value": "g"
+    },
+    {
+     "label": "Bad",
+     "value": "b"
+    }
+   ],
+   "settings": {
+    "rows": [
+     "Speed",
+     "Price"
+    ],
+    "require_all": true
+   }
+  },
+  "raw": {
+   "0": "",
+   "1": "b"
+  },
+  "normalized": [
+   "Price: Bad"
+  ],
+  "valid": true
+ },
+ {
+  "name": "list drops empty items and trims",
+  "field": {
+   "name": "f",
+   "type": "list",
+   "required": false,
+   "rules": [],
+   "options": [],
+   "settings": {}
+  },
+  "raw": [
+   "  Ann ",
+   "",
+   "Bob"
+  ],
+  "normalized": [
+   "Ann",
+   "Bob"
+  ],
+  "valid": true
+ },
+ {
+  "name": "list required with only empty items",
+  "field": {
+   "name": "f",
+   "type": "list",
+   "required": true,
+   "rules": [],
+   "options": [],
+   "settings": {}
+  },
+  "raw": [
+   "",
+   ""
+  ],
+  "normalized": [],
+  "valid": false
+ },
+ {
+  "name": "list over its maximum",
+  "field": {
+   "name": "f",
+   "type": "list",
+   "required": false,
+   "rules": [],
+   "options": [],
+   "settings": {
+    "max_items": 2
+   }
+  },
+  "raw": [
+   "a",
+   "b",
+   "c"
+  ],
+  "normalized": [
+   "a",
+   "b",
+   "c"
+  ],
+  "valid": false
+ },
+ {
+  "name": "list at its maximum",
+  "field": {
+   "name": "f",
+   "type": "list",
+   "required": false,
+   "rules": [],
+   "options": [],
+   "settings": {
+    "max_items": 2
+   }
+  },
+  "raw": [
+   "a",
+   "b"
+  ],
+  "normalized": [
+   "a",
+   "b"
+  ],
+  "valid": true
+ },
+ {
+  "name": "list with a nested array",
+  "field": {
+   "name": "f",
+   "type": "list",
+   "required": false,
+   "rules": [],
+   "options": [],
+   "settings": {}
+  },
+  "raw": [
+   "a",
+   [
+    "x"
+   ]
+  ],
+  "normalized": [
+   "\u0000"
+  ],
+  "valid": false
+ },
+ {
+  "name": "list from a single string",
+  "field": {
+   "name": "f",
+   "type": "list",
+   "required": false,
+   "rules": [],
+   "options": [],
+   "settings": {}
+  },
+  "raw": "solo",
+  "normalized": [
+   "solo"
+  ],
+  "valid": true
+ },
+ {
+  "name": "list strips control characters and newlines",
+  "field": {
+   "name": "f",
+   "type": "list",
+   "required": false,
+   "rules": [],
+   "options": [],
+   "settings": {}
+  },
+  "raw": [
+   "a\u0007b\nc"
+  ],
+  "normalized": [
+   "ab c"
+  ],
+  "valid": true
+ },
+ {
+  "name": "number step 1 whole",
+  "field": {
+   "name": "f",
+   "type": "number",
+   "required": false,
+   "rules": [],
+   "options": [],
+   "settings": {
+    "step": "1"
+   }
+  },
+  "raw": "3",
+  "normalized": "3",
+  "valid": true
+ },
+ {
+  "name": "number step 1 decimal",
+  "field": {
+   "name": "f",
+   "type": "number",
+   "required": false,
+   "rules": [],
+   "options": [],
+   "settings": {
+    "step": "1"
+   }
+  },
+  "raw": "1.5",
+  "normalized": "1.5",
+  "valid": false,
+  "message": "Please enter a whole number."
+ },
+ {
+  "name": "number step 1 negative whole",
+  "field": {
+   "name": "f",
+   "type": "number",
+   "required": false,
+   "rules": [],
+   "options": [],
+   "settings": {
+    "step": "1"
+   }
+  },
+  "raw": "-4",
+  "normalized": "-4",
+  "valid": true
+ },
+ {
+  "name": "number step 1 negative decimal",
+  "field": {
+   "name": "f",
+   "type": "number",
+   "required": false,
+   "rules": [],
+   "options": [],
+   "settings": {
+    "step": "1"
+   }
+  },
+  "raw": "-4.25",
+  "normalized": "-4.25",
+  "valid": false,
+  "message": "Please enter a whole number."
+ },
+ {
+  "name": "number step any decimal",
+  "field": {
+   "name": "f",
+   "type": "number",
+   "required": false,
+   "rules": [],
+   "options": [],
+   "settings": {
+    "step": "any"
+   }
+  },
+  "raw": "1.5",
+  "normalized": "1.5",
+  "valid": true
+ },
+ {
+  "name": "number step empty decimal",
+  "field": {
+   "name": "f",
+   "type": "number",
+   "required": false,
+   "rules": [],
+   "options": [],
+   "settings": {
+    "step": ""
+   }
+  },
+  "raw": "1.5",
+  "normalized": "1.5",
+  "valid": true
+ },
+ {
+  "name": "number step absent decimal",
+  "field": {
+   "name": "f",
+   "type": "number",
+   "required": false,
+   "rules": [],
+   "options": [],
+   "settings": {}
+  },
+  "raw": "1.5",
+  "normalized": "1.5",
+  "valid": true
+ },
+ {
+  "name": "number step zero ignored",
+  "field": {
+   "name": "f",
+   "type": "number",
+   "required": false,
+   "rules": [],
+   "options": [],
+   "settings": {
+    "step": "0"
+   }
+  },
+  "raw": "1.5",
+  "normalized": "1.5",
+  "valid": true
+ },
+ {
+  "name": "number step garbage ignored",
+  "field": {
+   "name": "f",
+   "type": "number",
+   "required": false,
+   "rules": [],
+   "options": [],
+   "settings": {
+    "step": "abc"
+   }
+  },
+  "raw": "1.5",
+  "normalized": "1.5",
+  "valid": true
+ },
+ {
+  "name": "number step decimal fits",
+  "field": {
+   "name": "f",
+   "type": "number",
+   "required": false,
+   "rules": [],
+   "options": [],
+   "settings": {
+    "step": "0.1"
+   }
+  },
+  "raw": "0.3",
+  "normalized": "0.3",
+  "valid": true
+ },
+ {
+  "name": "number step decimal off",
+  "field": {
+   "name": "f",
+   "type": "number",
+   "required": false,
+   "rules": [],
+   "options": [],
+   "settings": {
+    "step": "0.1"
+   }
+  },
+  "raw": "0.35",
+  "normalized": "0.35",
+  "valid": false,
+  "message": "Please enter a number in steps of 0.1."
+ },
+ {
+  "name": "number step counts from min",
+  "field": {
+   "name": "f",
+   "type": "number",
+   "required": false,
+   "rules": [
+    {
+     "rule": "min",
+     "value": 2
+    }
+   ],
+   "options": [],
+   "settings": {
+    "step": "5"
+   }
+  },
+  "raw": "7",
+  "normalized": "7",
+  "valid": true
+ },
+ {
+  "name": "number step from min off",
+  "field": {
+   "name": "f",
+   "type": "number",
+   "required": false,
+   "rules": [
+    {
+     "rule": "min",
+     "value": 2
+    }
+   ],
+   "options": [],
+   "settings": {
+    "step": "5"
+   }
+  },
+  "raw": "5",
+  "normalized": "5",
+  "valid": false,
+  "message": "Please enter a number in steps of 5."
+ },
+ {
+  "name": "number step 1 from decimal min",
+  "field": {
+   "name": "f",
+   "type": "number",
+   "required": false,
+   "rules": [
+    {
+     "rule": "min",
+     "value": "0.5"
+    }
+   ],
+   "options": [],
+   "settings": {
+    "step": "1"
+   }
+  },
+  "raw": "1.5",
+  "normalized": "1.5",
+  "valid": true
+ },
+ {
+  "name": "number step 1 from decimal min off",
+  "field": {
+   "name": "f",
+   "type": "number",
+   "required": false,
+   "rules": [
+    {
+     "rule": "min",
+     "value": "0.5"
+    }
+   ],
+   "options": [],
+   "settings": {
+    "step": "1"
+   }
+  },
+  "raw": "2",
+  "normalized": "2",
+  "valid": false,
+  "message": "Please enter a number in steps of 1."
+ }
+]

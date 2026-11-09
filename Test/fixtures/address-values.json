@@ -1,0 +1,991 @@
+[
+ {
+  "name": "valid gb address",
+  "field": {
+   "name": "addr",
+   "type": "address",
+   "required": false,
+   "rules": [],
+   "options": [],
+   "settings": {}
+  },
+  "raw": {
+   "street": [
+    "1 Main St"
+   ],
+   "city": "Leeds",
+   "region_id": "",
+   "region": "",
+   "postcode": "ls1  4ab",
+   "country_id": "GB"
+  },
+  "directory": {
+   "allowedCountries": [
+    "GB",
+    "US",
+    "IE"
+   ],
+   "regionsRequired": [
+    "US"
+   ],
+   "optionalZip": [
+    "IE"
+   ],
+   "postcodes": {
+    "GB": [
+     "^[A-Z]{1,2}[0-9]"
+    ],
+    "US": [
+     "^[0-9]{5}$"
+    ]
+   },
+   "streetLines": 2,
+   "regions": {
+    "US": {
+     "12": "California"
+    }
+   }
+  },
+  "normalized": {
+   "street": [
+    "1 Main St"
+   ],
+   "city": "Leeds",
+   "region_id": "",
+   "region": "",
+   "postcode": "LS1 4AB",
+   "country_id": "GB"
+  },
+  "valid": true
+ },
+ {
+  "name": "only country is empty",
+  "field": {
+   "name": "addr",
+   "type": "address",
+   "required": false,
+   "rules": [],
+   "options": [],
+   "settings": {}
+  },
+  "raw": {
+   "street": [
+    ""
+   ],
+   "city": "",
+   "region_id": "",
+   "region": "",
+   "postcode": "",
+   "country_id": "GB"
+  },
+  "directory": {
+   "allowedCountries": [
+    "GB",
+    "US",
+    "IE"
+   ],
+   "regionsRequired": [
+    "US"
+   ],
+   "optionalZip": [
+    "IE"
+   ],
+   "postcodes": {
+    "GB": [
+     "^[A-Z]{1,2}[0-9]"
+    ],
+    "US": [
+     "^[0-9]{5}$"
+    ]
+   },
+   "streetLines": 2,
+   "regions": {
+    "US": {
+     "12": "California"
+    }
+   }
+  },
+  "normalized": "",
+  "valid": true
+ },
+ {
+  "name": "only country required",
+  "field": {
+   "name": "addr",
+   "type": "address",
+   "required": true,
+   "rules": [],
+   "options": [],
+   "settings": {}
+  },
+  "raw": {
+   "street": [
+    ""
+   ],
+   "city": "",
+   "region_id": "",
+   "region": "",
+   "postcode": "",
+   "country_id": "GB"
+  },
+  "directory": {
+   "allowedCountries": [
+    "GB",
+    "US",
+    "IE"
+   ],
+   "regionsRequired": [
+    "US"
+   ],
+   "optionalZip": [
+    "IE"
+   ],
+   "postcodes": {
+    "GB": [
+     "^[A-Z]{1,2}[0-9]"
+    ],
+    "US": [
+     "^[0-9]{5}$"
+    ]
+   },
+   "streetLines": 2,
+   "regions": {
+    "US": {
+     "12": "California"
+    }
+   }
+  },
+  "normalized": "",
+  "valid": false
+ },
+ {
+  "name": "country not allowed",
+  "field": {
+   "name": "addr",
+   "type": "address",
+   "required": false,
+   "rules": [],
+   "options": [],
+   "settings": {}
+  },
+  "raw": {
+   "street": [
+    "1 Main St"
+   ],
+   "city": "Leeds",
+   "region_id": "",
+   "region": "",
+   "postcode": "LS1 4AB",
+   "country_id": "FR"
+  },
+  "directory": {
+   "allowedCountries": [
+    "GB",
+    "US",
+    "IE"
+   ],
+   "regionsRequired": [
+    "US"
+   ],
+   "optionalZip": [
+    "IE"
+   ],
+   "postcodes": {
+    "GB": [
+     "^[A-Z]{1,2}[0-9]"
+    ],
+    "US": [
+     "^[0-9]{5}$"
+    ]
+   },
+   "streetLines": 2,
+   "regions": {
+    "US": {
+     "12": "California"
+    }
+   }
+  },
+  "normalized": {
+   "street": [
+    "1 Main St"
+   ],
+   "city": "Leeds",
+   "region_id": "",
+   "region": "",
+   "postcode": "LS1 4AB",
+   "country_id": "FR"
+  },
+  "valid": false
+ },
+ {
+  "name": "missing city",
+  "field": {
+   "name": "addr",
+   "type": "address",
+   "required": false,
+   "rules": [],
+   "options": [],
+   "settings": {}
+  },
+  "raw": {
+   "street": [
+    "1 Main St"
+   ],
+   "city": "",
+   "region_id": "",
+   "region": "",
+   "postcode": "LS1 4AB",
+   "country_id": "GB"
+  },
+  "directory": {
+   "allowedCountries": [
+    "GB",
+    "US",
+    "IE"
+   ],
+   "regionsRequired": [
+    "US"
+   ],
+   "optionalZip": [
+    "IE"
+   ],
+   "postcodes": {
+    "GB": [
+     "^[A-Z]{1,2}[0-9]"
+    ],
+    "US": [
+     "^[0-9]{5}$"
+    ]
+   },
+   "streetLines": 2,
+   "regions": {
+    "US": {
+     "12": "California"
+    }
+   }
+  },
+  "normalized": {
+   "street": [
+    "1 Main St"
+   ],
+   "city": "",
+   "region_id": "",
+   "region": "",
+   "postcode": "LS1 4AB",
+   "country_id": "GB"
+  },
+  "valid": false
+ },
+ {
+  "name": "us region required but missing",
+  "field": {
+   "name": "addr",
+   "type": "address",
+   "required": false,
+   "rules": [],
+   "options": [],
+   "settings": {}
+  },
+  "raw": {
+   "street": [
+    "1 Main St"
+   ],
+   "city": "Leeds",
+   "region_id": "",
+   "region": "",
+   "postcode": "90001",
+   "country_id": "US"
+  },
+  "directory": {
+   "allowedCountries": [
+    "GB",
+    "US",
+    "IE"
+   ],
+   "regionsRequired": [
+    "US"
+   ],
+   "optionalZip": [
+    "IE"
+   ],
+   "postcodes": {
+    "GB": [
+     "^[A-Z]{1,2}[0-9]"
+    ],
+    "US": [
+     "^[0-9]{5}$"
+    ]
+   },
+   "streetLines": 2,
+   "regions": {
+    "US": {
+     "12": "California"
+    }
+   }
+  },
+  "normalized": {
+   "street": [
+    "1 Main St"
+   ],
+   "city": "Leeds",
+   "region_id": "",
+   "region": "",
+   "postcode": "90001",
+   "country_id": "US"
+  },
+  "valid": false
+ },
+ {
+  "name": "us region id valid",
+  "field": {
+   "name": "addr",
+   "type": "address",
+   "required": false,
+   "rules": [],
+   "options": [],
+   "settings": {}
+  },
+  "raw": {
+   "street": [
+    "1 Main St"
+   ],
+   "city": "Leeds",
+   "region_id": "12",
+   "region": "",
+   "postcode": "90001",
+   "country_id": "US"
+  },
+  "directory": {
+   "allowedCountries": [
+    "GB",
+    "US",
+    "IE"
+   ],
+   "regionsRequired": [
+    "US"
+   ],
+   "optionalZip": [
+    "IE"
+   ],
+   "postcodes": {
+    "GB": [
+     "^[A-Z]{1,2}[0-9]"
+    ],
+    "US": [
+     "^[0-9]{5}$"
+    ]
+   },
+   "streetLines": 2,
+   "regions": {
+    "US": {
+     "12": "California"
+    }
+   }
+  },
+  "normalized": {
+   "street": [
+    "1 Main St"
+   ],
+   "city": "Leeds",
+   "region_id": "12",
+   "region": "",
+   "postcode": "90001",
+   "country_id": "US"
+  },
+  "valid": true
+ },
+ {
+  "name": "us region id not in country",
+  "field": {
+   "name": "addr",
+   "type": "address",
+   "required": false,
+   "rules": [],
+   "options": [],
+   "settings": {}
+  },
+  "raw": {
+   "street": [
+    "1 Main St"
+   ],
+   "city": "Leeds",
+   "region_id": "99",
+   "region": "",
+   "postcode": "90001",
+   "country_id": "US"
+  },
+  "directory": {
+   "allowedCountries": [
+    "GB",
+    "US",
+    "IE"
+   ],
+   "regionsRequired": [
+    "US"
+   ],
+   "optionalZip": [
+    "IE"
+   ],
+   "postcodes": {
+    "GB": [
+     "^[A-Z]{1,2}[0-9]"
+    ],
+    "US": [
+     "^[0-9]{5}$"
+    ]
+   },
+   "streetLines": 2,
+   "regions": {
+    "US": {
+     "12": "California"
+    }
+   }
+  },
+  "normalized": {
+   "street": [
+    "1 Main St"
+   ],
+   "city": "Leeds",
+   "region_id": "99",
+   "region": "",
+   "postcode": "90001",
+   "country_id": "US"
+  },
+  "valid": false
+ },
+ {
+  "name": "region text required without list",
+  "field": {
+   "name": "addr",
+   "type": "address",
+   "required": false,
+   "rules": [],
+   "options": [],
+   "settings": {}
+  },
+  "raw": {
+   "street": [
+    "1 Main St"
+   ],
+   "city": "Leeds",
+   "region_id": "",
+   "region": "",
+   "postcode": "90001",
+   "country_id": "US"
+  },
+  "directory": {
+   "allowedCountries": [
+    "GB",
+    "US",
+    "IE"
+   ],
+   "regionsRequired": [
+    "US"
+   ],
+   "optionalZip": [
+    "IE"
+   ],
+   "postcodes": {
+    "GB": [
+     "^[A-Z]{1,2}[0-9]"
+    ],
+    "US": [
+     "^[0-9]{5}$"
+    ]
+   },
+   "streetLines": 2,
+   "regions": {}
+  },
+  "normalized": {
+   "street": [
+    "1 Main St"
+   ],
+   "city": "Leeds",
+   "region_id": "",
+   "region": "",
+   "postcode": "90001",
+   "country_id": "US"
+  },
+  "valid": false
+ },
+ {
+  "name": "region text accepted without list",
+  "field": {
+   "name": "addr",
+   "type": "address",
+   "required": false,
+   "rules": [],
+   "options": [],
+   "settings": {}
+  },
+  "raw": {
+   "street": [
+    "1 Main St"
+   ],
+   "city": "Leeds",
+   "region_id": "",
+   "region": "Texas",
+   "postcode": "90001",
+   "country_id": "US"
+  },
+  "directory": {
+   "allowedCountries": [
+    "GB",
+    "US",
+    "IE"
+   ],
+   "regionsRequired": [
+    "US"
+   ],
+   "optionalZip": [
+    "IE"
+   ],
+   "postcodes": {
+    "GB": [
+     "^[A-Z]{1,2}[0-9]"
+    ],
+    "US": [
+     "^[0-9]{5}$"
+    ]
+   },
+   "streetLines": 2,
+   "regions": {}
+  },
+  "normalized": {
+   "street": [
+    "1 Main St"
+   ],
+   "city": "Leeds",
+   "region_id": "",
+   "region": "Texas",
+   "postcode": "90001",
+   "country_id": "US"
+  },
+  "valid": true
+ },
+ {
+  "name": "ie optional postcode",
+  "field": {
+   "name": "addr",
+   "type": "address",
+   "required": false,
+   "rules": [],
+   "options": [],
+   "settings": {}
+  },
+  "raw": {
+   "street": [
+    "1 Main St"
+   ],
+   "city": "Leeds",
+   "region_id": "",
+   "region": "",
+   "postcode": "",
+   "country_id": "IE"
+  },
+  "directory": {
+   "allowedCountries": [
+    "GB",
+    "US",
+    "IE"
+   ],
+   "regionsRequired": [
+    "US"
+   ],
+   "optionalZip": [
+    "IE"
+   ],
+   "postcodes": {
+    "GB": [
+     "^[A-Z]{1,2}[0-9]"
+    ],
+    "US": [
+     "^[0-9]{5}$"
+    ]
+   },
+   "streetLines": 2,
+   "regions": {
+    "US": {
+     "12": "California"
+    }
+   }
+  },
+  "normalized": {
+   "street": [
+    "1 Main St"
+   ],
+   "city": "Leeds",
+   "region_id": "",
+   "region": "",
+   "postcode": "",
+   "country_id": "IE"
+  },
+  "valid": true
+ },
+ {
+  "name": "gb postcode required",
+  "field": {
+   "name": "addr",
+   "type": "address",
+   "required": false,
+   "rules": [],
+   "options": [],
+   "settings": {}
+  },
+  "raw": {
+   "street": [
+    "1 Main St"
+   ],
+   "city": "Leeds",
+   "region_id": "",
+   "region": "",
+   "postcode": "",
+   "country_id": "GB"
+  },
+  "directory": {
+   "allowedCountries": [
+    "GB",
+    "US",
+    "IE"
+   ],
+   "regionsRequired": [
+    "US"
+   ],
+   "optionalZip": [
+    "IE"
+   ],
+   "postcodes": {
+    "GB": [
+     "^[A-Z]{1,2}[0-9]"
+    ],
+    "US": [
+     "^[0-9]{5}$"
+    ]
+   },
+   "streetLines": 2,
+   "regions": {
+    "US": {
+     "12": "California"
+    }
+   }
+  },
+  "normalized": {
+   "street": [
+    "1 Main St"
+   ],
+   "city": "Leeds",
+   "region_id": "",
+   "region": "",
+   "postcode": "",
+   "country_id": "GB"
+  },
+  "valid": false
+ },
+ {
+  "name": "gb postcode mismatch warns",
+  "field": {
+   "name": "addr",
+   "type": "address",
+   "required": false,
+   "rules": [],
+   "options": [],
+   "settings": {}
+  },
+  "raw": {
+   "street": [
+    "1 Main St"
+   ],
+   "city": "Leeds",
+   "region_id": "",
+   "region": "",
+   "postcode": "12345",
+   "country_id": "GB"
+  },
+  "directory": {
+   "allowedCountries": [
+    "GB",
+    "US",
+    "IE"
+   ],
+   "regionsRequired": [
+    "US"
+   ],
+   "optionalZip": [
+    "IE"
+   ],
+   "postcodes": {
+    "GB": [
+     "^[A-Z]{1,2}[0-9]"
+    ],
+    "US": [
+     "^[0-9]{5}$"
+    ]
+   },
+   "streetLines": 2,
+   "regions": {
+    "US": {
+     "12": "California"
+    }
+   }
+  },
+  "normalized": {
+   "street": [
+    "1 Main St"
+   ],
+   "city": "Leeds",
+   "region_id": "",
+   "region": "",
+   "postcode": "12345",
+   "country_id": "GB"
+  },
+  "valid": true,
+  "warning": "postcode"
+ },
+ {
+  "name": "country without patterns is valid",
+  "field": {
+   "name": "addr",
+   "type": "address",
+   "required": false,
+   "rules": [],
+   "options": [],
+   "settings": {}
+  },
+  "raw": {
+   "street": [
+    "1 Main St"
+   ],
+   "city": "Leeds",
+   "region_id": "",
+   "region": "",
+   "postcode": "whatever",
+   "country_id": "IE"
+  },
+  "directory": {
+   "allowedCountries": [
+    "GB",
+    "US",
+    "IE"
+   ],
+   "regionsRequired": [
+    "US"
+   ],
+   "optionalZip": [
+    "IE"
+   ],
+   "postcodes": {
+    "GB": [
+     "^[A-Z]{1,2}[0-9]"
+    ],
+    "US": [
+     "^[0-9]{5}$"
+    ]
+   },
+   "streetLines": 2,
+   "regions": {
+    "US": {
+     "12": "California"
+    }
+   }
+  },
+  "normalized": {
+   "street": [
+    "1 Main St"
+   ],
+   "city": "Leeds",
+   "region_id": "",
+   "region": "",
+   "postcode": "WHATEVER",
+   "country_id": "IE"
+  },
+  "valid": true
+ },
+ {
+  "name": "too many street lines",
+  "field": {
+   "name": "addr",
+   "type": "address",
+   "required": false,
+   "rules": [],
+   "options": [],
+   "settings": {}
+  },
+  "raw": {
+   "street": [
+    "a",
+    "b",
+    "c"
+   ],
+   "city": "Leeds",
+   "region_id": "",
+   "region": "",
+   "postcode": "LS1 4AB",
+   "country_id": "GB"
+  },
+  "directory": {
+   "allowedCountries": [
+    "GB",
+    "US",
+    "IE"
+   ],
+   "regionsRequired": [
+    "US"
+   ],
+   "optionalZip": [
+    "IE"
+   ],
+   "postcodes": {
+    "GB": [
+     "^[A-Z]{1,2}[0-9]"
+    ],
+    "US": [
+     "^[0-9]{5}$"
+    ]
+   },
+   "streetLines": 2,
+   "regions": {
+    "US": {
+     "12": "California"
+    }
+   }
+  },
+  "normalized": {
+   "street": [
+    "a",
+    "b",
+    "c"
+   ],
+   "city": "Leeds",
+   "region_id": "",
+   "region": "",
+   "postcode": "LS1 4AB",
+   "country_id": "GB"
+  },
+  "valid": false
+ },
+ {
+  "name": "street lines within limit",
+  "field": {
+   "name": "addr",
+   "type": "address",
+   "required": false,
+   "rules": [],
+   "options": [],
+   "settings": {}
+  },
+  "raw": {
+   "street": [
+    "a",
+    "b",
+    "c"
+   ],
+   "city": "Leeds",
+   "region_id": "",
+   "region": "",
+   "postcode": "LS1 4AB",
+   "country_id": "GB"
+  },
+  "directory": {
+   "allowedCountries": [
+    "GB",
+    "US",
+    "IE"
+   ],
+   "regionsRequired": [
+    "US"
+   ],
+   "optionalZip": [
+    "IE"
+   ],
+   "postcodes": {
+    "GB": [
+     "^[A-Z]{1,2}[0-9]"
+    ],
+    "US": [
+     "^[0-9]{5}$"
+    ]
+   },
+   "streetLines": 3,
+   "regions": {
+    "US": {
+     "12": "California"
+    }
+   }
+  },
+  "normalized": {
+   "street": [
+    "a",
+    "b",
+    "c"
+   ],
+   "city": "Leeds",
+   "region_id": "",
+   "region": "",
+   "postcode": "LS1 4AB",
+   "country_id": "GB"
+  },
+  "valid": true
+ },
+ {
+  "name": "empty street lines dropped",
+  "field": {
+   "name": "addr",
+   "type": "address",
+   "required": false,
+   "rules": [],
+   "options": [],
+   "settings": {}
+  },
+  "raw": {
+   "street": [
+    "a",
+    "",
+    "b"
+   ],
+   "city": "Leeds",
+   "region_id": "",
+   "region": "",
+   "postcode": "LS1 4AB",
+   "country_id": "GB"
+  },
+  "directory": {
+   "allowedCountries": [
+    "GB",
+    "US",
+    "IE"
+   ],
+   "regionsRequired": [
+    "US"
+   ],
+   "optionalZip": [
+    "IE"
+   ],
+   "postcodes": {
+    "GB": [
+     "^[A-Z]{1,2}[0-9]"
+    ],
+    "US": [
+     "^[0-9]{5}$"
+    ]
+   },
+   "streetLines": 2,
+   "regions": {
+    "US": {
+     "12": "California"
+    }
+   }
+  },
+  "normalized": {
+   "street": [
+    "a",
+    "b"
+   ],
+   "city": "Leeds",
+   "region_id": "",
+   "region": "",
+   "postcode": "LS1 4AB",
+   "country_id": "GB"
+  },
+  "valid": true
+ }
+]

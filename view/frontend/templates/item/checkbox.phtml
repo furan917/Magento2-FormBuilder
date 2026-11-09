@@ -1,0 +1,11 @@
+<?php
+/** @var \Magento\Framework\View\Element\Template $block */
+/** @var \Magento\Framework\Escaper $escaper */
+$form = $block->getData('parent_block');
+extract($form->getItemContext((array)$block->getData('item'), $escaper), EXTR_SKIP);
+$checkedValue = (string)($settings['checked_value'] ?? '') !== '' ? (string)$settings['checked_value'] : 'yes';
+?>
+<div<?= /* @noEscape */ $attrs(['class' => $wrapperClass . ($cssClass !== '' ? ' ' . $cssClass : '')]) ?><?= /* @noEscape */ $dataAttrs ?>>
+    <input<?= /* @noEscape */ $attrs(array_replace($base, ['class' => 'ffb-choice']) + ['type' => 'checkbox', 'value' => $checkedValue]) ?>>
+    <label class="ffb-label" for="<?= $escaper->escapeHtmlAttr($controlId) ?>"><?= /* @noEscape */ $labelHtml ?></label>
+<?= /* @noEscape */ $form->renderPartial($block, 'item/_close.phtml', ['group' => false]) ?>

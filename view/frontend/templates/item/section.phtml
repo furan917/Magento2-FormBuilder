@@ -1,0 +1,18 @@
+<?php
+/** @var \Magento\Framework\DataObject $block */
+/** @var \Magento\Framework\Escaper $escaper */
+$form = $block->getData('parent_block');
+$section = $block->getData('item');
+$description = trim((string)($section['description'] ?? ''));
+?>
+<fieldset class="ffb-item ffb-section ffb-w-full" data-ffb-item="<?= $escaper->escapeHtmlAttr($section['id'] ?? '') ?>">
+    <legend class="ffb-section-title"><?= $escaper->escapeHtml($section['title'] ?? '') ?></legend>
+<?php if ($description !== ''): ?>
+    <p class="ffb-section-description"><?= $escaper->escapeHtml($description) ?></p>
+<?php endif; ?>
+    <div class="ffb-grid">
+<?php foreach ($section['items'] ?? [] as $item): ?>
+        <?= /* @noEscape */ $form->renderItem($item) ?>
+<?php endforeach; ?>
+    </div>
+</fieldset>

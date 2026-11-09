@@ -1,0 +1,13 @@
+<?php
+/** @var \Magento\Framework\View\Element\Template $block */
+/** @var \Magento\Framework\Escaper $escaper */
+$form = $block->getData('parent_block');
+extract($form->getItemContext((array)$block->getData('item'), $escaper), EXTR_SKIP);
+// Consent must be an active, optional choice: never required, never pre-ticked, whatever the stored item says.
+$noteId = $controlId . '-lock';
+?>
+<div<?= /* @noEscape */ $attrs(['class' => $wrapperClass . ($cssClass !== '' ? ' ' . $cssClass : '')]) ?><?= /* @noEscape */ $dataAttrs ?>>
+    <input<?= /* @noEscape */ $attrs(array_replace($base, ['class' => 'ffb-choice', 'required' => false]) + ['type' => 'checkbox', 'value' => 'yes', 'data-ffb-impersonation-lock' => true]) ?>>
+    <label class="ffb-label" for="<?= $escaper->escapeHtmlAttr($controlId) ?>"><?= $escaper->escapeHtml((string)($item['label'] ?? '')) ?></label>
+    <p class="ffb-help" id="<?= $escaper->escapeHtmlAttr($noteId) ?>" data-ffb-lock-note hidden><?= $escaper->escapeHtml(__('Newsletter sign-up is not available while you are logged in as this customer.')) ?></p>
+<?= /* @noEscape */ $form->renderPartial($block, 'item/_close.phtml', ['group' => false]) ?>

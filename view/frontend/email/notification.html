@@ -1,0 +1,22 @@
+<!--@subject {{var subject}} @-->
+<!--@vars {
+"var subject":"Subject",
+"var form_title":"Form Title",
+"var submission_id":"Submission ID",
+"var values_html|raw":"Submitted Values (pre-escaped HTML)",
+"var product_html|raw":"Product Context (pre-escaped HTML, may be empty)",
+"var submission.id":"Submission ID","var submission.created_at":"Submission Date (UTC)","var submission.status":"Submission Status","var submission.reference":"Submission Reference",
+"var item.label":"Answer label inside {{for item in values}}","var item.value":"Answer text inside {{for item in values}}"
+} @-->
+
+{{template config_path="design/email/header_template"}}
+
+<p class="greeting">{{trans "A new submission was received for the form \"%form_title\"." form_title=$form_title}}</p>
+<p>{{trans "Submission #%id" id=$submission_id}}</p>
+<p>{{trans "Reference: %reference" reference=$submission.reference}}</p>
+
+{{var values_html|raw}}
+
+{{var product_html|raw}}
+
+{{template config_path="design/email/footer_template"}}

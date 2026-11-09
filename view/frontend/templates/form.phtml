@@ -1,0 +1,64 @@
+<?php
+/** @var \Magento\Framework\DataObject $block */
+/** @var \Magento\Framework\Escaper $escaper */
+/** @var \Furan\FormBuilder\Block\Form $form */
+$form = $block->getData('parent_block');
+$model = $form->getForm();
+$schema = $form->getRenderSchema();
+$settings = $model->getSettings();
+$formId = (int)$model->getId();
+$pages = $schema['pages'] ?? [];
+$config = $form->getConfig();
+$showProgress = count($pages) > 1 && !empty($settings['show_progress']);
+$skinned = ($settings['style'] ?? 'module') !== 'theme';
+$accent = (string)($settings['accent_color'] ?? '');
+$accent = preg_match('/^#[0-9a-f]{6}$/D', $accent) === 1 ? $accent : '';
+$accentStyle = '';
+if ($accent !== '') {
+    // Dark text on light accents so buttons stay readable.
+    [$r, $g, $b] = array_map(static fn (string $hex): float => hexdec($hex) / 255, str_split(substr($accent, 1), 2));
+    $onAccent = (0.2126 * $r + 0.7152 * $g + 0.0722 * $b) > 0.6 ? '#1f2328' : '#fff';
+    $accentStyle = '--ffb-accent: ' . $accent . '; --ffb-on-accent: ' . $onAccent;
+}
+?>
+<div class="ffb<?= $skinned ? ' ffb-skin' : '' ?>"<?php if ($accentStyle !== ''): ?> style="<?= $escaper->escapeHtmlAttr($accentStyle) ?>"<?php endif; ?> data-ffb-root data-ffb-config="<?= $escaper->escapeHtmlAttr($form->getConfigJson()) ?>">
+    <form class="ffb-form" method="post" action="<?= $escaper->escapeUrl($config['submitUrl']) ?>" enctype="multipart/form-data" novalidate data-ffb-form>
+        <input type="hidden" name="form_id" value="<?= (int)$formId ?>">
+        <input type="hidden" name="form_key" value="">
+        <input type="hidden" name="ffb_token" value="">
+        <div class="ffb-hp" aria-hidden="true"><label><?= $escaper->escapeHtml(__('Website')) ?><input type="text" name="ffb_website" tabindex="-1" autocomplete="off" value=""></label></div>
+<?php if ($showProgress): ?>
+        <ol class="ffb-progress" data-ffb-progress>
+<?php foreach ($pages as $index => $page): ?>
+<?php $title = trim((string)($page['title'] ?? '')); ?>
+            <li class="ffb-progress-step" data-ffb-step="<?= $escaper->escapeHtmlAttr($page['id'] ?? '') ?>"><?= $escaper->escapeHtml($title !== '' ? $title : __('Step %1', $index + 1)) ?></li>
+<?php endforeach; ?>
+        </ol>
+<?php endif; ?>
+<?php foreach ($pages as $page): ?>
+        <?= /* @noEscape */ $form->renderItem($page) ?>
+<?php endforeach; ?>
+        <div class="ffb-nav">
+            <button type="button" class="ffb-btn ffb-btn-secondary" data-ffb-prev><?= $escaper->escapeHtml($config['labels']['prev']) ?></button>
+            <button type="button" class="ffb-btn" data-ffb-next><?= $escaper->escapeHtml($config['labels']['next']) ?></button>
+            <button type="submit" class="ffb-btn ffb-btn-primary" data-ffb-submit><?= $escaper->escapeHtml($config['labels']['submit']) ?></button>
+        </div>
+        <div class="ffb-status" role="status" aria-live="polite" data-ffb-status></div>
+    </form>
+    <div class="ffb-success" data-ffb-success hidden tabindex="-1"></div>
+    <noscript><p class="ffb-noscript"><?= $escaper->escapeHtml(__('This form needs JavaScript enabled.')) ?></p></noscript>
+</div>
+<?php if ($form->shouldRenderAssets()): ?>
+<link rel="stylesheet" href="<?= $escaper->escapeUrl($form->getViewFileUrl('Furan_FormBuilder::css/ffb.css')) ?>">
+<?php foreach ($form->getExtensionStyles() as $styleUrl): ?>
+<link rel="stylesheet" href="<?= $escaper->escapeUrl($styleUrl) ?>">
+<?php endforeach; ?>
+<script src="<?= $escaper->escapeUrl($form->getViewFileUrl('Furan_FormBuilder::js/ffb-core.js')) ?>" defer></script>
+<script src="<?= $escaper->escapeUrl($form->getViewFileUrl('Furan_FormBuilder::js/ffb-types.js')) ?>" defer></script>
+<script src="<?= $escaper->escapeUrl($form->getViewFileUrl('Furan_FormBuilder::js/ffb-drafts.js')) ?>" defer></script>
+<script src="<?= $escaper->escapeUrl($form->getViewFileUrl('Furan_FormBuilder::js/ffb-submit.js')) ?>" defer></script>
+<?php foreach ($form->getExtensionScripts() as $scriptUrl): ?>
+<script src="<?= $escaper->escapeUrl($scriptUrl) ?>" defer></script>
+<?php endforeach; ?>
+<script src="<?= $escaper->escapeUrl($form->getViewFileUrl('Furan_FormBuilder::js/ffb-form.js')) ?>" defer></script>
+<?php endif; ?>

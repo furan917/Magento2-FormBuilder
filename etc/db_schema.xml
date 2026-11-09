@@ -1,0 +1,716 @@
+<?xml version="1.0"?>
+<schema xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:Setup/Declaration/Schema/etc/schema.xsd">
+    <table name="furan_formbuilder_form" resource="default" engine="innodb" comment="Form Builder forms">
+        <column xsi:type="int" name="form_id" unsigned="true" nullable="false" identity="true" comment="Form ID"/>
+        <column xsi:type="varchar" name="identifier" length="64" nullable="false" comment="URL identifier"/>
+        <column xsi:type="varchar" name="title" length="255" nullable="false" comment="Title"/>
+        <column xsi:type="smallint" name="is_active" unsigned="true" nullable="false" default="1" comment="Is active"/>
+        <column xsi:type="mediumtext" name="schema_json" nullable="false" comment="Form schema JSON"/>
+        <column xsi:type="text" name="settings_json" nullable="false" comment="Form settings JSON"/>
+        <column xsi:type="timestamp" name="created_at" on_update="false" nullable="false" default="CURRENT_TIMESTAMP" comment="Created at"/>
+        <column xsi:type="timestamp" name="updated_at" on_update="true" nullable="false" default="CURRENT_TIMESTAMP" comment="Updated at"/>
+        <column xsi:type="timestamp" name="purge_requested_at" on_update="false" nullable="true" comment="Set when a large form is being deleted in the background"/>
+        <column xsi:type="datetime" name="open_from" nullable="true" comment="Schedule: opens at (UTC), synced from settings"/>
+        <column xsi:type="datetime" name="close_at" nullable="true" comment="Schedule: closes at (UTC), synced from settings"/>
+        <constraint xsi:type="primary" referenceId="PRIMARY">
+            <column name="form_id"/>
+        </constraint>
+        <constraint xsi:type="unique" referenceId="FURAN_FORMBUILDER_FORM_IDENTIFIER">
+            <column name="identifier"/>
+        </constraint>
+        <index referenceId="FURAN_FORMBUILDER_FORM_OPEN_FROM" indexType="btree">
+            <column name="open_from"/>
+        </index>
+        <index referenceId="FURAN_FORMBUILDER_FORM_CLOSE_AT" indexType="btree">
+            <column name="close_at"/>
+        </index>
+    </table>
+    <table name="furan_formbuilder_form_store" resource="default" engine="innodb" comment="Form Builder form to store">
+        <column xsi:type="int" name="form_id" unsigned="true" nullable="false" comment="Form ID"/>
+        <column xsi:type="smallint" name="store_id" unsigned="true" nullable="false" comment="Store ID"/>
+        <constraint xsi:type="primary" referenceId="PRIMARY">
+            <column name="form_id"/>
+            <column name="store_id"/>
+        </constraint>
+        <constraint xsi:type="foreign" referenceId="FURAN_FORMBUILDER_FORM_STORE_FORM_ID_FURAN_FORMBUILDER_FORM_FORM_ID"
+                    table="furan_formbuilder_form_store" column="form_id" referenceTable="furan_formbuilder_form"
+                    referenceColumn="form_id" onDelete="CASCADE"/>
+        <constraint xsi:type="foreign" referenceId="FURAN_FORMBUILDER_FORM_STORE_STORE_ID_STORE_STORE_ID"
+                    table="furan_formbuilder_form_store" column="store_id" referenceTable="store"
+                    referenceColumn="store_id" onDelete="CASCADE"/>
+        <index referenceId="FURAN_FORMBUILDER_FORM_STORE_STORE_ID" indexType="btree">
+            <column name="store_id"/>
+        </index>
+    </table>
+    <table name="furan_formbuilder_form_translation" resource="default" engine="innodb" comment="Form Builder store view texts">
+        <column xsi:type="int" name="form_id" unsigned="true" nullable="false" comment="Form ID"/>
+        <column xsi:type="smallint" name="store_id" unsigned="true" nullable="false" comment="Store view ID"/>
+        <column xsi:type="mediumtext" name="content" nullable="false" comment="Translated texts JSON"/>
+        <constraint xsi:type="primary" referenceId="PRIMARY">
+            <column name="form_id"/>
+            <column name="store_id"/>
+        </constraint>
+        <constraint xsi:type="foreign" referenceId="FURAN_FORMBUILDER_FORM_TRANSLATION_FORM_ID_FURAN_FORMBUILDER_FORM_FORM_ID"
+                    table="furan_formbuilder_form_translation" column="form_id" referenceTable="furan_formbuilder_form"
+                    referenceColumn="form_id" onDelete="CASCADE"/>
+        <constraint xsi:type="foreign" referenceId="FURAN_FORMBUILDER_FORM_TRANSLATION_STORE_ID_STORE_STORE_ID"
+                    table="furan_formbuilder_form_translation" column="store_id" referenceTable="store"
+                    referenceColumn="store_id" onDelete="CASCADE"/>
+        <index referenceId="FURAN_FORMBUILDER_FORM_TRANSLATION_STORE_ID" indexType="btree">
+            <column name="store_id"/>
+        </index>
+    </table>
+    <table name="furan_formbuilder_submission" resource="default" engine="innodb" comment="Form Builder submissions">
+        <column xsi:type="int" name="submission_id" unsigned="true" nullable="false" identity="true" comment="Submission ID"/>
+        <column xsi:type="int" name="form_id" unsigned="true" nullable="false" comment="Form ID"/>
+        <column xsi:type="smallint" name="store_id" unsigned="true" nullable="true" comment="Store ID"/>
+        <column xsi:type="int" name="customer_id" unsigned="true" nullable="true" comment="Customer ID"/>
+        <column xsi:type="mediumtext" name="payload_json" nullable="false" comment="Submitted values JSON"/>
+        <column xsi:type="varchar" name="summary" length="255" nullable="false" default="" comment="Plain text summary"/>
+        <column xsi:type="varchar" name="remote_ip" length="45" nullable="true" comment="Remote IP"/>
+        <column xsi:type="smallint" name="is_read" unsigned="true" nullable="false" default="0" comment="Is read"/>
+        <column xsi:type="timestamp" name="created_at" on_update="false" nullable="false" default="CURRENT_TIMESTAMP" comment="Created at"/>
+        <column xsi:type="int" name="customer_group_id" unsigned="true" nullable="false" default="0" comment="Customer group at submit time, 0 = guest"/>
+        <column xsi:type="varbinary" name="email_hash" length="32" nullable="true" comment="Keyed email fingerprint"/>
+        <column xsi:type="smallint" name="email_hash_version" unsigned="true" nullable="true" comment="Crypt key position used for email_hash"/>
+        <column xsi:type="smallint" name="status" unsigned="true" nullable="false" default="0" comment="0 new, 1 in progress, 2 answered, 3 closed"/>
+        <column xsi:type="timestamp" name="updated_at" on_update="false" nullable="true" comment="Updated at"/>
+        <column xsi:type="text" name="context_json" nullable="true" comment="Product context snapshot JSON"/>
+        <column xsi:type="int" name="thread_token_version" unsigned="true" nullable="false" default="0" comment="Guest reply link revocation counter"/>
+        <column xsi:type="varbinary" name="reference" length="16" nullable="false" comment="UUIDv7 reference, 16 raw bytes"/>
+        <constraint xsi:type="primary" referenceId="PRIMARY">
+            <column name="submission_id"/>
+        </constraint>
+        <constraint xsi:type="foreign" referenceId="FURAN_FORMBUILDER_SUBMISSION_FORM_ID_FURAN_FORMBUILDER_FORM_FORM_ID"
+                    table="furan_formbuilder_submission" column="form_id" referenceTable="furan_formbuilder_form"
+                    referenceColumn="form_id" onDelete="CASCADE"/>
+        <constraint xsi:type="foreign" referenceId="FURAN_FORMBUILDER_SUBMISSION_STORE_ID_STORE_STORE_ID"
+                    table="furan_formbuilder_submission" column="store_id" referenceTable="store"
+                    referenceColumn="store_id" onDelete="SET NULL"/>
+        <constraint xsi:type="foreign" referenceId="FURAN_FORMBUILDER_SUBMISSION_CUSTOMER_ID_CUSTOMER_ENTITY_ENTITY_ID"
+                    table="furan_formbuilder_submission" column="customer_id" referenceTable="customer_entity"
+                    referenceColumn="entity_id" onDelete="SET NULL"/>
+        <constraint xsi:type="unique" referenceId="FURAN_FORMBUILDER_SUBMISSION_REFERENCE">
+            <column name="reference"/>
+        </constraint>
+        <index referenceId="FURAN_FORMBUILDER_SUBMISSION_FORM_ID_CREATED_AT" indexType="btree">
+            <column name="form_id"/>
+            <column name="created_at"/>
+        </index>
+        <index referenceId="FURAN_FORMBUILDER_SUBMISSION_FORM_ID_IS_READ" indexType="btree">
+            <column name="form_id"/>
+            <column name="is_read"/>
+        </index>
+        <index referenceId="FURAN_FORMBUILDER_SUBMISSION_CREATED_AT" indexType="btree">
+            <column name="created_at"/>
+        </index>
+        <index referenceId="FURAN_FORMBUILDER_SUBMISSION_CUSTOMER_ID_SUBMISSION_ID" indexType="btree">
+            <column name="customer_id"/>
+            <column name="submission_id"/>
+        </index>
+        <index referenceId="FURAN_FORMBUILDER_SUBMISSION_EMAIL_HASH_CUSTOMER_ID" indexType="btree">
+            <column name="email_hash"/>
+            <column name="customer_id"/>
+        </index>
+        <index referenceId="FURAN_FORMBUILDER_SUBMISSION_EMAIL_HASH_SUBMISSION_ID" indexType="btree">
+            <column name="email_hash"/>
+            <column name="submission_id"/>
+        </index>
+        <index referenceId="FURAN_FORMBUILDER_SUBMISSION_FORM_ID_STATUS_SUBMISSION_ID" indexType="btree">
+            <column name="form_id"/>
+            <column name="status"/>
+            <column name="submission_id"/>
+        </index>
+        <index referenceId="FURAN_FORMBUILDER_SUBMISSION_STATUS_SUBMISSION_ID" indexType="btree">
+            <column name="status"/>
+            <column name="submission_id"/>
+        </index>
+        <index referenceId="FURAN_FORMBUILDER_SUBMISSION_FORM_ID_SUBMISSION_ID" indexType="btree">
+            <column name="form_id"/>
+            <column name="submission_id"/>
+        </index>
+        <index referenceId="FURAN_FORMBUILDER_SUBMISSION_IS_READ_SUBMISSION_ID" indexType="btree">
+            <column name="is_read"/>
+            <column name="submission_id"/>
+        </index>
+    </table>
+    <table name="furan_formbuilder_file" resource="default" engine="innodb" comment="Form Builder uploaded files">
+        <column xsi:type="int" name="file_id" unsigned="true" nullable="false" identity="true" comment="File ID"/>
+        <column xsi:type="varchar" name="path" length="128" nullable="false" comment="Path relative to var/"/>
+        <column xsi:type="int" name="submission_id" unsigned="true" nullable="true" comment="Submission ID, empty until saved or once deleted"/>
+        <column xsi:type="timestamp" name="created_at" on_update="false" nullable="false" default="CURRENT_TIMESTAMP" comment="Created at"/>
+        <constraint xsi:type="primary" referenceId="PRIMARY">
+            <column name="file_id"/>
+        </constraint>
+        <constraint xsi:type="unique" referenceId="FURAN_FORMBUILDER_FILE_PATH">
+            <column name="path"/>
+        </constraint>
+        <constraint xsi:type="foreign" referenceId="FURAN_FORMBUILDER_FILE_SUBMISSION_ID_FURAN_FORMBUILDER_SUBMISSION_SUBMISSION_ID"
+                    table="furan_formbuilder_file" column="submission_id" referenceTable="furan_formbuilder_submission"
+                    referenceColumn="submission_id" onDelete="SET NULL"/>
+        <index referenceId="FURAN_FORMBUILDER_FILE_SUBMISSION_ID" indexType="btree">
+            <column name="submission_id"/>
+        </index>
+    </table>
+    <table name="furan_formbuilder_rule" resource="default" engine="innodb" comment="Form Builder saved validation rules">
+        <column xsi:type="int" name="rule_id" unsigned="true" nullable="false" identity="true" comment="Rule ID"/>
+        <column xsi:type="varchar" name="code" length="64" nullable="false" comment="Code used by form fields"/>
+        <column xsi:type="varchar" name="label" length="128" nullable="false" comment="Name"/>
+        <column xsi:type="varchar" name="pattern" length="256" nullable="false" comment="Pattern"/>
+        <column xsi:type="varchar" name="message" length="255" nullable="false" comment="Error message"/>
+        <column xsi:type="varchar" name="example" length="128" nullable="false" default="" comment="Example of a valid value"/>
+        <column xsi:type="timestamp" name="created_at" on_update="false" nullable="false" default="CURRENT_TIMESTAMP" comment="Created at"/>
+        <column xsi:type="timestamp" name="updated_at" on_update="true" nullable="false" default="CURRENT_TIMESTAMP" comment="Updated at"/>
+        <constraint xsi:type="primary" referenceId="PRIMARY">
+            <column name="rule_id"/>
+        </constraint>
+        <constraint xsi:type="unique" referenceId="FURAN_FORMBUILDER_RULE_CODE">
+            <column name="code"/>
+        </constraint>
+    </table>
+    <table name="furan_formbuilder_field_group" resource="default" engine="innodb" comment="Form Builder reusable field groups">
+        <column xsi:type="int" name="group_id" unsigned="true" nullable="false" identity="true" comment="Group ID"/>
+        <column xsi:type="varchar" name="name" length="120" nullable="false" comment="Name"/>
+        <column xsi:type="text" name="description" nullable="true" comment="Description"/>
+        <column xsi:type="mediumtext" name="fields_json" nullable="false" comment="Normalised fields JSON"/>
+        <column xsi:type="mediumtext" name="translations_json" nullable="true" comment="Translations JSON"/>
+        <column xsi:type="timestamp" name="created_at" on_update="false" nullable="false" default="CURRENT_TIMESTAMP" comment="Created at"/>
+        <column xsi:type="timestamp" name="updated_at" on_update="true" nullable="false" default="CURRENT_TIMESTAMP" comment="Updated at"/>
+        <constraint xsi:type="primary" referenceId="PRIMARY">
+            <column name="group_id"/>
+        </constraint>
+        <constraint xsi:type="unique" referenceId="FURAN_FORMBUILDER_FIELD_GROUP_NAME">
+            <column name="name"/>
+        </constraint>
+    </table>
+    <table name="furan_formbuilder_field_group_form" resource="default" engine="innodb" comment="Form Builder forms that contain a field group">
+        <column xsi:type="int" name="group_id" unsigned="true" nullable="false" comment="Group ID"/>
+        <column xsi:type="int" name="form_id" unsigned="true" nullable="false" comment="Form ID"/>
+        <constraint xsi:type="primary" referenceId="PRIMARY">
+            <column name="group_id"/>
+            <column name="form_id"/>
+        </constraint>
+        <constraint xsi:type="foreign" referenceId="FURAN_FORMBUILDER_FIELD_GROUP_FORM_GROUP_ID_FURAN_FORMBUILDER_FIELD_GROUP_GROUP_ID"
+                    table="furan_formbuilder_field_group_form" column="group_id" referenceTable="furan_formbuilder_field_group"
+                    referenceColumn="group_id" onDelete="CASCADE"/>
+        <constraint xsi:type="foreign" referenceId="FURAN_FORMBUILDER_FIELD_GROUP_FORM_FORM_ID_FURAN_FORMBUILDER_FORM_FORM_ID"
+                    table="furan_formbuilder_field_group_form" column="form_id" referenceTable="furan_formbuilder_form"
+                    referenceColumn="form_id" onDelete="CASCADE"/>
+        <index referenceId="FURAN_FORMBUILDER_FIELD_GROUP_FORM_FORM_ID" indexType="btree">
+            <column name="form_id"/>
+        </index>
+    </table>
+    <table name="furan_formbuilder_saved_rule_form" resource="default" engine="innodb" comment="Form Builder forms that use a saved validation rule">
+        <column xsi:type="varchar" name="code" length="64" nullable="false" comment="Saved rule code"/>
+        <column xsi:type="int" name="form_id" unsigned="true" nullable="false" comment="Form ID"/>
+        <constraint xsi:type="primary" referenceId="PRIMARY">
+            <column name="code"/>
+            <column name="form_id"/>
+        </constraint>
+        <constraint xsi:type="foreign" referenceId="FURAN_FORMBUILDER_SAVED_RULE_FORM_CODE_FURAN_FORMBUILDER_RULE_CODE"
+                    table="furan_formbuilder_saved_rule_form" column="code" referenceTable="furan_formbuilder_rule"
+                    referenceColumn="code" onDelete="CASCADE"/>
+        <constraint xsi:type="foreign" referenceId="FURAN_FORMBUILDER_SAVED_RULE_FORM_FORM_ID_FURAN_FORMBUILDER_FORM_FORM_ID"
+                    table="furan_formbuilder_saved_rule_form" column="form_id" referenceTable="furan_formbuilder_form"
+                    referenceColumn="form_id" onDelete="CASCADE"/>
+        <index referenceId="FURAN_FORMBUILDER_SAVED_RULE_FORM_FORM_ID" indexType="btree">
+            <column name="form_id"/>
+        </index>
+    </table>
+    <table name="furan_formbuilder_privacy_pending" resource="default" engine="innodb" comment="Form Builder submissions of deleted accounts waiting to be erased or anonymised">
+        <column xsi:type="int" name="submission_id" unsigned="true" nullable="false" comment="Submission ID"/>
+        <column xsi:type="int" name="customer_id" unsigned="true" nullable="false" comment="Deleted customer ID"/>
+        <column xsi:type="varchar" name="mode" length="16" nullable="false" comment="anonymise or delete"/>
+        <column xsi:type="smallint" name="attempts" unsigned="true" nullable="false" default="0" comment="Failed attempts"/>
+        <column xsi:type="datetime" name="next_attempt_at" nullable="false" comment="Next attempt (UTC)"/>
+        <column xsi:type="timestamp" name="created_at" nullable="false" default="CURRENT_TIMESTAMP" on_update="false" comment="Created at"/>
+        <constraint xsi:type="primary" referenceId="PRIMARY">
+            <column name="submission_id"/>
+        </constraint>
+        <constraint xsi:type="foreign" referenceId="FURAN_FORMBUILDER_PRIVACY_PENDING_SUBMISSION_ID_FURAN_FORMBUILDER_SUBMISSION_SUBMISSION_ID"
+                    table="furan_formbuilder_privacy_pending" column="submission_id" referenceTable="furan_formbuilder_submission"
+                    referenceColumn="submission_id" onDelete="CASCADE"/>
+        <index referenceId="FURAN_FORMBUILDER_PRIVACY_PENDING_NEXT_ATTEMPT_AT_SUBMISSION_ID" indexType="btree">
+            <column name="next_attempt_at"/>
+            <column name="submission_id"/>
+        </index>
+        <index referenceId="FURAN_FORMBUILDER_PRIVACY_PENDING_CUSTOMER_ID_SUBMISSION_ID" indexType="btree">
+            <column name="customer_id"/>
+            <column name="submission_id"/>
+        </index>
+    </table>
+    <table name="furan_formbuilder_respondent" resource="default" engine="innodb" comment="Form Builder survey respondents">
+        <column xsi:type="int" name="form_id" unsigned="true" nullable="false" comment="Form ID"/>
+        <column xsi:type="varbinary" name="respondent_key" length="33" nullable="false" comment="Type byte c or e plus fingerprint"/>
+        <column xsi:type="int" name="submission_id" unsigned="true" nullable="true" comment="Submission ID, empty once the customer deleted it"/>
+        <constraint xsi:type="primary" referenceId="PRIMARY">
+            <column name="form_id"/>
+            <column name="respondent_key"/>
+        </constraint>
+        <constraint xsi:type="foreign" referenceId="FURAN_FORMBUILDER_RESPONDENT_FORM_ID_FURAN_FORMBUILDER_FORM_FORM_ID"
+                    table="furan_formbuilder_respondent" column="form_id" referenceTable="furan_formbuilder_form"
+                    referenceColumn="form_id" onDelete="CASCADE"/>
+        <constraint xsi:type="foreign" referenceId="FURAN_FORMBUILDER_RESPONDENT_SUBMISSION_ID_FURAN_FORMBUILDER_SUBMISSION_SUBMISSION_ID"
+                    table="furan_formbuilder_respondent" column="submission_id" referenceTable="furan_formbuilder_submission"
+                    referenceColumn="submission_id" onDelete="CASCADE"/>
+        <index referenceId="FURAN_FORMBUILDER_RESPONDENT_SUBMISSION_ID" indexType="btree">
+            <column name="submission_id"/>
+        </index>
+        <index referenceId="FURAN_FORMBUILDER_RESPONDENT_RESPONDENT_KEY" indexType="btree">
+            <column name="respondent_key"/>
+        </index>
+    </table>
+    <table name="furan_formbuilder_message" resource="default" engine="innodb" comment="Form Builder submission thread">
+        <column xsi:type="int" name="message_id" unsigned="true" nullable="false" identity="true" comment="Message ID"/>
+        <column xsi:type="int" name="submission_id" unsigned="true" nullable="false" comment="Submission ID"/>
+        <column xsi:type="varchar" name="author" length="16" nullable="false" comment="admin, customer or system"/>
+        <column xsi:type="int" name="admin_user_id" unsigned="true" nullable="true" comment="Admin user ID"/>
+        <column xsi:type="text" name="body" nullable="false" comment="Body"/>
+        <column xsi:type="timestamp" name="emailed_at" nullable="true" on_update="false" comment="Emailed at"/>
+        <column xsi:type="timestamp" name="created_at" nullable="false" default="CURRENT_TIMESTAMP" on_update="false" comment="Created at"/>
+        <constraint xsi:type="primary" referenceId="PRIMARY">
+            <column name="message_id"/>
+        </constraint>
+        <constraint xsi:type="foreign" referenceId="FURAN_FORMBUILDER_MESSAGE_SUBMISSION_ID_FURAN_FORMBUILDER_SUBMISSION_SUBMISSION_ID"
+                    table="furan_formbuilder_message" column="submission_id" referenceTable="furan_formbuilder_submission"
+                    referenceColumn="submission_id" onDelete="CASCADE"/>
+        <index referenceId="FURAN_FORMBUILDER_MESSAGE_SUBMISSION_ID_MESSAGE_ID" indexType="btree">
+            <column name="submission_id"/>
+            <column name="message_id"/>
+        </index>
+    </table>
+    <table name="furan_formbuilder_draft" resource="default" engine="innodb" comment="Form Builder server drafts">
+        <column xsi:type="int" name="form_id" unsigned="true" nullable="false" comment="Form ID"/>
+        <column xsi:type="int" name="customer_id" unsigned="true" nullable="false" comment="Customer ID"/>
+        <column xsi:type="smallint" name="store_id" unsigned="true" nullable="false" comment="Store ID"/>
+        <column xsi:type="mediumtext" name="payload_json" nullable="false" comment="Draft values JSON"/>
+        <column xsi:type="timestamp" name="updated_at" nullable="false" default="CURRENT_TIMESTAMP" on_update="true" comment="Updated at"/>
+        <constraint xsi:type="primary" referenceId="PRIMARY">
+            <column name="form_id"/>
+            <column name="customer_id"/>
+            <column name="store_id"/>
+        </constraint>
+        <constraint xsi:type="foreign" referenceId="FURAN_FORMBUILDER_DRAFT_FORM_ID_FURAN_FORMBUILDER_FORM_FORM_ID"
+                    table="furan_formbuilder_draft" column="form_id" referenceTable="furan_formbuilder_form"
+                    referenceColumn="form_id" onDelete="CASCADE"/>
+        <constraint xsi:type="foreign" referenceId="FURAN_FORMBUILDER_DRAFT_CUSTOMER_ID_CUSTOMER_ENTITY_ENTITY_ID"
+                    table="furan_formbuilder_draft" column="customer_id" referenceTable="customer_entity"
+                    referenceColumn="entity_id" onDelete="CASCADE"/>
+        <constraint xsi:type="foreign" referenceId="FURAN_FORMBUILDER_DRAFT_STORE_ID_STORE_STORE_ID"
+                    table="furan_formbuilder_draft" column="store_id" referenceTable="store"
+                    referenceColumn="store_id" onDelete="CASCADE"/>
+        <index referenceId="FURAN_FORMBUILDER_DRAFT_CUSTOMER_ID" indexType="btree">
+            <column name="customer_id"/>
+        </index>
+        <index referenceId="FURAN_FORMBUILDER_DRAFT_STORE_ID_UPDATED_AT" indexType="btree">
+            <column name="store_id"/>
+            <column name="updated_at"/>
+        </index>
+    </table>
+    <table name="furan_formbuilder_stat_field" resource="default" engine="innodb" comment="Form Builder statistics field dictionary">
+        <column xsi:type="int" name="field_id" unsigned="true" nullable="false" identity="true" comment="Field ID"/>
+        <column xsi:type="int" name="form_id" unsigned="true" nullable="false" comment="Form ID"/>
+        <column xsi:type="varchar" name="field_key" length="80" nullable="false" comment="Field key"/>
+        <column xsi:type="smallint" name="kind" nullable="false" comment="Bucket kind, frozen per series"/>
+        <column xsi:type="double" name="bucket_step" nullable="true" comment="Bucket step, frozen per series"/>
+        <constraint xsi:type="primary" referenceId="PRIMARY">
+            <column name="field_id"/>
+        </constraint>
+        <constraint xsi:type="foreign" referenceId="FURAN_FORMBUILDER_STAT_FIELD_FORM_ID_FURAN_FORMBUILDER_FORM_FORM_ID"
+                    table="furan_formbuilder_stat_field" column="form_id" referenceTable="furan_formbuilder_form"
+                    referenceColumn="form_id" onDelete="CASCADE"/>
+        <constraint xsi:type="unique" referenceId="FURAN_FORMBUILDER_STAT_FIELD_FORM_ID_FIELD_KEY">
+            <column name="form_id"/>
+            <column name="field_key"/>
+        </constraint>
+    </table>
+    <table name="furan_formbuilder_stat_day" resource="default" engine="innodb" comment="Form Builder submissions per period">
+        <column xsi:type="int" name="form_id" unsigned="true" nullable="false" comment="Form ID"/>
+        <column xsi:type="smallint" name="grain" unsigned="true" nullable="false" comment="0 day, 1 month"/>
+        <column xsi:type="smallint" name="is_rollup" unsigned="true" nullable="false" default="0" comment="1 = all stores and groups total"/>
+        <column xsi:type="date" name="period" nullable="false" comment="Day or first of month"/>
+        <column xsi:type="smallint" name="store_id" unsigned="true" nullable="false" comment="Store ID, 0 when unknown"/>
+        <column xsi:type="int" name="customer_group_id" unsigned="true" nullable="false" default="0" comment="Customer group ID"/>
+        <column xsi:type="int" name="submissions" nullable="false" default="0" comment="Submissions"/>
+        <constraint xsi:type="primary" referenceId="PRIMARY">
+            <column name="form_id"/>
+            <column name="grain"/>
+            <column name="is_rollup"/>
+            <column name="period"/>
+            <column name="store_id"/>
+            <column name="customer_group_id"/>
+        </constraint>
+        <constraint xsi:type="foreign" referenceId="FURAN_FORMBUILDER_STAT_DAY_FORM_ID_FURAN_FORMBUILDER_FORM_FORM_ID"
+                    table="furan_formbuilder_stat_day" column="form_id" referenceTable="furan_formbuilder_form"
+                    referenceColumn="form_id" onDelete="CASCADE"/>
+    </table>
+    <table name="furan_formbuilder_stat_value" resource="default" engine="innodb" comment="Form Builder answer counts">
+        <column xsi:type="int" name="field_id" unsigned="true" nullable="false" comment="Field ID"/>
+        <column xsi:type="smallint" name="grain" unsigned="true" nullable="false" comment="0 day, 1 month"/>
+        <column xsi:type="smallint" name="is_rollup" unsigned="true" nullable="false" default="0" comment="1 = all stores and groups total"/>
+        <column xsi:type="date" name="period" nullable="false" comment="Day or first of month"/>
+        <column xsi:type="smallint" name="store_id" unsigned="true" nullable="false" comment="Store ID, 0 when unknown"/>
+        <column xsi:type="int" name="customer_group_id" unsigned="true" nullable="false" default="0" comment="Customer group ID"/>
+        <column xsi:type="varbinary" name="value_key" length="16" nullable="false" comment="Value key"/>
+        <column xsi:type="int" name="hits" nullable="false" default="0" comment="Answers"/>
+        <constraint xsi:type="primary" referenceId="PRIMARY">
+            <column name="field_id"/>
+            <column name="grain"/>
+            <column name="is_rollup"/>
+            <column name="period"/>
+            <column name="store_id"/>
+            <column name="customer_group_id"/>
+            <column name="value_key"/>
+        </constraint>
+        <constraint xsi:type="foreign" referenceId="FURAN_FORMBUILDER_STAT_VALUE_FIELD_ID_FURAN_FORMBUILDER_STAT_FIELD_FIELD_ID"
+                    table="furan_formbuilder_stat_value" column="field_id" referenceTable="furan_formbuilder_stat_field"
+                    referenceColumn="field_id" onDelete="CASCADE"/>
+    </table>
+    <table name="furan_formbuilder_stat_number" resource="default" engine="innodb" comment="Form Builder numeric answer sums">
+        <column xsi:type="int" name="field_id" unsigned="true" nullable="false" comment="Field ID"/>
+        <column xsi:type="smallint" name="grain" unsigned="true" nullable="false" comment="0 day, 1 month"/>
+        <column xsi:type="smallint" name="is_rollup" unsigned="true" nullable="false" default="0" comment="1 = all stores and groups total"/>
+        <column xsi:type="date" name="period" nullable="false" comment="Day or first of month"/>
+        <column xsi:type="smallint" name="store_id" unsigned="true" nullable="false" comment="Store ID, 0 when unknown"/>
+        <column xsi:type="int" name="customer_group_id" unsigned="true" nullable="false" default="0" comment="Customer group ID"/>
+        <column xsi:type="int" name="n" nullable="false" default="0" comment="Answers"/>
+        <column xsi:type="double" name="total" nullable="false" default="0" comment="Sum"/>
+        <constraint xsi:type="primary" referenceId="PRIMARY">
+            <column name="field_id"/>
+            <column name="grain"/>
+            <column name="is_rollup"/>
+            <column name="period"/>
+            <column name="store_id"/>
+            <column name="customer_group_id"/>
+        </constraint>
+        <constraint xsi:type="foreign" referenceId="FURAN_FORMBUILDER_STAT_NUMBER_FIELD_ID_FURAN_FORMBUILDER_STAT_FIELD_FIELD_ID"
+                    table="furan_formbuilder_stat_number" column="field_id" referenceTable="furan_formbuilder_stat_field"
+                    referenceColumn="field_id" onDelete="CASCADE"/>
+    </table>
+    <table name="furan_formbuilder_stat_label" resource="default" engine="innodb" comment="Form Builder value labels">
+        <column xsi:type="int" name="field_id" unsigned="true" nullable="false" comment="Field ID"/>
+        <column xsi:type="varbinary" name="value_key" length="16" nullable="false" comment="Value key"/>
+        <column xsi:type="varchar" name="label" length="255" nullable="false" comment="Label"/>
+        <constraint xsi:type="primary" referenceId="PRIMARY">
+            <column name="field_id"/>
+            <column name="value_key"/>
+        </constraint>
+        <constraint xsi:type="foreign" referenceId="FURAN_FORMBUILDER_STAT_LABEL_FIELD_ID_FURAN_FORMBUILDER_STAT_FIELD_FIELD_ID"
+                    table="furan_formbuilder_stat_label" column="field_id" referenceTable="furan_formbuilder_stat_field"
+                    referenceColumn="field_id" onDelete="CASCADE"/>
+    </table>
+    <table name="furan_formbuilder_stat_journal" resource="default" engine="innodb" comment="Form Builder statistics journal">
+        <column xsi:type="bigint" name="journal_id" unsigned="true" nullable="false" identity="true" comment="Journal ID"/>
+        <column xsi:type="int" name="form_id" unsigned="true" nullable="false" comment="Form ID"/>
+        <column xsi:type="mediumtext" name="deltas" nullable="false" comment="Deltas JSON"/>
+        <column xsi:type="timestamp" name="created_at" nullable="false" default="CURRENT_TIMESTAMP" on_update="false" comment="Created at"/>
+        <constraint xsi:type="primary" referenceId="PRIMARY">
+            <column name="journal_id"/>
+        </constraint>
+        <constraint xsi:type="foreign" referenceId="FURAN_FORMBUILDER_STAT_JOURNAL_FORM_ID_FURAN_FORMBUILDER_FORM_FORM_ID"
+                    table="furan_formbuilder_stat_journal" column="form_id" referenceTable="furan_formbuilder_form"
+                    referenceColumn="form_id" onDelete="CASCADE"/>
+        <index referenceId="FURAN_FORMBUILDER_STAT_JOURNAL_FORM_ID_JOURNAL_ID" indexType="btree">
+            <column name="form_id"/>
+            <column name="journal_id"/>
+        </index>
+    </table>
+    <table name="furan_formbuilder_stat_stage_day" resource="default" engine="innodb" comment="Form Builder submissions per period">
+        <column xsi:type="int" name="form_id" unsigned="true" nullable="false" comment="Form ID"/>
+        <column xsi:type="int" name="rebuild_id" unsigned="true" nullable="false" comment="Rebuild ID"/>
+        <column xsi:type="smallint" name="grain" unsigned="true" nullable="false" comment="0 day, 1 month"/>
+        <column xsi:type="smallint" name="is_rollup" unsigned="true" nullable="false" default="0" comment="1 = all stores and groups total"/>
+        <column xsi:type="date" name="period" nullable="false" comment="Day or first of month"/>
+        <column xsi:type="smallint" name="store_id" unsigned="true" nullable="false" comment="Store ID, 0 when unknown"/>
+        <column xsi:type="int" name="customer_group_id" unsigned="true" nullable="false" default="0" comment="Customer group ID"/>
+        <column xsi:type="int" name="submissions" nullable="false" default="0" comment="Submissions"/>
+        <constraint xsi:type="primary" referenceId="PRIMARY">
+            <column name="form_id"/>
+            <column name="rebuild_id"/>
+            <column name="grain"/>
+            <column name="is_rollup"/>
+            <column name="period"/>
+            <column name="store_id"/>
+            <column name="customer_group_id"/>
+        </constraint>
+        <constraint xsi:type="foreign" referenceId="FURAN_FORMBUILDER_STAT_STAGE_DAY_FORM_ID_FURAN_FORMBUILDER_FORM_FORM_ID"
+                    table="furan_formbuilder_stat_stage_day" column="form_id" referenceTable="furan_formbuilder_form"
+                    referenceColumn="form_id" onDelete="CASCADE"/>
+    </table>
+    <table name="furan_formbuilder_stat_stage_value" resource="default" engine="innodb" comment="Form Builder answer counts">
+        <column xsi:type="int" name="form_id" unsigned="true" nullable="false" comment="Form ID"/>
+        <column xsi:type="int" name="rebuild_id" unsigned="true" nullable="false" comment="Rebuild ID"/>
+        <column xsi:type="int" name="field_id" unsigned="true" nullable="false" comment="Field ID"/>
+        <column xsi:type="smallint" name="grain" unsigned="true" nullable="false" comment="0 day, 1 month"/>
+        <column xsi:type="smallint" name="is_rollup" unsigned="true" nullable="false" default="0" comment="1 = all stores and groups total"/>
+        <column xsi:type="date" name="period" nullable="false" comment="Day or first of month"/>
+        <column xsi:type="smallint" name="store_id" unsigned="true" nullable="false" comment="Store ID, 0 when unknown"/>
+        <column xsi:type="int" name="customer_group_id" unsigned="true" nullable="false" default="0" comment="Customer group ID"/>
+        <column xsi:type="varbinary" name="value_key" length="16" nullable="false" comment="Value key"/>
+        <column xsi:type="int" name="hits" nullable="false" default="0" comment="Answers"/>
+        <constraint xsi:type="primary" referenceId="PRIMARY">
+            <column name="form_id"/>
+            <column name="rebuild_id"/>
+            <column name="field_id"/>
+            <column name="grain"/>
+            <column name="is_rollup"/>
+            <column name="period"/>
+            <column name="store_id"/>
+            <column name="customer_group_id"/>
+            <column name="value_key"/>
+        </constraint>
+        <constraint xsi:type="foreign" referenceId="FURAN_FORMBUILDER_STAT_STAGE_VALUE_FORM_ID_FURAN_FORMBUILDER_FORM_FORM_ID"
+                    table="furan_formbuilder_stat_stage_value" column="form_id" referenceTable="furan_formbuilder_form"
+                    referenceColumn="form_id" onDelete="CASCADE"/>
+    </table>
+    <table name="furan_formbuilder_stat_stage_number" resource="default" engine="innodb" comment="Form Builder numeric answer sums">
+        <column xsi:type="int" name="form_id" unsigned="true" nullable="false" comment="Form ID"/>
+        <column xsi:type="int" name="rebuild_id" unsigned="true" nullable="false" comment="Rebuild ID"/>
+        <column xsi:type="int" name="field_id" unsigned="true" nullable="false" comment="Field ID"/>
+        <column xsi:type="smallint" name="grain" unsigned="true" nullable="false" comment="0 day, 1 month"/>
+        <column xsi:type="smallint" name="is_rollup" unsigned="true" nullable="false" default="0" comment="1 = all stores and groups total"/>
+        <column xsi:type="date" name="period" nullable="false" comment="Day or first of month"/>
+        <column xsi:type="smallint" name="store_id" unsigned="true" nullable="false" comment="Store ID, 0 when unknown"/>
+        <column xsi:type="int" name="customer_group_id" unsigned="true" nullable="false" default="0" comment="Customer group ID"/>
+        <column xsi:type="int" name="n" nullable="false" default="0" comment="Answers"/>
+        <column xsi:type="double" name="total" nullable="false" default="0" comment="Sum"/>
+        <constraint xsi:type="primary" referenceId="PRIMARY">
+            <column name="form_id"/>
+            <column name="rebuild_id"/>
+            <column name="field_id"/>
+            <column name="grain"/>
+            <column name="is_rollup"/>
+            <column name="period"/>
+            <column name="store_id"/>
+            <column name="customer_group_id"/>
+        </constraint>
+        <constraint xsi:type="foreign" referenceId="FURAN_FORMBUILDER_STAT_STAGE_NUMBER_FORM_ID_FURAN_FORMBUILDER_FORM_FORM_ID"
+                    table="furan_formbuilder_stat_stage_number" column="form_id" referenceTable="furan_formbuilder_form"
+                    referenceColumn="form_id" onDelete="CASCADE"/>
+    </table>
+    <table name="furan_formbuilder_stat_stage_label" resource="default" engine="innodb" comment="Form Builder value labels">
+        <column xsi:type="int" name="form_id" unsigned="true" nullable="false" comment="Form ID"/>
+        <column xsi:type="int" name="rebuild_id" unsigned="true" nullable="false" comment="Rebuild ID"/>
+        <column xsi:type="int" name="field_id" unsigned="true" nullable="false" comment="Field ID"/>
+        <column xsi:type="varbinary" name="value_key" length="16" nullable="false" comment="Value key"/>
+        <column xsi:type="varchar" name="label" length="255" nullable="false" comment="Label"/>
+        <constraint xsi:type="primary" referenceId="PRIMARY">
+            <column name="form_id"/>
+            <column name="rebuild_id"/>
+            <column name="field_id"/>
+            <column name="value_key"/>
+        </constraint>
+        <constraint xsi:type="foreign" referenceId="FURAN_FORMBUILDER_STAT_STAGE_LABEL_FORM_ID_FURAN_FORMBUILDER_FORM_FORM_ID"
+                    table="furan_formbuilder_stat_stage_label" column="form_id" referenceTable="furan_formbuilder_form"
+                    referenceColumn="form_id" onDelete="CASCADE"/>
+    </table>
+    <table name="furan_formbuilder_stat_stage_journal" resource="default" engine="innodb" comment="Form Builder rebuild staging journal ids">
+        <column xsi:type="int" name="form_id" unsigned="true" nullable="false" comment="Form ID"/>
+        <column xsi:type="int" name="rebuild_id" unsigned="true" nullable="false" comment="Rebuild ID"/>
+        <column xsi:type="bigint" name="journal_id" unsigned="true" nullable="false" comment="Journal ID"/>
+        <column xsi:type="mediumtext" name="deltas" nullable="false" comment="Deltas JSON"/>
+        <constraint xsi:type="primary" referenceId="PRIMARY">
+            <column name="form_id"/>
+            <column name="rebuild_id"/>
+            <column name="journal_id"/>
+        </constraint>
+        <constraint xsi:type="foreign" referenceId="FURAN_FORMBUILDER_STAT_STAGE_JOURNAL_FORM_ID_FURAN_FORMBUILDER_FORM_FORM_ID"
+                    table="furan_formbuilder_stat_stage_journal" column="form_id" referenceTable="furan_formbuilder_form"
+                    referenceColumn="form_id" onDelete="CASCADE"/>
+    </table>
+    <table name="furan_formbuilder_stat_state" resource="default" engine="innodb" comment="Form Builder statistics state">
+        <column xsi:type="int" name="form_id" unsigned="true" nullable="false" comment="Form ID"/>
+        <column xsi:type="smallint" name="rebuilding" nullable="false" default="0" comment="Rebuild running"/>
+        <column xsi:type="timestamp" name="rebuild_started_at" nullable="true" on_update="false" comment="Rebuild started at"/>
+        <column xsi:type="smallint" name="needs_rebuild" nullable="false" default="0" comment="Aggregates need a rebuild"/>
+        <column xsi:type="int" name="rebuild_id" unsigned="true" nullable="false" default="0" comment="Current rebuild ID"/>
+        <column xsi:type="smallint" name="rebuild_requested" nullable="false" default="0" comment="Rebuild queued"/>
+        <column xsi:type="timestamp" name="rebuild_requested_at" nullable="true" on_update="false" comment="Rebuild queued at"/>
+        <constraint xsi:type="primary" referenceId="PRIMARY">
+            <column name="form_id"/>
+        </constraint>
+        <constraint xsi:type="foreign" referenceId="FURAN_FORMBUILDER_STAT_STATE_FORM_ID_FURAN_FORMBUILDER_FORM_FORM_ID"
+                    table="furan_formbuilder_stat_state" column="form_id" referenceTable="furan_formbuilder_form"
+                    referenceColumn="form_id" onDelete="CASCADE"/>
+    </table>
+    <table name="furan_formbuilder_counter" resource="default" engine="innodb" comment="Form Builder rate limits and used tokens">
+        <column xsi:type="varbinary" name="counter_key" length="32" nullable="false" comment="SHA-256 of the counter name"/>
+        <column xsi:type="int" name="hits" unsigned="true" nullable="false" default="0" comment="Count or bytes in the window"/>
+        <column xsi:type="int" name="expires_at" unsigned="true" nullable="false" default="0" comment="Unix time the window ends"/>
+        <constraint xsi:type="primary" referenceId="PRIMARY">
+            <column name="counter_key"/>
+        </constraint>
+        <index referenceId="FURAN_FORMBUILDER_COUNTER_EXPIRES_AT" indexType="btree">
+            <column name="expires_at"/>
+        </index>
+    </table>
+    <table name="furan_formbuilder_action_retry" resource="default" engine="innodb" comment="Form Builder pending action retries">
+        <column xsi:type="int" name="retry_id" unsigned="true" nullable="false" identity="true" comment="Retry ID"/>
+        <column xsi:type="int" name="submission_id" unsigned="true" nullable="false" comment="Submission ID"/>
+        <column xsi:type="varchar" name="action_code" length="64" nullable="false" comment="Action pool key"/>
+        <column xsi:type="smallint" name="attempt" unsigned="true" nullable="false" comment="Attempt to run next"/>
+        <column xsi:type="datetime" name="due_at" nullable="false" comment="Earliest run time (UTC)"/>
+        <column xsi:type="varchar" name="last_error" length="255" nullable="false" default="" comment="Error class or code of the last failure"/>
+        <column xsi:type="smallint" name="is_edit" unsigned="true" nullable="false" default="0" comment="Retry runs as a submission edit"/>
+        <column xsi:type="timestamp" name="created_at" nullable="false" default="CURRENT_TIMESTAMP" on_update="false" comment="Created at"/>
+        <constraint xsi:type="primary" referenceId="PRIMARY">
+            <column name="retry_id"/>
+        </constraint>
+        <constraint xsi:type="foreign" referenceId="FURAN_FORMBUILDER_ACTION_RETRY_SUBMISSION_ID_FURAN_FORMBUILDER_SUBMISSION_SUBMISSION_ID"
+                    table="furan_formbuilder_action_retry" column="submission_id" referenceTable="furan_formbuilder_submission"
+                    referenceColumn="submission_id" onDelete="CASCADE"/>
+        <constraint xsi:type="unique" referenceId="FURAN_FORMBUILDER_ACTION_RETRY_SUBMISSION_ID_ACTION_CODE">
+            <column name="submission_id"/>
+            <column name="action_code"/>
+        </constraint>
+        <index referenceId="FURAN_FORMBUILDER_ACTION_RETRY_DUE_AT_RETRY_ID" indexType="btree">
+            <column name="due_at"/>
+            <column name="retry_id"/>
+        </index>
+    </table>
+    <table name="furan_formbuilder_webhook" resource="default" engine="innodb" comment="Form Builder webhook endpoints">
+        <column xsi:type="int" name="endpoint_id" unsigned="true" nullable="false" identity="true" comment="Endpoint ID"/>
+        <column xsi:type="varchar" name="name" length="120" nullable="false" comment="Name"/>
+        <column xsi:type="text" name="url" nullable="false" comment="Canonical target URL"/>
+        <column xsi:type="smallint" name="is_active" unsigned="false" nullable="false" default="1" comment="Active"/>
+        <column xsi:type="varchar" name="scope_type" length="8" nullable="false" comment="website or store"/>
+        <column xsi:type="text" name="scope_ids" nullable="false" comment="JSON int[] of website or store ids"/>
+        <column xsi:type="smallint" name="all_forms" unsigned="false" nullable="false" default="0" comment="Send for every form"/>
+        <column xsi:type="text" name="form_ids" nullable="false" comment="JSON int[] of form ids"/>
+        <column xsi:type="text" name="events" nullable="false" comment="JSON list of subscribed events"/>
+        <column xsi:type="varchar" name="field_mode" length="8" nullable="false" default="all" comment="all or selected"/>
+        <column xsi:type="text" name="fields" nullable="false" comment="JSON list of field names"/>
+        <column xsi:type="smallint" name="include_personal" unsigned="false" nullable="false" default="0" comment="Include personal fields"/>
+        <column xsi:type="smallint" name="debug_responses" unsigned="false" nullable="false" default="0" comment="Keep response excerpts"/>
+        <column xsi:type="text" name="secret_enc" nullable="false" comment="Encrypted signing secret"/>
+        <column xsi:type="text" name="previous_secret_enc" nullable="true" comment="Encrypted previous secret (rotation window)"/>
+        <column xsi:type="datetime" name="previous_expires_at" nullable="true" comment="Previous secret expiry (UTC)"/>
+        <column xsi:type="varchar" name="disabled_reason" length="32" nullable="true" comment="gone, failing, manual or secret_unavailable"/>
+        <column xsi:type="datetime" name="failing_since" nullable="true" comment="First failure of the current streak (UTC)"/>
+        <column xsi:type="int" name="consecutive_failures" unsigned="true" nullable="false" default="0" comment="Consecutive failed deliveries"/>
+        <column xsi:type="datetime" name="circuit_open_until" nullable="true" comment="Circuit breaker open until (UTC)"/>
+        <column xsi:type="datetime" name="slot0_until" nullable="true" comment="In-flight lease 0 (UTC)"/>
+        <column xsi:type="datetime" name="slot1_until" nullable="true" comment="In-flight lease 1 (UTC)"/>
+        <column xsi:type="datetime" name="purge_requested_at" nullable="true" comment="Soft delete: purge pending (UTC)"/>
+        <column xsi:type="timestamp" name="created_at" nullable="false" default="CURRENT_TIMESTAMP" on_update="false" comment="Created at"/>
+        <column xsi:type="timestamp" name="updated_at" nullable="false" default="CURRENT_TIMESTAMP" on_update="true" comment="Updated at"/>
+        <constraint xsi:type="primary" referenceId="PRIMARY">
+            <column name="endpoint_id"/>
+        </constraint>
+        <index referenceId="FURAN_FORMBUILDER_WEBHOOK_IS_ACTIVE" indexType="btree">
+            <column name="is_active"/>
+        </index>
+    </table>
+    <table name="furan_formbuilder_webhook_audit" resource="default" engine="innodb" comment="Form Builder webhook endpoint audit trail">
+        <column xsi:type="int" name="audit_id" unsigned="true" nullable="false" identity="true" comment="Audit ID"/>
+        <column xsi:type="int" name="endpoint_id" unsigned="true" nullable="false" comment="Endpoint ID (no FK: history survives a purge)"/>
+        <column xsi:type="int" name="admin_user_id" unsigned="true" nullable="true" comment="Admin user, null for the system"/>
+        <column xsi:type="varchar" name="action" length="32" nullable="false" comment="Action"/>
+        <column xsi:type="varchar" name="detail" length="255" nullable="false" default="" comment="Short note, never a secret"/>
+        <column xsi:type="timestamp" name="created_at" nullable="false" default="CURRENT_TIMESTAMP" on_update="false" comment="Created at"/>
+        <constraint xsi:type="primary" referenceId="PRIMARY">
+            <column name="audit_id"/>
+        </constraint>
+        <index referenceId="FURAN_FORMBUILDER_WEBHOOK_AUDIT_ENDPOINT_ID_AUDIT_ID" indexType="btree">
+            <column name="endpoint_id"/>
+            <column name="audit_id"/>
+        </index>
+    </table>
+    <table name="furan_formbuilder_webhook_delivery" resource="default" engine="innodb" comment="Form Builder webhook deliveries">
+        <column xsi:type="bigint" name="delivery_id" unsigned="true" nullable="false" identity="true" comment="Delivery ID"/>
+        <column xsi:type="int" name="endpoint_id" unsigned="true" nullable="false" comment="Endpoint ID"/>
+        <column xsi:type="int" name="submission_id" unsigned="true" nullable="true" comment="Submission ID, null only for webhook.test"/>
+        <column xsi:type="varchar" name="event" length="40" nullable="false" comment="Event type"/>
+        <column xsi:type="varchar" name="event_data" length="255" nullable="true" comment="JSON event details without personal data"/>
+        <column xsi:type="varchar" name="webhook_id" length="40" nullable="false" comment="Standard Webhooks message id"/>
+        <column xsi:type="bigint" name="replay_of" unsigned="true" nullable="true" comment="Original delivery of a replay (no FK)"/>
+        <column xsi:type="int" name="admin_user_id" unsigned="true" nullable="true" comment="Admin who replayed or tested"/>
+        <column xsi:type="smallint" name="status" unsigned="false" nullable="false" default="0" comment="Delivery status"/>
+        <column xsi:type="smallint" name="attempts" unsigned="true" nullable="false" default="0" comment="Attempts made"/>
+        <column xsi:type="datetime" name="next_attempt_at" nullable="false" comment="Next attempt (UTC)"/>
+        <column xsi:type="smallint" name="last_status_code" unsigned="false" nullable="true" comment="Last HTTP status"/>
+        <column xsi:type="varchar" name="last_error" length="32" nullable="true" comment="Last error class"/>
+        <column xsi:type="timestamp" name="created_at" nullable="false" default="CURRENT_TIMESTAMP" on_update="false" comment="Created at"/>
+        <column xsi:type="timestamp" name="updated_at" nullable="false" default="CURRENT_TIMESTAMP" on_update="true" comment="Updated at"/>
+        <column xsi:type="datetime" name="delivered_at" nullable="true" comment="Delivered at (UTC)"/>
+        <constraint xsi:type="primary" referenceId="PRIMARY">
+            <column name="delivery_id"/>
+        </constraint>
+        <constraint xsi:type="foreign" referenceId="FURAN_FORMBUILDER_WEBHOOK_DELIVERY_SUBMISSION_ID_FURAN_FORMBUILDER_SUBMISSION_SUBMISSION_ID"
+                    table="furan_formbuilder_webhook_delivery" column="submission_id" referenceTable="furan_formbuilder_submission"
+                    referenceColumn="submission_id" onDelete="CASCADE"/>
+        <index referenceId="FURAN_FORMBUILDER_WEBHOOK_DELIVERY_STATUS_ENDPOINT_ID_NEXT_ATTEMPT_AT_DELIVERY_ID" indexType="btree">
+            <column name="status"/>
+            <column name="endpoint_id"/>
+            <column name="next_attempt_at"/>
+            <column name="delivery_id"/>
+        </index>
+        <index referenceId="FURAN_FORMBUILDER_WEBHOOK_DELIVERY_ENDPOINT_ID_DELIVERY_ID" indexType="btree">
+            <column name="endpoint_id"/>
+            <column name="delivery_id"/>
+        </index>
+        <index referenceId="FURAN_FORMBUILDER_WEBHOOK_DELIVERY_ENDPOINT_ID_STATUS_DELIVERY_ID" indexType="btree">
+            <column name="endpoint_id"/>
+            <column name="status"/>
+            <column name="delivery_id"/>
+        </index>
+        <index referenceId="FURAN_FORMBUILDER_WEBHOOK_DELIVERY_SUBMISSION_ID" indexType="btree">
+            <column name="submission_id"/>
+        </index>
+        <index referenceId="FURAN_FORMBUILDER_WEBHOOK_DELIVERY_CREATED_AT_DELIVERY_ID" indexType="btree">
+            <column name="created_at"/>
+            <column name="delivery_id"/>
+        </index>
+        <index referenceId="FURAN_FORMBUILDER_WEBHOOK_DELIVERY_WEBHOOK_ID" indexType="btree">
+            <column name="webhook_id"/>
+        </index>
+    </table>
+    <table name="furan_formbuilder_webhook_attempt" resource="default" engine="innodb" comment="Form Builder webhook delivery attempts">
+        <column xsi:type="bigint" name="attempt_id" unsigned="true" nullable="false" identity="true" comment="Attempt ID"/>
+        <column xsi:type="bigint" name="delivery_id" unsigned="true" nullable="false" comment="Delivery ID"/>
+        <column xsi:type="datetime" name="started_at" nullable="false" comment="Started at (UTC)"/>
+        <column xsi:type="int" name="duration_ms" unsigned="true" nullable="false" default="0" comment="Duration in ms"/>
+        <column xsi:type="smallint" name="status_code" unsigned="false" nullable="true" comment="HTTP status"/>
+        <column xsi:type="varchar" name="error_class" length="32" nullable="true" comment="Error class"/>
+        <column xsi:type="smallint" name="errno" unsigned="false" nullable="true" comment="curl errno"/>
+        <column xsi:type="varchar" name="connected_ip" length="45" nullable="true" comment="Address connected to"/>
+        <column xsi:type="varchar" name="location" length="255" nullable="true" comment="Redirect Location, control characters stripped"/>
+        <column xsi:type="int" name="retry_after" unsigned="true" nullable="true" comment="Clamped Retry-After seconds"/>
+        <constraint xsi:type="primary" referenceId="PRIMARY">
+            <column name="attempt_id"/>
+        </constraint>
+        <constraint xsi:type="foreign" referenceId="FURAN_FORMBUILDER_WEBHOOK_ATTEMPT_DELIVERY_ID_FURAN_FORMBUILDER_WEBHOOK_DELIVERY_DELIVERY_ID"
+                    table="furan_formbuilder_webhook_attempt" column="delivery_id" referenceTable="furan_formbuilder_webhook_delivery"
+                    referenceColumn="delivery_id" onDelete="CASCADE"/>
+        <index referenceId="FURAN_FORMBUILDER_WEBHOOK_ATTEMPT_DELIVERY_ID_ATTEMPT_ID" indexType="btree">
+            <column name="delivery_id"/>
+            <column name="attempt_id"/>
+        </index>
+    </table>
+    <table name="furan_formbuilder_webhook_attempt_debug" resource="default" engine="innodb" comment="Form Builder webhook response excerpts (opt-in, 7 days)">
+        <column xsi:type="bigint" name="attempt_id" unsigned="true" nullable="false" comment="Attempt ID"/>
+        <column xsi:type="text" name="excerpt" nullable="false" comment="First 1 KB of the response, control characters stripped"/>
+        <column xsi:type="timestamp" name="created_at" nullable="false" default="CURRENT_TIMESTAMP" on_update="false" comment="Created at"/>
+        <constraint xsi:type="primary" referenceId="PRIMARY">
+            <column name="attempt_id"/>
+        </constraint>
+        <constraint xsi:type="foreign" referenceId="FURAN_FORMBUILDER_WEBHOOK_ATTEMPT_DEBUG_ATTEMPT_ID_FURAN_FORMBUILDER_WEBHOOK_ATTEMPT_ATTEMPT_ID"
+                    table="furan_formbuilder_webhook_attempt_debug" column="attempt_id" referenceTable="furan_formbuilder_webhook_attempt"
+                    referenceColumn="attempt_id" onDelete="CASCADE"/>
+        <index referenceId="FURAN_FORMBUILDER_WEBHOOK_ATTEMPT_DEBUG_CREATED_AT" indexType="btree">
+            <column name="created_at"/>
+        </index>
+    </table>
+    <table name="furan_formbuilder_webhook_recipient" resource="default" engine="innodb" comment="Form Builder webhook recipients per submission (GDPR Art. 15, ids and host only)">
+        <column xsi:type="int" name="submission_id" unsigned="true" nullable="false" comment="Submission ID"/>
+        <column xsi:type="int" name="endpoint_id" unsigned="true" nullable="false" comment="Endpoint ID (no FK: survives a purge)"/>
+        <column xsi:type="varchar" name="host" length="255" nullable="false" comment="Receiver host at delivery"/>
+        <column xsi:type="datetime" name="first_delivered_at" nullable="false" comment="First delivery that may have reached the endpoint (UTC)"/>
+        <constraint xsi:type="primary" referenceId="PRIMARY">
+            <column name="submission_id"/>
+            <column name="endpoint_id"/>
+        </constraint>
+        <constraint xsi:type="foreign" referenceId="FURAN_FORMBUILDER_WEBHOOK_RECIPIENT_SUBMISSION_ID" table="furan_formbuilder_webhook_recipient"
+                    column="submission_id" referenceTable="furan_formbuilder_submission" referenceColumn="submission_id" onDelete="CASCADE"/>
+    </table>
+</schema>

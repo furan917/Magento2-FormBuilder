@@ -1,0 +1,26 @@
+<?php
+/** @var \Furan\FormBuilder\Block\Adminhtml\Form\Edit $block */
+/** @var \Magento\Framework\Escaper $escaper */
+?>
+<form id="ffb-admin-form" class="ffb-admin" method="post" action="<?= $escaper->escapeUrl($block->getSaveUrl()) ?>">
+    <input type="hidden" name="form_key" value="<?= $escaper->escapeHtmlAttr($block->getFormKey()) ?>">
+    <input type="hidden" name="form_id" value="<?= $escaper->escapeHtmlAttr((string)$block->getFormId()) ?>">
+    <input type="hidden" name="identifier" value="">
+    <input type="hidden" name="title" value="">
+    <input type="hidden" name="is_active" value="">
+    <input type="hidden" name="store_ids" value="">
+    <input type="hidden" name="schema" value="">
+    <input type="hidden" name="settings" value="">
+    <input type="hidden" name="translations" value="">
+    <input type="hidden" name="back" value="">
+    <div id="ffb-builder" data-ffb-builder></div>
+</form>
+<script type="application/json" id="ffb-builder-config"><?= /* @noEscape JsonHexTag-encoded */ $block->getConfigJson() ?></script>
+<script src="<?= $escaper->escapeUrl($block->getViewFileUrl('Furan_FormBuilder::js/builder-registry.js')) ?>" defer></script>
+<script src="<?= $escaper->escapeUrl($block->getViewFileUrl('Furan_FormBuilder::js/builder-i18n.js')) ?>" defer></script>
+<script src="<?= $escaper->escapeUrl($block->getViewFileUrl('Furan_FormBuilder::js/pattern-safety.js')) ?>" defer></script>
+<script src="<?= $escaper->escapeUrl($block->getViewFileUrl('Furan_FormBuilder::js/builder-model.js')) ?>" defer></script>
+<script src="<?= $escaper->escapeUrl($block->getViewFileUrl('Furan_FormBuilder::js/builder-inspector.js')) ?>" defer></script>
+<script src="<?= $escaper->escapeUrl($block->getViewFileUrl('Furan_FormBuilder::js/builder-preview.js')) ?>" defer></script>
+<script src="<?= $escaper->escapeUrl($block->getViewFileUrl('Furan_FormBuilder::js/builder-presets.js')) ?>" defer></script>
+<script src="<?= $escaper->escapeUrl($block->getViewFileUrl('Furan_FormBuilder::js/builder.js')) ?>" defer></script>

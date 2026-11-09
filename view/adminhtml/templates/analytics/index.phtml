@@ -1,0 +1,57 @@
+<?php
+/** @var \Furan\FormBuilder\Block\Adminhtml\Analytics $block */
+/** @var \Magento\Framework\Escaper $escaper */
+$filters = $block->getFilters();
+$range = $block->getEffectiveRange();
+?>
+<?php if (!$block->isEnabled()): ?>
+    <div class="message message-notice"><div><?= $escaper->escapeHtml(__('Analytics is disabled in the configuration. Submissions are still counted, so the statistics will be complete once it is enabled.')) ?></div></div>
+<?php return; endif; ?>
+<?= /* @noEscape escaped in notice.phtml */ $block->renderNotices() ?>
+<form class="ffb-admin-filters" method="get" action="<?= $escaper->escapeUrl($block->getUrl('*/*/index')) ?>">
+    <input type="hidden" name="form_id" value="<?= $escaper->escapeHtmlAttr((string)$block->getFormId()) ?>">
+    <label><?= $escaper->escapeHtml(__('From')) ?>
+        <input type="date" name="from" value="<?= $escaper->escapeHtmlAttr($range['from']) ?>"></label>
+    <label><?= $escaper->escapeHtml(__('To')) ?>
+        <input type="date" name="to" value="<?= $escaper->escapeHtmlAttr($range['to']) ?>"></label>
+    <label><?= $escaper->escapeHtml(__('Store view')) ?>
+        <select name="store_id">
+            <option value=""><?= $escaper->escapeHtml(__('All')) ?></option>
+            <?php foreach ($block->getStoreOptions() as $option): ?>
+                <option value="<?= $escaper->escapeHtmlAttr((string)$option['value']) ?>"<?= ($filters['store_id'] ?? null) === $option['value'] ? ' selected' : '' ?>><?= $escaper->escapeHtml($option['label']) ?></option>
+            <?php endforeach; ?>
+        </select></label>
+    <label><?= $escaper->escapeHtml(__('Customer group')) ?>
+        <select name="customer_group_id">
+            <option value=""><?= $escaper->escapeHtml(__('All')) ?></option>
+            <?php foreach ($block->getGroupOptions() as $option): ?>
+                <option value="<?= $escaper->escapeHtmlAttr((string)$option['value']) ?>"<?= ($filters['customer_group_id'] ?? null) === $option['value'] ? ' selected' : '' ?>><?= $escaper->escapeHtml($option['label']) ?></option>
+            <?php endforeach; ?>
+        </select></label>
+    <button type="submit" class="action-default"><?= $escaper->escapeHtml(__('Apply')) ?></button>
+</form>
+<p class="ffb-admin-total"><?= $escaper->escapeHtml(__('Submissions in period: %1', $block->getSubmissionCount())) ?></p>
+<div class="ffb-admin-charts" data-ffb-analytics-charts></div>
+<?php $freeText = $block->getFreeText(); $labels = $block->getFreeTextLabels(); ?>
+<?php if ($freeText !== []): ?>
+    <section class="ffb-admin-freetext">
+        <h2><?= $escaper->escapeHtml(__('Latest text answers')) ?></h2>
+        <?php foreach ($freeText as $name => $list): ?>
+            <h3><?= $escaper->escapeHtml($labels[$name] ?? $name) ?></h3>
+            <?php if ($list['answers'] === []): ?>
+                <p><?= $escaper->escapeHtml(__('No answers found in the latest submissions.')) ?></p>
+            <?php else: ?>
+                <ul>
+                    <?php foreach ($list['answers'] as $answer): ?>
+                        <li><?= $escaper->escapeHtml($answer['text']) ?></li>
+                    <?php endforeach; ?>
+                </ul>
+            <?php endif; ?>
+            <?php if ($list['cursor'] !== null): ?>
+                <p><a href="<?= $escaper->escapeUrl($block->getOlderUrl((string)$name, (int)$list['cursor'])) ?>"><?= $escaper->escapeHtml(__('Older answers')) ?></a></p>
+            <?php endif; ?>
+        <?php endforeach; ?>
+    </section>
+<?php endif; ?>
+<script type="application/json" id="ffb-analytics-data"><?= /* @noEscape JsonHexTag-encoded */ $block->getDataJson() ?></script>
+<script src="<?= $escaper->escapeUrl($block->getViewFileUrl('Furan_FormBuilder::js/analytics-charts.js')) ?>" defer></script>

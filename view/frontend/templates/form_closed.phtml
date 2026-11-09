@@ -1,0 +1,8 @@
+<?php
+/** @var \Magento\Framework\View\Element\Template $block */
+/** @var \Magento\Framework\Escaper $escaper */
+?>
+<link rel="stylesheet" href="<?= $escaper->escapeUrl($block->getViewFileUrl('Furan_FormBuilder::css/ffb.css')) ?>">
+<div class="ffb ffb-closed" data-ffb-closed>
+    <p class="ffb-closed-text"><?= $escaper->escapeHtml((string)$block->getData('message')) ?></p>
+</div>

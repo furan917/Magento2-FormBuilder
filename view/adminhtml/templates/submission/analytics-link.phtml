@@ -1,0 +1,15 @@
+<?php
+use Furan\FormBuilder\ViewModel\Submission\AnalyticsLink;
+
+/** @var \Magento\Framework\Escaper $escaper */
+/** @var \Magento\Framework\View\Element\Template $block */
+/** @var AnalyticsLink $viewModel */
+$viewModel = $block->getData('view_model');
+$url = $viewModel->url();
+if ($url === '') {
+    return;
+}
+?>
+<p class="ffb-sub-analytics-link">
+    <a href="<?= $escaper->escapeUrl($url) ?>"><?= $escaper->escapeHtml(__('View analytics for this form')) ?></a>
+</p>

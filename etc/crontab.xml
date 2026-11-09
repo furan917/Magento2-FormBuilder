@@ -1,0 +1,47 @@
+<?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Cron:etc/crontab.xsd">
+    <group id="furan_formbuilder">
+        <job name="furan_formbuilder_form_purge" instance="Furan\FormBuilder\Model\Cron\FormPurge" method="execute">
+            <schedule>* * * * *</schedule>
+        </job>
+        <job name="furan_formbuilder_file_cleanup" instance="Furan\FormBuilder\Model\Cron\FileCleanup" method="execute">
+            <schedule>*/5 * * * *</schedule>
+        </job>
+        <job name="furan_formbuilder_retention" instance="Furan\FormBuilder\Model\Cron\Retention" method="execute">
+            <schedule>15 * * * *</schedule>
+        </job>
+        <job name="furan_formbuilder_counter_cleanup" instance="Furan\FormBuilder\Model\Cron\CounterCleanup" method="execute">
+            <schedule>25 * * * *</schedule>
+        </job>
+        <job name="furan_formbuilder_webhook_retention" instance="Furan\FormBuilder\Model\Cron\WebhookRetention" method="execute">
+            <schedule>35 * * * *</schedule>
+        </job>
+        <job name="furan_formbuilder_draft_cleanup" instance="Furan\FormBuilder\Model\Cron\DraftCleanup" method="execute">
+            <schedule>45 3 * * *</schedule>
+        </job>
+        <job name="furan_formbuilder_privacy_pending" instance="Furan\FormBuilder\Model\Cron\PrivacyPending" method="execute">
+            <schedule>*/5 * * * *</schedule>
+        </job>
+    </group>
+    <group id="furan_formbuilder_realtime">
+        <job name="furan_formbuilder_form_schedule" instance="Furan\FormBuilder\Model\Cron\FormSchedule" method="execute">
+            <schedule>* * * * *</schedule>
+        </job>
+        <job name="furan_formbuilder_action_retries" instance="Furan\FormBuilder\Model\Cron\ActionRetries" method="execute">
+            <schedule>* * * * *</schedule>
+        </job>
+        <job name="furan_formbuilder_webhook_drain" instance="Furan\FormBuilder\Model\Cron\WebhookDrain" method="execute">
+            <schedule>* * * * *</schedule>
+        </job>
+    </group>
+    <group id="furan_formbuilder_fold">
+        <job name="furan_formbuilder_stats_fold" instance="Furan\FormBuilder\Model\Cron\StatsFold" method="execute">
+            <schedule>* * * * *</schedule>
+        </job>
+    </group>
+    <group id="furan_formbuilder_stats">
+        <job name="furan_formbuilder_stats_rebuild_queue" instance="Furan\FormBuilder\Model\Cron\StatsRebuildQueue" method="execute">
+            <schedule>30 2 * * *</schedule>
+        </job>
+    </group>
+</config>

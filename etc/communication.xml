@@ -1,0 +1,8 @@
+<?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:Communication/etc/communication.xsd">
+    <topic name="furan_formbuilder.mail" request="string"/>
+    <topic name="furan_formbuilder.export" request="string"/>
+    <topic name="furan_formbuilder.action" request="string"/>
+    <topic name="furan_formbuilder.webhook" request="string"/>
+    <topic name="furan_formbuilder.privacy" request="string"/>
+</config>

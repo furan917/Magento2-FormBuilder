@@ -1,0 +1,32 @@
+.ffb-admin-visually-hidden { position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
+.ffb-admin-webhook-table:not(.ffb-admin-delivery-table) td { overflow-wrap: anywhere; }
+.ffb-admin-delivery-log { min-width: 840px; }
+.ffb-admin-delivery-attempts { min-width: 760px; }
+.ffb-admin-delivery-table .ffb-admin-nowrap { white-space: nowrap; }
+.ffb-admin-delivery-table .ffb-admin-wrap { overflow-wrap: anywhere; }
+.ffb-admin-webhook-secret { display: block; width: 100%; box-sizing: border-box; color: inherit; margin: 8px 0; padding: 10px 12px; border: 1px solid #1a7f37; border-radius: 8px; background: #e9f6ee; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 13px; overflow-wrap: anywhere; user-select: all; }
+.ffb-admin-webhook-note { margin: 0 0 12px; padding: 10px 12px; border-left: 4px solid #b26a00; background: #fff4e0; border-radius: 4px; }
+.ffb-admin-webhook-fieldset { margin: 0; padding: 0; border: 0; min-width: 0; }
+.ffb-admin-webhook-fieldset legend { padding: 0; margin-bottom: 4px; font-weight: 600; }
+.ffb-admin-webhook-checks { display: grid; gap: 4px; max-height: 220px; overflow-y: auto; padding: 8px; border: 1px solid #c2c2c2; border-radius: 8px; }
+.ffb-rule-field .ffb-admin-webhook-check, .ffb-admin-webhook-check { display: flex; align-items: flex-start; gap: 8px; min-height: 28px; margin-bottom: 0; font-weight: 400; }
+.ffb-rule-field .ffb-admin-webhook-check input, .ffb-admin-webhook-check input { width: auto; min-height: 0; margin-top: 4px; padding: 0; border: 0; box-shadow: none; flex: 0 0 auto; }
+.ffb-admin-webhook-fieldset[hidden] { display: none; }
+.ffb-admin-webhook-check:has(:focus-visible) { outline: 2px solid #007bdb; outline-offset: 1px; border-radius: 4px; }
+.ffb-admin-webhook-facts { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px 24px; margin: 0; }
+.ffb-admin-webhook-facts dt { font-size: 12px; font-weight: 600; color: var(--ffb-rules-muted); }
+.ffb-admin-webhook-facts dd { margin: 2px 0 0; overflow-wrap: anywhere; }
+.ffb-admin-webhook-excerpt { margin: 4px 0 0; padding: 8px 12px; max-height: 160px; overflow: auto; white-space: pre-wrap; overflow-wrap: anywhere; background: #f4f4f4; border-radius: 8px; font-size: 12px; }
+.ffb-admin-webhook-actions { display: flex; flex-wrap: wrap; gap: 16px 32px; }
+.ffb-admin-webhook-actions form { max-width: 320px; }
+.ffb-rules-scroll[tabindex]:focus-visible { outline: 2px solid #007bdb; outline-offset: 2px; }
+.ffb-admin-webhook-reveal { margin-bottom: 12px; }
+.ffb-admin-webhook-reveal:focus-visible { outline: 2px solid #007bdb; outline-offset: 4px; }
+.ffb-admin-webhook-table a:focus-visible { outline: 2px solid #007bdb; outline-offset: 2px; }
+.ffb-admin-webhook-table tbody th { padding: 10px 12px 10px 0; border-bottom: 1px solid var(--ffb-rules-line); vertical-align: top; text-align: left; font-size: inherit; font-weight: 600; color: inherit; overflow-wrap: anywhere; }
+.ffb-admin-webhook-table tbody tr:last-child th { border-bottom: 0; }
+.ffb-admin-delivery-filter { display: flex; flex-wrap: wrap; gap: 8px 12px; align-items: center; margin: 0 0 16px; }
+.ffb-admin-delivery-filter label { font-weight: 600; }
+.ffb-admin-delivery-filter input[type="search"] { width: 24em; max-width: 100%; }
+.ffb-admin-delivery-filter .ffb-rules-hint { flex-basis: 100%; margin: 0; }
+.ffb-rules-pager .ffb-rules-btn[aria-disabled="true"] { opacity: 0.5; cursor: default; }

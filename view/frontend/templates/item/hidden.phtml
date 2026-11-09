@@ -1,0 +1,9 @@
+<?php
+/** @var \Magento\Framework\View\Element\Template $block */
+/** @var \Magento\Framework\Escaper $escaper */
+$form = $block->getData('parent_block');
+extract($form->getItemContext((array)$block->getData('item'), $escaper), EXTR_SKIP);
+?>
+<div class="ffb-item ffb-field ffb-type-hidden"<?= /* @noEscape */ $dataAttrs ?>>
+    <input<?= /* @noEscape */ $attrs(['type' => 'hidden', 'id' => $controlId, 'name' => $base['name']]) ?> value="<?= $escaper->escapeHtmlAttr((string)($item['default'] ?? '')) ?>">
+</div>

@@ -1,0 +1,17 @@
+<?php
+/** @var \Magento\Framework\View\Element\Template $block */
+/** @var \Magento\Framework\Escaper $escaper */
+$form = $block->getData('parent_block');
+extract($form->getItemContext((array)$block->getData('item'), $escaper), EXTR_SKIP);
+$min = (float)($settings['min'] ?? 0);
+$max = (float)($settings['max'] ?? 100);
+$step = (float)($settings['step'] ?? 1);
+$hasDefault = (string)($item['default'] ?? '') !== '';
+$current = $hasDefault ? (string)$item['default'] : (string)$min;
+$unset = (string)__('Not set');
+?>
+<?= /* @noEscape */ $form->renderPartial($block, 'item/_open.phtml', ['group' => false]) ?>
+    <?php // Without a default the slider stays unanswered until the visitor sets it, instead of submitting the minimum. ?>
+    <input<?= /* @noEscape */ $attrs(['type' => 'range'] + $base + ['min' => $min, 'max' => $max, 'step' => $step, 'value' => $current]) ?><?= $hasDefault ? '' : ' data-ffb-unset data-ffb-nodefault' ?>>
+    <output class="ffb-range-value" data-ffb-output data-ffb-unset-label="<?= $escaper->escapeHtmlAttr($unset) ?>" for="<?= $escaper->escapeHtmlAttr($controlId) ?>"><?= $escaper->escapeHtml($hasDefault ? $current : $unset) ?></output>
+<?= /* @noEscape */ $form->renderPartial($block, 'item/_close.phtml', ['group' => false]) ?>

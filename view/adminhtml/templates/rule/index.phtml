@@ -1,0 +1,171 @@
+<?php
+/** @var \Furan\FormBuilder\Block\Adminhtml\Rule\Index $block */
+/** @var \Magento\Framework\Escaper $escaper */
+$filters = $block->getFilters();
+$list = $block->getListing();
+$groups = $block->getBuiltInGroups();
+$sortOptions = ['name' => __('Name (A to Z)'), 'updated' => __('Recently updated'), 'usage' => __('Most used')];
+$usageOptions = ['all' => __('All rules'), 'used' => __('Used on a form'), 'unused' => __('Not used yet')];
+?>
+<div class="ffb-rules">
+    <section class="ffb-rules-card" aria-labelledby="ffb-saved-title">
+        <div class="ffb-rules-head">
+            <div>
+                <h2 class="ffb-rules-title" id="ffb-saved-title">
+                    <?= $escaper->escapeHtml(__('Your saved rules')) ?>
+                    <?php if ($list['all'] > 0): ?>
+                        <span class="ffb-rules-count"><?= (int)$list['all'] ?></span>
+                    <?php endif; ?>
+                </h2>
+                <p class="ffb-rules-muted"><?= $escaper->escapeHtml(__('Save a format once, then pick it from "Add rule" on any text, email, phone or text area field. Editing a rule updates every form that uses it.')) ?></p>
+            </div>
+            <?php if ($block->canSave()): ?>
+                <a class="ffb-rules-btn ffb-rules-btn-primary" href="<?= $escaper->escapeUrl($block->getNewUrl()) ?>"><?= $escaper->escapeHtml(__('Add rule')) ?></a>
+            <?php endif; ?>
+        </div>
+        <?php if ($list['all'] === 0): ?>
+            <p class="ffb-rules-empty"><?= $escaper->escapeHtml(__('No saved rules yet. Start a blank rule, or copy one of the built-in rules below and adjust it.')) ?></p>
+        <?php else: ?>
+            <form class="ffb-rules-toolbar" method="get" action="<?= $escaper->escapeUrl($block->getClearUrl()) ?>" data-ffb-rules-filters>
+                <label class="ffb-rules-field ffb-rules-field-search">
+                    <span><?= $escaper->escapeHtml(__('Search')) ?></span>
+                    <input type="search" name="q" value="<?= $escaper->escapeHtmlAttr($filters['q']) ?>" maxlength="100"
+                           placeholder="<?= $escaper->escapeHtmlAttr(__('Name, code, example or pattern')) ?>">
+                </label>
+                <label class="ffb-rules-field">
+                    <span><?= $escaper->escapeHtml(__('Show')) ?></span>
+                    <select name="usage">
+                        <?php foreach ($usageOptions as $value => $label): ?>
+                            <option value="<?= $escaper->escapeHtmlAttr($value) ?>"<?= $filters['usage'] === $value ? ' selected' : '' ?>><?= $escaper->escapeHtml($label) ?></option>
+                        <?php endforeach; ?>
+                    </select>
+                </label>
+                <label class="ffb-rules-field">
+                    <span><?= $escaper->escapeHtml(__('Sort by')) ?></span>
+                    <select name="sort">
+                        <?php foreach ($sortOptions as $value => $label): ?>
+                            <option value="<?= $escaper->escapeHtmlAttr($value) ?>"<?= $filters['sort'] === $value ? ' selected' : '' ?>><?= $escaper->escapeHtml($label) ?></option>
+                        <?php endforeach; ?>
+                    </select>
+                </label>
+                <label class="ffb-rules-field">
+                    <span><?= $escaper->escapeHtml(__('Per page')) ?></span>
+                    <select name="limit">
+                        <?php foreach (\Furan\FormBuilder\Model\Validation\SavedRuleList::LIMITS as $limit): ?>
+                            <option value="<?= (int)$limit ?>"<?= $filters['limit'] === $limit ? ' selected' : '' ?>><?= (int)$limit ?></option>
+                        <?php endforeach; ?>
+                    </select>
+                </label>
+                <div class="ffb-rules-toolbar-actions">
+                    <button type="submit" class="ffb-rules-btn ffb-rules-btn-outline" data-ffb-rules-apply><?= $escaper->escapeHtml(__('Apply')) ?></button>
+                    <?php if ($block->hasActiveFilters()): ?>
+                        <a class="ffb-rules-btn" href="<?= $escaper->escapeUrl($block->getClearUrl()) ?>"><?= $escaper->escapeHtml(__('Clear filters')) ?></a>
+                    <?php endif; ?>
+                </div>
+            </form>
+            <?php if ($list['total'] === 0): ?>
+                <p class="ffb-rules-empty"><?= $escaper->escapeHtml(__('No saved rules match these filters.')) ?>
+                    <a href="<?= $escaper->escapeUrl($block->getClearUrl()) ?>"><?= $escaper->escapeHtml(__('Clear filters')) ?></a></p>
+            <?php else: ?>
+                <div class="ffb-rules-scroll">
+                    <table class="ffb-rules-table ffb-rules-table-saved">
+                        <thead>
+                        <tr>
+                            <th scope="col"><?= $escaper->escapeHtml(__('Name')) ?></th>
+                            <th scope="col"><?= $escaper->escapeHtml(__('Example')) ?></th>
+                            <th scope="col"><?= $escaper->escapeHtml(__('Pattern')) ?></th>
+                            <th scope="col"><?= $escaper->escapeHtml(__('Used by')) ?></th>
+                            <th scope="col"><?= $escaper->escapeHtml(__('Updated')) ?></th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <?php foreach ($list['rows'] as $rule): ?>
+                            <tr>
+                                <td>
+                                    <a class="ffb-rules-name" href="<?= $escaper->escapeUrl($rule['url']) ?>"><?= $escaper->escapeHtml($rule['label']) ?></a>
+                                    <span class="ffb-rules-mono ffb-rules-sub"><?= $escaper->escapeHtml($rule['code']) ?></span>
+                                </td>
+                                <td><?= $escaper->escapeHtml($rule['example']) ?></td>
+                                <td><code class="ffb-rules-code ffb-rules-clamp" title="<?= $escaper->escapeHtmlAttr($rule['pattern']) ?>"><?= $escaper->escapeHtml($rule['pattern']) ?></code></td>
+                                <td>
+                                    <?php if ($rule['used'] === 0): ?>
+                                        <span class="ffb-rules-pill"><?= $escaper->escapeHtml(__('Not used yet')) ?></span>
+                                    <?php else: ?>
+                                        <span class="ffb-rules-pill is-used"><?= $escaper->escapeHtml($rule['used'] === 1 ? __('1 form') : __('%1 forms', $rule['used'])) ?></span>
+                                    <?php endif; ?>
+                                </td>
+                                <td class="ffb-rules-muted ffb-rules-nowrap"><?= $escaper->escapeHtml($block->formatUpdated($rule['updated_at'])) ?></td>
+                            </tr>
+                        <?php endforeach; ?>
+                        </tbody>
+                    </table>
+                </div>
+                <nav class="ffb-rules-pager" aria-label="<?= $escaper->escapeHtmlAttr(__('Saved rules pages')) ?>">
+                    <span class="ffb-rules-muted"><?= $escaper->escapeHtml(__('Showing %1 to %2 of %3', $list['from'], $list['to'], $list['total'])) ?></span>
+                    <?php if ($list['pages'] > 1): ?>
+                        <span class="ffb-rules-pages">
+                            <?php if ($list['page'] > 1): ?>
+                                <a class="ffb-rules-btn" href="<?= $escaper->escapeUrl($block->getListUrl(['p' => $list['page'] - 1])) ?>"><?= $escaper->escapeHtml(__('Previous')) ?></a>
+                            <?php endif; ?>
+                            <?php foreach (range(max(1, $list['page'] - 2), min($list['pages'], $list['page'] + 2)) as $n): ?>
+                                <?php if ($n === $list['page']): ?>
+                                    <span class="ffb-rules-page is-current" aria-current="page"><?= (int)$n ?></span>
+                                <?php else: ?>
+                                    <a class="ffb-rules-page" href="<?= $escaper->escapeUrl($block->getListUrl(['p' => $n])) ?>"><?= (int)$n ?></a>
+                                <?php endif; ?>
+                            <?php endforeach; ?>
+                            <?php if ($list['page'] < $list['pages']): ?>
+                                <a class="ffb-rules-btn" href="<?= $escaper->escapeUrl($block->getListUrl(['p' => $list['page'] + 1])) ?>"><?= $escaper->escapeHtml(__('Next')) ?></a>
+                            <?php endif; ?>
+                        </span>
+                    <?php endif; ?>
+                </nav>
+            <?php endif; ?>
+        <?php endif; ?>
+    </section>
+
+    <section class="ffb-rules-card" aria-labelledby="ffb-builtin-title" data-ffb-builtin>
+        <div class="ffb-rules-head">
+            <div>
+                <h2 class="ffb-rules-title" id="ffb-builtin-title"><?= $escaper->escapeHtml(__('Built-in rules')) ?></h2>
+                <p class="ffb-rules-muted"><?= $escaper->escapeHtml(__('Ready to use on any form. To change a pattern or message, copy the rule and edit the copy.')) ?></p>
+            </div>
+        </div>
+        <div class="ffb-rules-toolbar" data-ffb-builtin-tools hidden>
+            <label class="ffb-rules-field ffb-rules-field-search">
+                <span><?= $escaper->escapeHtml(__('Search')) ?></span>
+                <input type="search" data-ffb-builtin-search placeholder="<?= $escaper->escapeHtmlAttr(__('Name, example or pattern')) ?>">
+            </label>
+            <div class="ffb-rules-chips" role="group" aria-label="<?= $escaper->escapeHtmlAttr(__('Category')) ?>">
+                <button type="button" class="ffb-rules-chip" data-ffb-builtin-chip="" aria-pressed="true"><?= $escaper->escapeHtml(__('All')) ?></button>
+                <?php foreach (array_keys($groups) as $group): ?>
+                    <button type="button" class="ffb-rules-chip" data-ffb-builtin-chip="<?= $escaper->escapeHtmlAttr($group) ?>" aria-pressed="false"><?= $escaper->escapeHtml($group) ?></button>
+                <?php endforeach; ?>
+            </div>
+        </div>
+        <?php foreach ($groups as $group => $rules): ?>
+            <div class="ffb-rules-builtin-group" data-ffb-builtin-group="<?= $escaper->escapeHtmlAttr($group) ?>">
+                <h3 class="ffb-rules-group"><?= $escaper->escapeHtml($group) ?></h3>
+                <div class="ffb-rules-scroll">
+                    <table class="ffb-rules-table ffb-rules-table-fixed">
+                        <tbody>
+                        <?php foreach ($rules as $rule): ?>
+                            <tr data-ffb-builtin-row data-text="<?= $escaper->escapeHtmlAttr(mb_strtolower($rule['label'] . ' ' . $rule['example'] . ' ' . $rule['pattern'])) ?>">
+                                <td><?= $escaper->escapeHtml($rule['label']) ?></td>
+                                <td><?= $escaper->escapeHtml($rule['example']) ?></td>
+                                <td><code class="ffb-rules-code"><?= $escaper->escapeHtml($rule['pattern']) ?></code></td>
+                                <td class="ffb-rules-action">
+                                    <?php if ($block->canSave()): ?>
+                                        <a href="<?= $escaper->escapeUrl($rule['copy_url']) ?>"><?= $escaper->escapeHtml(__('Copy and edit')) ?></a>
+                                    <?php endif; ?>
+                                </td>
+                            </tr>
+                        <?php endforeach; ?>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        <?php endforeach; ?>
+        <p class="ffb-rules-empty" data-ffb-builtin-empty hidden><?= $escaper->escapeHtml(__('No built-in rules match.')) ?></p>
+    </section>
+</div>

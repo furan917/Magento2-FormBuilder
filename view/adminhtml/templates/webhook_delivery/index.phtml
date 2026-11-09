@@ -1,0 +1,104 @@
+<?php
+/** @var \Furan\FormBuilder\Block\Adminhtml\WebhookDelivery\Index $block */
+/** @var \Magento\Framework\Escaper $escaper */
+$name = $block->getEndpointName();
+$list = $name === null ? ['rows' => [], 'next' => null] : $block->getListing();
+?>
+<div class="ffb-rules">
+    <section class="ffb-rules-card" aria-labelledby="ffb-deliveries-title">
+        <div class="ffb-rules-head">
+            <div>
+                <h2 class="ffb-rules-title" id="ffb-deliveries-title"><?= $escaper->escapeHtml($name === null ? __('Delivery log') : __('Delivery log: %1', $name)) ?></h2>
+                <p class="ffb-rules-muted"><?= $escaper->escapeHtml(__('Newest first. No request headers or bodies are kept.')) ?></p>
+            </div>
+            <a class="ffb-rules-btn ffb-rules-btn-back" href="<?= $escaper->escapeUrl($name === null ? $block->getUrl('*/webhook/') : $block->getBackUrl()) ?>"><?= $escaper->escapeHtml(__('Back')) ?></a>
+        </div>
+        <?php if ($name !== null): ?>
+            <?php $status = $block->getStatus(); ?>
+            <form class="ffb-admin-delivery-filter" method="get" action="<?= $escaper->escapeUrl($block->getClearUrl()) ?>" role="search" aria-label="<?= $escaper->escapeHtmlAttr(__('Filter deliveries')) ?>">
+                <label for="ffb-delivery-status"><?= $escaper->escapeHtml(__('Status')) ?></label>
+                <select id="ffb-delivery-status" name="status" class="admin__control-select">
+                    <option value=""><?= $escaper->escapeHtml(__('All statuses')) ?></option>
+                    <?php foreach ($block->getStatusOptions() as $value => $label): ?>
+                        <option value="<?= (int)$value ?>"<?= $status === $value ? ' selected' : '' ?>><?= $escaper->escapeHtml($label) ?></option>
+                    <?php endforeach; ?>
+                </select>
+                <label for="ffb-delivery-find"><?= $escaper->escapeHtml(__('Find')) ?></label>
+                <input id="ffb-delivery-find" name="find" type="search" class="admin__control-text" maxlength="100" value="<?= $escaper->escapeHtmlAttr($block->getFind()) ?>" placeholder="<?= $escaper->escapeHtmlAttr(__('Submission id, reference or webhook-id')) ?>" aria-describedby="ffb-delivery-find-hint">
+                <button type="submit" class="ffb-rules-btn"><?= $escaper->escapeHtml(__('Filter')) ?></button>
+                <?php if ($block->isFiltered()): ?>
+                    <a class="ffb-rules-btn ffb-rules-btn-back" href="<?= $escaper->escapeUrl($block->getClearUrl()) ?>"><?= $escaper->escapeHtml(__('Clear')) ?></a>
+                <?php endif; ?>
+                <p class="ffb-rules-hint" id="ffb-delivery-find-hint"><?= $escaper->escapeHtml(__('For example 1042, a submission reference, or msg_... from the webhook-id header.')) ?></p>
+            </form>
+        <?php endif; ?>
+        <?php if ($name === null): ?>
+            <p class="ffb-rules-empty"><?= $escaper->escapeHtml(__('The webhook endpoint no longer exists.')) ?></p>
+        <?php elseif ($list['unrecognised']): ?>
+            <p class="ffb-rules-empty" role="alert"><?= $escaper->escapeHtml(__('Enter a submission id, a submission reference or a webhook-id (msg_...).')) ?></p>
+        <?php elseif (!$list['rows'] && $block->isFiltered()): ?>
+            <p class="ffb-rules-empty"><?= $escaper->escapeHtml(__('No deliveries match.')) ?></p>
+        <?php elseif (!$list['rows']): ?>
+            <p class="ffb-rules-empty"><?= $escaper->escapeHtml(__('No deliveries yet.')) ?></p>
+        <?php else: ?>
+            <div class="ffb-rules-scroll" role="region" tabindex="0" aria-labelledby="ffb-deliveries-title">
+                <table class="ffb-rules-table ffb-admin-webhook-table ffb-admin-delivery-table ffb-admin-delivery-log">
+                    <caption class="ffb-admin-visually-hidden"><?= $escaper->escapeHtml(__('Deliveries, newest first')) ?></caption>
+                    <thead>
+                    <tr>
+                        <th scope="col"><?= $escaper->escapeHtml(__('Reference')) ?></th>
+                        <th scope="col"><?= $escaper->escapeHtml(__('Event')) ?></th>
+                        <th scope="col"><?= $escaper->escapeHtml(__('Status')) ?></th>
+                        <th scope="col"><?= $escaper->escapeHtml(__('Attempts')) ?></th>
+                        <th scope="col"><?= $escaper->escapeHtml(__('Last HTTP status')) ?></th>
+                        <th scope="col"><?= $escaper->escapeHtml(__('Error')) ?></th>
+                        <th scope="col"><?= $escaper->escapeHtml(__('Created (UTC)')) ?></th>
+                        <th scope="col"><?= $escaper->escapeHtml(__('Delivered (UTC)')) ?></th>
+                        <th scope="col"><?= $escaper->escapeHtml(__('Submission')) ?></th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <?php foreach ($list['rows'] as $row): ?>
+                        <tr>
+                            <th scope="row" class="ffb-rules-mono"><a class="ffb-rules-name" href="<?= $escaper->escapeUrl($row['view_url']) ?>"><?= $escaper->escapeHtml($row['reference']) ?></a><?php if ($row['replay_of'] !== null): ?> <span class="ffb-rules-hint"><?= $escaper->escapeHtml(__('Replay of #%1', $row['replay_of'])) ?></span><?php endif; ?></th>
+                            <td><?= $escaper->escapeHtml(\Furan\FormBuilder\Model\Webhook\DeliveryStatus::eventLabel($row['event'])) ?></td>
+                            <td class="ffb-admin-nowrap"><span class="ffb-rules-pill"><?= $escaper->escapeHtml(\Furan\FormBuilder\Model\Webhook\DeliveryStatus::label($row['status'])) ?></span></td>
+                            <td class="ffb-admin-nowrap"><?= (int)$row['attempts'] ?></td>
+                            <td class="ffb-admin-nowrap"><?= $row['code'] === null ? '-' : (int)$row['code'] ?></td>
+                            <td class="ffb-admin-wrap"><?php if ($row['error'] === null): ?>-<?php else: ?><?= $escaper->escapeHtml(\Furan\FormBuilder\Model\Webhook\DeliveryStatus::errorLabel($row['error'])) ?> <span class="ffb-rules-hint ffb-rules-mono"><?= $escaper->escapeHtml($row['error']) ?></span><?php endif; ?></td>
+                            <td class="ffb-admin-nowrap"><?= $escaper->escapeHtml($row['created_at']) ?></td>
+                            <td class="ffb-admin-nowrap"><?= $row['delivered_at'] === null ? '-' : $escaper->escapeHtml($row['delivered_at']) ?></td>
+                            <td>
+                                <?php if ($row['submission_url'] !== null): ?>
+                                    <a href="<?= $escaper->escapeUrl($row['submission_url']) ?>">#<?= (int)$row['submission_id'] ?></a>
+                                <?php elseif ($row['submission_id'] !== null): ?>
+                                    #<?= (int)$row['submission_id'] ?>
+                                <?php else: ?>
+                                    -
+                                <?php endif; ?>
+                            </td>
+                        </tr>
+                    <?php endforeach; ?>
+                    </tbody>
+                </table>
+            </div>
+        <?php endif; ?>
+        <?php if ($name !== null && ($list['rows'] || !$block->isFirstPage())): ?>
+            <nav class="ffb-rules-pager" aria-label="<?= $escaper->escapeHtmlAttr(__('Delivery pages')) ?>">
+                <span class="ffb-rules-muted"><?= $escaper->escapeHtml(__('50 per page')) ?></span>
+                <span class="ffb-rules-pages">
+                    <?php if ($block->isFirstPage()): ?>
+                        <span class="ffb-rules-btn" aria-disabled="true"><?= $escaper->escapeHtml(__('Newest')) ?></span>
+                    <?php else: ?>
+                        <a class="ffb-rules-btn" href="<?= $escaper->escapeUrl($block->getFirstUrl()) ?>"><?= $escaper->escapeHtml(__('Newest')) ?></a>
+                    <?php endif; ?>
+                    <?php if ($list['next'] === null): ?>
+                        <span class="ffb-rules-btn" aria-disabled="true"><?= $escaper->escapeHtml(__('Older')) ?></span>
+                    <?php else: ?>
+                        <a class="ffb-rules-btn" href="<?= $escaper->escapeUrl($block->getNextUrl()) ?>"><?= $escaper->escapeHtml(__('Older')) ?></a>
+                    <?php endif; ?>
+                </span>
+            </nav>
+        <?php endif; ?>
+    </section>
+</div>
