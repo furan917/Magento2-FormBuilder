@@ -4,12 +4,12 @@ A drag-and-drop form builder for the Magento and Mage-OS admin. Build multi-page
 
 <table>
   <tr>
-    <td width="50%"><img src="docs/builder.png" alt="Form builder"></td>
-    <td width="50%"><img src="docs/storefront.png" alt="Storefront form with validation"></td>
+    <td width="50%"><img src="docs/builder.webp" alt="Form builder"></td>
+    <td width="50%"><img src="docs/storefront.webp" alt="Storefront form with validation"></td>
   </tr>
   <tr>
-    <td width="50%"><img src="docs/pages.png" alt="Multi-page form"></td>
-    <td width="50%"><img src="docs/submission.png" alt="Submission in the admin"></td>
+    <td width="50%"><img src="docs/pages.webp" alt="Multi-page form"></td>
+    <td width="50%"><img src="docs/submission.webp" alt="Submission in the admin"></td>
   </tr>
 </table>
 
