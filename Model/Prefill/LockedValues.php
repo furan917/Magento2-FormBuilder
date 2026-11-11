@@ -3,11 +3,14 @@ declare(strict_types=1);
 
 namespace Furan\FormBuilder\Model\Prefill;
 
+use Furan\FormBuilder\Model\FieldType\Pool;
+
 class LockedValues
 {
     public function __construct(
         private readonly PrefillService $prefillService,
-        private readonly Sources $sources
+        private readonly Sources $sources,
+        private readonly Pool $fieldTypes
     ) {
     }
 
@@ -37,7 +40,7 @@ class LockedValues
     }
 
     /**
-     * Overwrites posted answers of locked prefill fields with server-side data.
+     * Overwrites posted answers of locked prefill fields and fields of fixed-value types with server-side data.
      *
      * @param list<array<string, mixed>> $fields schema field items
      * @param array<string, mixed>|null $product
@@ -46,6 +49,12 @@ class LockedValues
      */
     public function apply(array $fields, array $posted, int $customerId, ?array $product, int $storeId): array
     {
+        foreach ($fields as $field) {
+            $fixed = $this->fieldTypes->fixedValue($field);
+            if ($fixed !== null) {
+                $posted[(string)$field['name']] = $fixed;
+            }
+        }
         $locked = array_filter($fields, fn(array $f): bool => !empty($f['locked']) && (string)($f['prefill'] ?? '') !== '');
         // A lock never falls back to the browser: unknown, removed or unsuitable sources blank the answer.
         $usable = [];

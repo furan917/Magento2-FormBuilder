@@ -204,7 +204,11 @@ class ProcessorTest extends TestCase
                 $pool
             ),
             new \Furan\FormBuilder\Model\Access\FormAccess(),
-            new \Furan\FormBuilder\Model\Prefill\LockedValues($this->prefill, \Furan\FormBuilder\Test\Unit\Helper\PrefillSourcePools::builtIn()),
+            new \Furan\FormBuilder\Model\Prefill\LockedValues(
+                $this->prefill,
+                \Furan\FormBuilder\Test\Unit\Helper\PrefillSourcePools::builtIn(),
+                $pool
+            ),
             new \Furan\FormBuilder\Model\Submission\SubmissionEditor($this->updater, $this->repository, $runner, $files, $this->logger),
             new \Furan\FormBuilder\Model\Customer\Impersonation($this->session), $runner, $files, $this->submissionBuilder(),
             new \Furan\FormBuilder\Model\Submission\EditTargetResolver($this->editToken, $this->respondents, $this->updater),
@@ -1499,6 +1503,24 @@ class ProcessorTest extends TestCase
         );
 
         $this->assertTrue($result->isSuccess());
+    }
+
+    public function testItValidatesAFixedValueHiddenFieldWithItsDefaultWhateverWasPosted(): void
+    {
+        $validator = $this->createMock(Validator::class);
+        $this->fixture(validator: $validator);
+        $schema = ['version' => 1, 'pages' => [['id' => 'p_aaaa01', 'title' => '', 'items' => [
+            ['id' => 'f_camp01', 'kind' => 'field', 'type' => 'hidden', 'name' => 'campaign', 'label' => 'Campaign',
+                'default' => 'spring-sale', 'settings' => ['source' => 'static'], 'prefill' => '', 'locked' => false],
+            ['id' => 'f_utm001', 'kind' => 'field', 'type' => 'hidden', 'name' => 'utm', 'label' => 'UTM',
+                'default' => 'direct', 'settings' => ['source' => 'query', 'query_param' => 'utm'], 'prefill' => '', 'locked' => false],
+        ]]]];
+        $validator->expects($this->once())->method('validate')
+            ->with($this->anything(), ['campaign' => 'spring-sale', 'utm' => 'news'])
+            ->willReturn(new ValidationResult(['campaign' => 'spring-sale', 'utm' => 'news'], [], []));
+
+        $pool = new Pool(['file' => new File(), 'text' => new Text(), 'hidden' => new \Furan\FormBuilder\Model\FieldType\Hidden()]);
+        $this->processor([], $pool)->process($this->form([], $schema), $this->request(['campaign' => 'tampered', 'utm' => 'news']));
     }
 
     public function testItNeverRequiresALockedFieldWhoseAnswerTheServerOwns(): void

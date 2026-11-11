@@ -835,10 +835,20 @@
   function settingsPanel(doc, field, type, commit, config) {
     const p = el(doc, 'div');
     const spec = (type && type.settingsSpec) || {};
+    const settings = field.settings || {};
+    const current = (name) => (settings[name] === undefined ? (spec[name] || {}).default : settings[name]);
+    // `visible_when` maps another setting to the values that show this one.
+    const visible = (when) => !when || Object.keys(when).every((key) => [].concat(when[key]).indexOf(current(key)) !== -1);
     Object.keys(spec).forEach((name) => {
-      p.appendChild(settingControl(doc, name, spec[name], (field.settings || {})[name], (n, v) => {
-        commit({ settings: Object.assign({}, field.settings || {}, { [n]: v }) });
+      if (!visible(spec[name].visible_when)) {
+        return;
+      }
+      p.appendChild(settingControl(doc, name, spec[name], settings[name], (n, v) => {
+        commit({ settings: Object.assign({}, settings, { [n]: v }) });
       }, { masks: config.masks || [], maskHints: maskHints(field, config) }));
+      if (typeof spec[name].hint === 'string' && spec[name].hint !== '') {
+        p.appendChild(el(doc, 'p', { class: 'ffb-admin-hint', text: spec[name].hint }));
+      }
     });
     return p;
   }

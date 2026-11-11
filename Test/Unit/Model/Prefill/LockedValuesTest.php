@@ -6,6 +6,7 @@ namespace Furan\FormBuilder\Test\Unit\Model\Prefill;
 use Furan\FormBuilder\Model\Prefill\LockedValues;
 use Furan\FormBuilder\Model\Prefill\PrefillService;
 use Furan\FormBuilder\Test\Unit\Helper\ArrayPrefillSource;
+use Furan\FormBuilder\Test\Unit\Helper\FieldPools;
 use Furan\FormBuilder\Test\Unit\Helper\PrefillSourcePools;
 use PHPUnit\Framework\MockObject\Stub;
 use PHPUnit\Framework\TestCase;
@@ -26,7 +27,7 @@ class LockedValuesTest extends TestCase
         return new LockedValues($this->prefill, PrefillSourcePools::builtIn([
             'product.stock' => $this->stock,
             'customer.loyalty' => new ArrayPrefillSource('customer.loyalty', 'customer', ['text'], 'L-1'),
-        ]));
+        ]), FieldPools::builtIn());
     }
 
     private function field(string $name, string $type, string $prefill, bool $locked = true): array
@@ -38,6 +39,73 @@ class LockedValuesTest extends TestCase
     {
         return ['id' => 9, 'sku' => 'SKU-9', 'name' => 'Widget', 'url' => 'https://shop.test/w.html', 'price' => 19.9,
             'priceFormatted' => '$19.90', 'currency' => 'USD'];
+    }
+
+    private function hidden(string $name, array $settings, string $default, string $prefill = ''): array
+    {
+        return ['kind' => 'field', 'name' => $name, 'type' => 'hidden', 'default' => $default, 'settings' => $settings,
+            'prefill' => $prefill, 'locked' => false];
+    }
+
+    public function testItOverwritesAFixedValueHiddenFieldWithItsDefault(): void
+    {
+        $fields = [$this->hidden('campaign', ['source' => 'static'], 'spring-sale')];
+
+        $result = $this->locked()->apply($fields, ['campaign' => 'tampered', 'other' => 'x'], 0, null, 1);
+
+        $this->assertSame(['campaign' => 'spring-sale', 'other' => 'x'], $result);
+    }
+
+    public function testItSetsAFixedValueHiddenFieldThatWasNotPosted(): void
+    {
+        $result = $this->locked()->apply([$this->hidden('campaign', ['source' => 'static'], 'spring-sale')], [], 0, null, 1);
+
+        $this->assertSame(['campaign' => 'spring-sale'], $result);
+    }
+
+    public function testItTreatsAHiddenFieldWithoutASourceAsAFixedValue(): void
+    {
+        $result = $this->locked()->apply([$this->hidden('campaign', [], 'spring-sale')], ['campaign' => 'tampered'], 0, null, 1);
+
+        $this->assertSame(['campaign' => 'spring-sale'], $result);
+    }
+
+    public function testItKeepsThePostedValueOfBrowserSourcedHiddenFields(): void
+    {
+        $fields = [
+            $this->hidden('q', ['source' => 'query', 'query_param' => 'utm_source'], 'direct'),
+            $this->hidden('url', ['source' => 'page_url'], ''),
+            $this->hidden('ref', ['source' => 'referrer'], ''),
+            $this->hidden('crm', ['source' => 'crm.id'], ''),
+        ];
+        $posted = ['q' => 'google', 'url' => 'https://shop.test/forms/x', 'ref' => 'https://example.com/', 'crm' => 'C-7'];
+
+        $this->assertSame($posted, $this->locked()->apply($fields, $posted, 0, null, 1));
+    }
+
+    public function testItLeavesAFixedValueHiddenFieldWithAPrefillSourceToThePrefillRules(): void
+    {
+        $fields = [$this->hidden('mail', ['source' => 'static'], '', 'customer.email')];
+
+        $this->assertSame(['mail' => 'guest@example.com'], $this->locked()->apply($fields, ['mail' => 'guest@example.com'], 0, null, 1));
+    }
+
+    public function testItIgnoresMalformedHiddenSettingsWithoutWarnings(): void
+    {
+        $fields = [
+            ['kind' => 'field', 'name' => 'a', 'type' => 'hidden', 'default' => ['x'], 'settings' => []],
+            ['kind' => 'field', 'name' => 'b', 'type' => 'hidden', 'default' => 'd', 'settings' => ['source' => ['static']]],
+            ['kind' => 'field', 'name' => 'c', 'type' => 'hidden', 'default' => 'd', 'settings' => 'static'],
+        ];
+
+        $this->assertSame(['b' => 'p', 'a' => '', 'c' => 'd'], $this->locked()->apply($fields, ['b' => 'p'], 0, null, 1));
+    }
+
+    public function testItNeverFixesTheValueOfOtherFieldTypes(): void
+    {
+        $field = ['kind' => 'field', 'name' => 'note', 'type' => 'text', 'default' => 'd', 'settings' => ['source' => 'static']];
+
+        $this->assertSame(['note' => 'typed'], $this->locked()->apply([$field], ['note' => 'typed'], 0, null, 1));
     }
 
     public function testItOverwritesLockedFieldsWithTheCustomersRealData(): void

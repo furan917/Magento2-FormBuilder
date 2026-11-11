@@ -55,6 +55,7 @@ A custom rule, operator or field type needs both a PHP pool item and a JS regist
 | `FreeTextTypeInterface` | Latest answers listed as free text in analytics |
 | `ConsentTypeInterface` | Marker: records consent. Never required, never set by a condition, never drafted, blank under Login as Customer |
 | `ServerValueTypeInterface` | Marker: the server owns the value. A condition's `set_value` always overwrites it, and a draft never stores it |
+| `FixedValueTypeInterface` | `fixedValue(array $field)`: the answer the server stores whatever the browser sends, or `null` to keep the posted answer. Hidden fields with the Fixed value source use it |
 | `EmailAddressTypeInterface` | Marker: the visitor's email address. Offered in the form's email pickers and as the notification reply-to |
 | `PersonalByDefaultInterface` | The "contains personal data" flag defaults to on |
 | `ConditionSourceInterface` | Whether conditions and "matches" rules may reference the type (default yes) |
@@ -65,7 +66,7 @@ A custom rule, operator or field type needs both a PHP pool item and a JS regist
 | `RenderHintsInterface` | `renderHints(array $field, int $storeId)`: data for the storefront template as `$item['render']`. Per form and store view, never per visitor: pages are cached |
 | `StatsLabelInterface` | `statsLabel(string $value, array $field)`: the chart label for a stored value, e.g. a country name for an ISO code |
 
-Settings spec entries are `name => [type, default, min, max, values, value_labels, label, translatable]`, with `type` one of `int`, `number`, `string`, `bool`, `enum`, `list`. The builder draws a control for each.
+Settings spec entries are `name => [type, default, min, max, values, value_labels, label, translatable, hint, visible_when]`, with `type` one of `int`, `number`, `string`, `bool`, `enum`, `list`. The builder draws a control for each. `hint` is a line of help under the control. `visible_when` maps another setting to the values that show this one, for example `['source' => ['query']]`.
 
 ### Worked example
 
@@ -352,7 +353,7 @@ The rest of the example is plain Magento:
 - **Operator**: `ConditionOperatorInterface` (`appliesTo($typeCode)` decides where the builder offers it, `needsValue()` hides the value input, `evaluate($actual, $expected, $field)` gets raw values). Browser side: `registry.operator(code, fn(rawActual, rawExpected, sourceField) -> bool)`. The Normalizer accepts a rule only if its operator is pooled and applies to the referenced field's type.
 - **Condition action**: `ConditionActionInterface` (`targets()` lists the item kinds it can sit on, `needsParam()` is `value`, `options` or null, `apply(Api\Data\FormState, $targetId, $param, $matched)` runs whether or not the rules matched). Built-ins are `show`, `hide`, `require`, `set_value` and `hide_options`. A pooled action also needs `registry.conditionAction` in the browser.
 - **Prefill source**: `PrefillSourceInterface` (`getGroup()` is `customer` or `product`, `suitsType()`, `resolve(Api\Data\PrefillContextInterface)` returns a string, an address array or null). Product sources are always locked and re-read on submit.
-- **Hidden field source**: add the code to `Hidden`'s `sources` argument and call `registry.hiddenSource(code, fn(field) -> string)`. Without a registration the field stays empty.
+- **Hidden field source**: add the code to `Hidden`'s `sources` argument and call `registry.hiddenSource(code, fn(field) -> string)`. Without a registration, or when the function returns an empty string, the field keeps its default value. The value comes from the browser, so treat it as visitor input.
 
 ## Spam checks
 

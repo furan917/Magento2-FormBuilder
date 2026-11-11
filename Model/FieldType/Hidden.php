@@ -3,13 +3,15 @@ declare(strict_types=1);
 
 namespace Furan\FormBuilder\Model\FieldType;
 
+use Furan\FormBuilder\Api\FieldType\FixedValueTypeInterface;
 use Furan\FormBuilder\Api\FieldType\ServerValueTypeInterface;
 use Furan\FormBuilder\Api\FieldType\StatsAwareTypeInterface;
 
-class Hidden extends AbstractFieldType implements StatsAwareTypeInterface, ServerValueTypeInterface
+class Hidden extends AbstractFieldType implements StatsAwareTypeInterface, ServerValueTypeInterface, FixedValueTypeInterface
 {
+    private const SOURCE_FIXED = 'static';
     private const SOURCE_CODE = '/^[a-z][a-z0-9_.-]{0,63}$/';
-    private const BUILT_IN_SOURCES = ['static', 'query', 'page_url', 'referrer'];
+    private const BUILT_IN_SOURCES = [self::SOURCE_FIXED, 'query', 'page_url', 'referrer'];
 
     private const MAX_LABEL = 100;
 
@@ -60,12 +62,25 @@ class Hidden extends AbstractFieldType implements StatsAwareTypeInterface, Serve
         return [
             'source' => [
                 'type' => 'enum',
-                'default' => 'static',
+                'default' => self::SOURCE_FIXED,
                 'values' => $this->sources,
                 'value_labels' => $this->valueLabels(),
+                'hint' => (string)__(
+                    "Fixed value saves the Default value. The other sources come from the visitor's browser, which can change them."
+                ),
             ],
-            'query_param' => ['type' => 'string', 'default' => ''],
+            'query_param' => ['type' => 'string', 'default' => '', 'visible_when' => ['source' => ['query']]],
         ];
+    }
+
+    /** A prefill source fills the field instead, under the prefill rules. */
+    public function fixedValue(array $field): ?string
+    {
+        $source = is_array($field['settings'] ?? null) ? ($field['settings']['source'] ?? '') : '';
+        if (($field['prefill'] ?? '') !== '' || !in_array($source, ['', self::SOURCE_FIXED], true)) {
+            return null;
+        }
+        return is_scalar($field['default'] ?? null) ? (string)$field['default'] : '';
     }
 
     public function statsKind(array $field): ?int

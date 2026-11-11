@@ -1094,6 +1094,7 @@ Your reply emails to guests contain a private link to answer on the website. Nee
 "Reference: %reference","Referentie: %reference"
 "Search by reference","Zoeken op referentie"
 "Fixed value","Vaste waarde"
+"Fixed value saves the Default value. The other sources come from the visitor's browser, which can change them.","Vaste waarde slaat de Standaardwaarde op. De andere bronnen komen uit de browser van de bezoeker, die ze kan wijzigen."
 "Page URL","Pagina-URL"
 "Referrer","Verwijzer"
 "Please wait a moment and try again.","Wacht even en probeer het opnieuw."
