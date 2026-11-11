@@ -8,8 +8,8 @@ use Furan\FormBuilder\Api\FieldType\RenderHintsInterface;
 use Furan\FormBuilder\Api\FieldType\StatsAwareTypeInterface;
 class Scale extends AbstractFieldType implements StatsAwareTypeInterface, AdminViewTypeInterface, RenderHintsInterface
 {
-    private const DEFAULT_MIN = 1;
-    private const DEFAULT_MAX = 5;
+    public const DEFAULT_MIN = 1;
+    public const DEFAULT_MAX = 5;
 
     public function getCode(): string
     {

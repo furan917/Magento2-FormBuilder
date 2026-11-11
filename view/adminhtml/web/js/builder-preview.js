@@ -48,6 +48,7 @@
     map: 'M3 6l6-2 6 2 6-2v14l-6 2-6-2-6 2zM9 4v14M15 6v14',
     list: 'M4 5h12v4H4zM4 11h12v4H4zM19 18v4M17 20h4',
     toggle: 'M3 8h18v8H3zM15 12a2 2 0 1 0 0.01 0z',
+    newsletter: 'M3 7h13v11H3zM3 8l6.5 4.5L16 8M19 4v6M16 7h6',
     heading: 'M6 4v16M18 4v16M6 12h12',
     paragraph: 'M5 6h14M5 10h14M5 14h14M5 18h8',
     divider: 'M3 12h18',
@@ -62,6 +63,8 @@
   };
 
   const NATIVE_INPUT_TYPES = ['text', 'email', 'tel', 'url', 'number', 'date', 'datetime', 'time', 'month', 'suggest', 'color', 'hidden', 'password'];
+  const PICKER_TYPES = ['date', 'time', 'datetime', 'month'];
+  const HEX_COLOUR = /^#[0-9a-f]{6}$/i;
 
   function el(doc, tag, cls, text) {
     const node = doc.createElement(tag);
@@ -244,6 +247,27 @@
     return row;
   }
 
+  function listbox(doc, item) {
+    const labels = optionLabels(item);
+    const wrap = el(doc, 'div', 'ffb-admin-mock-listbox');
+    labels.slice(0, MAX_OPTIONS).forEach((label) => wrap.appendChild(el(doc, 'div', 'ffb-admin-mock-option', label)));
+    if (labels.length > MAX_OPTIONS) {
+      wrap.appendChild(el(doc, 'div', 'ffb-admin-mock-more', tr('+%1 more', labels.length - MAX_OPTIONS)));
+    }
+    return wrap;
+  }
+
+  // The browser's own colour input shows black until a value is set.
+  function colour(doc, item) {
+    const value = HEX_COLOUR.test(String(item.default || '')) ? String(item.default).toLowerCase() : '#000000';
+    const b = el(doc, 'div', 'ffb-admin-mock-input');
+    const swatch = el(doc, 'span', 'ffb-admin-mock-swatch');
+    swatch.style.backgroundColor = value;
+    b.appendChild(swatch);
+    b.appendChild(el(doc, 'span', 'ffb-admin-mock-text', value));
+    return b;
+  }
+
   function toggle(doc, item) {
     const row = el(doc, 'div', 'ffb-admin-mock-choice');
     row.appendChild(el(doc, 'span', 'ffb-admin-mock-switch'));
@@ -262,7 +286,11 @@
     } else if (type === 'textarea') {
       node = box(doc, placeholder, true, false);
       node.classList.add('is-tall');
-    } else if (type === 'select' || type === 'multiselect' || type === 'country') {
+    } else if (type === 'multiselect') {
+      node = listbox(doc, item);
+    } else if (type === 'color') {
+      node = colour(doc, item);
+    } else if (type === 'select' || type === 'country') {
       const first = optionLabels(item)[0] || (type === 'country' ? tr('Select a country') : tr('Select...'));
       node = box(doc, placeholder || first, !!placeholder || type === 'country', true);
     } else if (type === 'radio') {
@@ -271,7 +299,7 @@
       node = choiceList(doc, item, 'check');
     } else if (type === 'checkbox') {
       node = singleCheckbox(doc, item, 'check');
-    } else if (type === 'consent') {
+    } else if (type === 'consent' || type === 'newsletter') {
       node = singleCheckbox(doc, item, 'check');
     } else if (type === 'rating') {
       node = stars(doc, item);
@@ -305,6 +333,11 @@
       if (suffix) {
         node.appendChild(el(doc, 'span', 'ffb-admin-mock-affix', suffix));
       }
+      if (PICKER_TYPES.indexOf(type) >= 0) {
+        node.appendChild(icon(doc, type));
+      } else if (type === 'number') {
+        node.appendChild(el(doc, 'span', 'ffb-admin-mock-stepper'));
+      }
     } else if (meta.hasOptions) {
       node = meta.isMultiValue ? choiceList(doc, item, 'check') : box(doc, optionLabels(item)[0] || tr('Select...'), false, true);
     } else {
@@ -316,7 +349,7 @@
   }
 
   function hasOwnLabel(item) {
-    return item.type === 'checkbox' || item.type === 'consent' || item.type === 'toggle';
+    return item.type === 'checkbox' || item.type === 'consent' || item.type === 'newsletter' || item.type === 'toggle';
   }
 
   // Rendered look of a content item.

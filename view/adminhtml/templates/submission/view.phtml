@@ -1,5 +1,6 @@
 <?php
 use Furan\FormBuilder\Api\FieldType\AdminViewTypeInterface as Kind;
+use Furan\FormBuilder\Model\FieldType\Scale;
 
 /** @var \Furan\FormBuilder\Block\Adminhtml\Submission\View $block */
 /** @var \Magento\Framework\Escaper $escaper */
@@ -106,7 +107,7 @@ $product = $block->getProductContext();
                                     <?= $escaper->escapeHtml(__('%1 of %2', $score, $max)) ?>
                                 <?php elseif ($kind === Kind::KIND_SCALE): ?>
                                     <span class="ffb-sub-score"><?= $escaper->escapeHtml($values[0]) ?></span>
-                                    <span class="ffb-sub-muted"><?= $escaper->escapeHtml(__('on a %1 to %2 scale', (int)($settings['min'] ?? 0), (int)($settings['max'] ?? 10))) ?></span>
+                                    <span class="ffb-sub-muted"><?= $escaper->escapeHtml(__('on a %1 to %2 scale', (int)($settings['min'] ?? Scale::DEFAULT_MIN), (int)($settings['max'] ?? Scale::DEFAULT_MAX))) ?></span>
                                 <?php elseif ($kind === Kind::KIND_BOOLEAN): ?>
                                     <?php if ($values[0] === 'Yes'): ?>
                                         <span class="ffb-sub-yes"><?= $escaper->escapeHtml(__('Yes')) ?></span>

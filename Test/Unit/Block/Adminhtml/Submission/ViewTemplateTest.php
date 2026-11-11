@@ -284,6 +284,8 @@ class ViewTemplateTest extends TestCase
                 '<span class="ffb-sub-stars" aria-hidden="true">★★★<span>★★</span></span> 3 of 5'],
             'scale' => [['type' => 'scale', 'value' => '7', 'field' => ['settings' => ['min' => 0, 'max' => 10]]],
                 '<span class="ffb-sub-score">7</span><span class="ffb-sub-muted">on a 0 to 10 scale</span>'],
+            'scale without stored bounds' => [['type' => 'scale', 'value' => '4', 'field' => ['settings' => []]],
+                '<span class="ffb-sub-score">4</span><span class="ffb-sub-muted">on a 1 to 5 scale</span>'],
             'checkbox yes' => [['type' => 'checkbox', 'value' => 'yes'], '<span class="ffb-sub-yes">Yes</span>'],
             'toggle no' => [['type' => 'toggle', 'value' => ''], '<span class="ffb-sub-muted">No</span>'],
             'consent yes' => [['type' => 'consent', 'value' => 'yes'], '<span class="ffb-sub-yes">Yes</span>'],
