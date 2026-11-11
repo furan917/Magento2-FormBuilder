@@ -3,8 +3,8 @@
 /** @var \Magento\Framework\Escaper $escaper */
 $form = $block->getData('parent_block');
 extract($form->getItemContext((array)$block->getData('item'), $escaper), EXTR_SKIP);
-$min = min(1, max(0, (int)($settings['min'] ?? 1)));
-$max = min(10, max(2, (int)($settings['max'] ?? 5)));
+$min = min(1, max(0, (int)($settings['min'] ?? \Furan\FormBuilder\Model\FieldType\Scale::DEFAULT_MIN)));
+$max = min(10, max(2, (int)($settings['max'] ?? \Furan\FormBuilder\Model\FieldType\Scale::DEFAULT_MAX)));
 $lowLabel = trim((string)($settings['low_label'] ?? ''));
 $highLabel = trim((string)($settings['high_label'] ?? ''));
 $default = (string)($item['default'] ?? '');

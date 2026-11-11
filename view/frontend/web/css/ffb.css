@@ -101,9 +101,10 @@
     margin: 0;
 }
 
+/* Field spacing comes from the grid gap; themes may add fieldset~fieldset margins. */
 .ffb fieldset.ffb-field {
     min-width: 0;
-    margin-inline: 0;
+    margin: 0;
     padding: 0;
     border: 0;
 }
@@ -452,7 +453,9 @@
     padding: 0.35em;
 }
 
+/* Chrome sizes the swatch from the input's height; auto collapses it. */
 .ffb-skin .ffb-input[type="color"] {
+    height: var(--ffb-control-h);
     width: 4.5em;
     padding: 0.3em;
     cursor: pointer;
@@ -750,6 +753,11 @@
     background: #fff;
     box-shadow: 0 1px 2px rgba(0, 0, 0, 0.25);
     transform: translateX(0);
+}
+
+/* Themes such as Hyvä draw their own thumb on [role="switch"]. */
+.ffb-skin input.ffb-choice.ffb-switch[type="checkbox"]::after {
+    content: none;
 }
 
 .ffb-skin input.ffb-choice.ffb-switch[type="checkbox"]:checked {

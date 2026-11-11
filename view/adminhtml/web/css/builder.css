@@ -185,6 +185,15 @@
 .ffb-admin-mock-input.is-placeholder .ffb-admin-mock-text { color: #9a9a9a; }
 .ffb-admin-mock-input.is-tall { min-height: 68px; align-items: flex-start; }
 .ffb-admin-mock-input.is-hidden-field { border-style: dashed; background: #f6f6f6; }
+.ffb-admin-mock-input > .ffb-admin-icon { flex: 0 0 16px; width: 16px; height: 16px; margin-left: 8px; color: #666; }
+.ffb-admin-mock-swatch { flex: 0 0 28px; height: 18px; margin-right: 8px; border: 1px solid #8a8a8a; border-radius: 2px; }
+.ffb-admin-mock-stepper { display: flex; flex-direction: column; gap: 3px; margin-left: 8px; flex: 0 0 auto; }
+.ffb-admin-mock-stepper::before, .ffb-admin-mock-stepper::after { content: ""; border: 4px solid transparent; }
+.ffb-admin-mock-stepper::before { border-bottom: 5px solid #666; border-top-width: 0; }
+.ffb-admin-mock-stepper::after { border-top: 5px solid #666; border-bottom-width: 0; }
+.ffb-admin-mock-listbox { padding: 3px 0; border: 1px solid #c2c2c2; background: #fff; border-radius: 2px; font-size: 13px; }
+.ffb-admin-mock-option { padding: 2px 9px; }
+.ffb-admin-mock-listbox > .ffb-admin-mock-more { padding: 2px 9px; }
 .ffb-admin-mock-chevron { width: 7px; height: 7px; border: solid #666; border-width: 0 2px 2px 0; transform: rotate(45deg); margin: -3px 2px 0 8px; flex: 0 0 auto; }
 .ffb-admin-mock-choices { display: flex; flex-direction: column; gap: 5px; }
 .ffb-admin-mock-choices.is-inline { flex-direction: row; flex-wrap: wrap; gap: 5px 16px; }
