@@ -47,6 +47,30 @@ class HiddenTest extends TestCase
         return $this->normalizer($hidden)->normalize($schema)['pages'][0]['items'][0]['settings']['source'];
     }
 
+    public function testItShowsTheQueryParameterSettingOnlyForTheQuerySource(): void
+    {
+        $this->assertSame(['source' => ['query']], (new Hidden())->getSettingsSpec()['query_param']['visible_when']);
+    }
+
+    public function testItExplainsWhereEachSourceGetsItsValue(): void
+    {
+        $hint = (new Hidden())->getSettingsSpec()['source']['hint'];
+
+        $this->assertStringContainsString('Default value', $hint);
+        $this->assertStringContainsString('browser', $hint);
+    }
+
+    public function testItKeepsTheSettingsOfASavedHiddenFieldFreeOfSpecMetadata(): void
+    {
+        $schema = ['pages' => [['title' => 'P', 'items' => [
+            ['kind' => 'field', 'type' => 'hidden', 'name' => 'h', 'label' => 'H', 'settings' => ['source' => 'static']],
+        ]]]];
+
+        $settings = $this->normalizer(new Hidden())->normalize($schema)['pages'][0]['items'][0]['settings'];
+
+        $this->assertSame(['source', 'query_param'], array_keys($settings));
+    }
+
     public function testItAcceptsAHiddenSourceCodeAddedThroughDiWhenTheFormIsSaved(): void
     {
         $this->assertSame('campaign.cookie', $this->sourceAfterSave(new Hidden(['campaign.cookie']), 'campaign.cookie'));

@@ -1094,6 +1094,7 @@ Your reply emails to guests contain a private link to answer on the website. Nee
 "Reference: %reference","Referens: %reference"
 "Search by reference","Sök på referens"
 "Fixed value","Fast värde"
+"Fixed value saves the Default value. The other sources come from the visitor's browser, which can change them.","Fast värde sparar Standardvärde. De andra källorna kommer från besökarens webbläsare, som kan ändra dem."
 "Page URL","Sidans URL"
 "Referrer","Hänvisare"
 "Please wait a moment and try again.","Vänta ett ögonblick och försök igen."

@@ -409,6 +409,25 @@ test('it keeps inputs on non current pages enabled so their values are submitted
   assert.equal(t.submitCalls()[0].init.body.get('fields[message]'), 'hidden page value');
 });
 
+test('it keeps the default value when a browser source gives nothing', async () => {
+  const cases = [
+    ['referrer', 'https://shop.test/forms/contact', null],
+    ['query', 'https://shop.test/forms/contact', null],
+    ['query', 'https://shop.test/forms/contact?utm=', null],
+    ['query', 'https://shop.test/forms/contact?utm=%20%20', null],
+  ];
+  for (const [source, url, referrer] of cases) {
+    const t = boot({
+      url,
+      ...(referrer ? { referrer } : {}),
+      config: (cfg) => { cfg.schema.pages[1].items[2].settings.source = source; },
+    });
+    t.q('[name="fields[source]"]').defaultValue = 'fallback';
+    await t.ready();
+    assert.equal(t.q('[name="fields[source]"]').value, 'fallback', source + ' ' + url);
+  }
+});
+
 test('it fills hidden fields from the query string page url and referrer', async () => {
   const t = boot({ url: 'https://shop.test/forms/contact?utm=' + 'x'.repeat(300) });
   await t.ready();

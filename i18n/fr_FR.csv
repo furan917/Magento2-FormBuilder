@@ -1094,6 +1094,7 @@ Your reply emails to guests contain a private link to answer on the website. Nee
 "Reference: %reference","Référence : %reference"
 "Search by reference","Rechercher par référence"
 "Fixed value","Valeur fixe"
+"Fixed value saves the Default value. The other sources come from the visitor's browser, which can change them.","Valeur fixe enregistre la Valeur par défaut. Les autres sources viennent du navigateur du visiteur, qui peut les modifier."
 "Page URL","URL de la page"
 "Referrer","Référent"
 "Please wait a moment and try again.","Veuillez patienter un instant et réessayer."

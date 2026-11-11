@@ -615,7 +615,8 @@
       }
       var w = wrapperOf(f.name);
       var input = w && w.querySelector('input');
-      if (input && value !== null) {
+      // A source that gives nothing keeps the field's default value.
+      if (input && value !== null && value !== undefined && String(value).trim() !== '') {
         input.value = String(value).slice(0, 255);
       }
     });

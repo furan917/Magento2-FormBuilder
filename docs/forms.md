@@ -14,6 +14,13 @@ Forms live under **Content → Form Builder → Forms**. Each active form is ser
 - **Presets**: full name, email with confirmation, phone, address, yes/no, date of birth, NPS and terms consent.
 - **Layout**: pages with a progress indicator, sections, headings, paragraphs, rich text, notices, a review step, dividers and spacers on a 6-column grid.
 
+Hidden fields take their value from one source:
+
+- **Fixed value**: the field's Default value. The server stores the Default value whatever the browser sends.
+- **Query parameter**, **Page URL**, **Referrer**: read in the browser when the form loads. When the source is empty, the field keeps its Default value. Visitors can change these values, so never use them to grant access or trust.
+
+A hidden field with a prefill source takes the prefill value when there is one.
+
 Drafts survive a page refresh (session storage by default, local storage or off per form). With local storage, logged-in customers' drafts follow them between devices. A draft is dropped when the form's draftable fields change; a label change keeps it.
 
 Uploads take one file per field, checked by extension allowlist, MIME type and a scan for embedded code, with per-field, per-request and per-form hourly size limits. Files are stored outside `pub/` under random names.

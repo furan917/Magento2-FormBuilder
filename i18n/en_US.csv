@@ -1106,6 +1106,7 @@ Your reply emails to guests contain a private link to answer on the website. Nee
 "Reference: %reference","Reference: %reference"
 "Search by reference","Search by reference"
 "Fixed value","Fixed value"
+"Fixed value saves the Default value. The other sources come from the visitor's browser, which can change them.","Fixed value saves the Default value. The other sources come from the visitor's browser, which can change them."
 "Page URL","Page URL"
 "Referrer","Referrer"
 "Please wait a moment and try again.","Please wait a moment and try again."

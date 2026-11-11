@@ -109,8 +109,9 @@ class InputTypesTest extends TestCase
             'source' => [
                 'type' => 'enum', 'default' => 'static', 'values' => ['static', 'query', 'page_url', 'referrer'],
                 'value_labels' => ['static' => 'Fixed value', 'query' => 'Query parameter', 'page_url' => 'Page URL', 'referrer' => 'Referrer'],
+                'hint' => "Fixed value saves the Default value. The other sources come from the visitor's browser, which can change them.",
             ],
-            'query_param' => ['type' => 'string', 'default' => ''],
+            'query_param' => ['type' => 'string', 'default' => '', 'visible_when' => ['source' => ['query']]],
         ], (new Hidden())->getSettingsSpec());
 
         foreach ($this->all() as $type) {

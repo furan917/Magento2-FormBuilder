@@ -6,6 +6,7 @@ namespace Furan\FormBuilder\Model\FieldType;
 use Furan\FormBuilder\Api\FieldType\AvailabilityInterface;
 use Furan\FormBuilder\Api\FieldType\ConsentTypeInterface;
 use Furan\FormBuilder\Api\FieldType\EmailAddressTypeInterface;
+use Furan\FormBuilder\Api\FieldType\FixedValueTypeInterface;
 use Furan\FormBuilder\Api\FieldType\ServerValueTypeInterface;
 use Furan\FormBuilder\Api\FieldTypeInterface;
 
@@ -61,6 +62,15 @@ class Pool
     public function isServerValue(string $code): bool
     {
         return $code === 'hidden' || ($this->types[$code] ?? null) instanceof ServerValueTypeInterface;
+    }
+
+    /**
+     * @param array<string, mixed> $field
+     */
+    public function fixedValue(array $field): ?string
+    {
+        $type = $this->types[(string)($field['type'] ?? '')] ?? null;
+        return $type instanceof FixedValueTypeInterface ? $type->fixedValue($field) : null;
     }
 
     /**
