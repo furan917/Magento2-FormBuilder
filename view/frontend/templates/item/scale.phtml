@@ -10,7 +10,7 @@ $highLabel = trim((string)($settings['high_label'] ?? ''));
 $default = (string)($item['default'] ?? '');
 ?>
 <?= /* @noEscape */ $form->renderPartial($block, 'item/_open.phtml', ['group' => true]) ?>
-    <div class="ffb-scale" role="radiogroup">
+    <div class="ffb-scale" role="radiogroup" data-ffb-summary-text="<?= $escaper->escapeHtmlAttr('%1 ' . __('on a %1 to %2 scale', $min, $max)) ?>">
 <?php if ($lowLabel !== ''): ?>
         <span class="ffb-scale-label ffb-scale-low"><?= $escaper->escapeHtml($lowLabel) ?></span>
 <?php endif; ?>

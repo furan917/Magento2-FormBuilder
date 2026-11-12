@@ -71,6 +71,19 @@ class ValidatorTest extends TestCase
         return new \Furan\FormBuilder\Model\FieldType\Newsletter($bridge);
     }
 
+    public function testItNeverRequiresAnEmptyServerValueFieldOfTheVisitor(): void
+    {
+        $schema = $this->schema([
+            $this->field('f_aaaa', 'hidden', 'ref', ['required' => true, 'settings' => ['source' => 'query', 'query_param' => 'r']]),
+            $this->field('f_bbbb', 'hidden', 'camp', ['required' => true]),
+            $this->field('f_cccc', 'text', 'name', ['required' => true]),
+        ]);
+
+        $result = $this->validator()->validate($schema, ['name' => ''], []);
+
+        $this->assertSame(['name' => 'This field is required.'], $result->getErrors());
+    }
+
     public function testItSkipsTheNewsletterFieldInValidationForAStoreWhereNewslettersAreOff(): void
     {
         $validator = $this->validator(['newsletter' => $this->newsletterType([1])]);

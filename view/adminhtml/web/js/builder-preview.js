@@ -12,7 +12,12 @@
       : String(text).replace(/%(\d+)/g, (m, n) => (args[n - 1] !== undefined ? String(args[n - 1]) : m));
   }
   const MAX_OPTIONS = 4;
+  const MIN_STARS = 3;
   const MAX_STARS = 10;
+  const NOTICE_STYLES = ['info', 'success', 'warning'];
+  const SUMMARY_ROWS = 3;
+  // Looked up at render time so script load order does not matter.
+  const RICH_TEXT_RENDERER = 'builderMarkdown';
   const MAX_SCALE_BUTTONS = 11;
 
   // 24x24 stroke paths per type code; unknown codes use the fallback.
@@ -138,10 +143,11 @@
   }
 
   function stars(doc, item) {
-    const max = Math.max(1, Math.min(MAX_STARS, number(setting(item, ['max'], 5), 5)));
+    const max = Math.max(MIN_STARS, Math.min(MAX_STARS, number(setting(item, ['max'], 5), 5)));
+    const chosen = /^[0-9]+$/.test(String(item.default || '')) ? Number(item.default) : 0;
     const wrap = el(doc, 'div', 'ffb-admin-mock-stars');
-    for (let i = 0; i < max; i++) {
-      wrap.appendChild(el(doc, 'span', 'ffb-admin-mock-star', '★'));
+    for (let i = 1; i <= max; i++) {
+      wrap.appendChild(el(doc, 'span', 'ffb-admin-mock-star' + (i <= chosen ? ' is-filled' : ''), i <= chosen ? '★' : '☆'));
     }
     return wrap;
   }
@@ -220,7 +226,8 @@
 
   function address(doc) {
     const wrap = el(doc, 'div', 'ffb-admin-mock-address');
-    [tr('Street address'), tr('City'), tr('Postcode'), tr('Country')].forEach((text) => {
+    wrap.appendChild(box(doc, tr('Country'), true, true));
+    [tr('Street address'), tr('City'), tr('Region'), tr('Postcode')].forEach((text) => {
       wrap.appendChild(box(doc, text, true, false));
     });
     return wrap;
@@ -257,15 +264,27 @@
     return wrap;
   }
 
-  // The browser's own colour input shows black until a value is set.
+  // Without a valid default the storefront colour is not chosen and submits nothing.
   function colour(doc, item) {
-    const value = HEX_COLOUR.test(String(item.default || '')) ? String(item.default).toLowerCase() : '#000000';
-    const b = el(doc, 'div', 'ffb-admin-mock-input');
-    const swatch = el(doc, 'span', 'ffb-admin-mock-swatch');
-    swatch.style.backgroundColor = value;
+    const value = HEX_COLOUR.test(String(item.default || '')) ? String(item.default).toLowerCase() : '';
+    const b = el(doc, 'div', 'ffb-admin-mock-input' + (value ? '' : ' is-placeholder'));
+    const swatch = el(doc, 'span', 'ffb-admin-mock-swatch' + (value ? '' : ' is-empty'));
+    if (value) {
+      swatch.style.backgroundColor = value;
+    }
     b.appendChild(swatch);
     b.appendChild(el(doc, 'span', 'ffb-admin-mock-text', value));
     return b;
+  }
+
+  // Mirrors _select.phtml: the default option when set, otherwise the empty label.
+  function dropdown(doc, item) {
+    const chosen = (Array.isArray(item.options) ? item.options : [])
+      .find((o) => o && item.default !== undefined && item.default !== null && item.default !== '' && String(o.value) === String(item.default));
+    if (chosen) {
+      return box(doc, String(chosen.label || chosen.value || ''), false, true);
+    }
+    return box(doc, String(setting(item, ['empty_label'], '') || tr('Please select')), true, true);
   }
 
   function toggle(doc, item) {
@@ -291,8 +310,7 @@
     } else if (type === 'color') {
       node = colour(doc, item);
     } else if (type === 'select' || type === 'country') {
-      const first = optionLabels(item)[0] || (type === 'country' ? tr('Select a country') : tr('Select...'));
-      node = box(doc, placeholder || first, !!placeholder || type === 'country', true);
+      node = dropdown(doc, item);
     } else if (type === 'radio') {
       node = choiceList(doc, item, 'radio');
     } else if (type === 'checkboxes') {
@@ -339,7 +357,7 @@
         node.appendChild(el(doc, 'span', 'ffb-admin-mock-stepper'));
       }
     } else if (meta.hasOptions) {
-      node = meta.isMultiValue ? choiceList(doc, item, 'check') : box(doc, optionLabels(item)[0] || tr('Select...'), false, true);
+      node = meta.isMultiValue ? choiceList(doc, item, 'check') : dropdown(doc, item);
     } else {
       node = box(doc, placeholder, true, false);
     }
@@ -352,6 +370,26 @@
     return item.type === 'checkbox' || item.type === 'consent' || item.type === 'newsletter' || item.type === 'toggle';
   }
 
+  function renderRich(doc, text) {
+    const renderer = (root.FuranFormBuilder || {})[RICH_TEXT_RENDERER];
+    if (!renderer || typeof renderer.render !== 'function') {
+      return null;
+    }
+    try {
+      const out = renderer.render(doc, text);
+      return out && typeof out.nodeType === 'number' ? out : null;
+    } catch (e) {
+      return null;
+    }
+  }
+
+  function richText(doc, text) {
+    const wrap = el(doc, 'div', 'ffb-admin-mock-rich');
+    wrap.appendChild(renderRich(doc, text) || el(doc, 'p', 'ffb-admin-mock-paragraph', text));
+    wrap.querySelectorAll('a').forEach((a) => a.setAttribute('tabindex', '-1'));
+    return wrap;
+  }
+
   // Rendered look of a content item.
   function content(doc, item) {
     if (item.type === 'heading') {
@@ -362,19 +400,26 @@
       return el(doc, 'p', 'ffb-admin-mock-paragraph', String(item.text || ''));
     }
     if (item.type === 'rich_text') {
-      return el(doc, 'p', 'ffb-admin-mock-paragraph', String(item.text || ''));
+      return richText(doc, String(item.text || ''));
     }
     if (item.type === 'notice') {
-      const box = el(doc, 'div', 'ffb-admin-mock-notice');
+      const style = NOTICE_STYLES.indexOf(item.style) >= 0 ? item.style : 'info';
+      const box = el(doc, 'div', 'ffb-admin-mock-notice is-' + style);
       if (item.title) {
-        box.appendChild(el(doc, 'strong', '', String(item.title)));
+        box.appendChild(el(doc, 'p', 'ffb-admin-mock-notice-title', String(item.title)));
       }
       box.appendChild(el(doc, 'p', 'ffb-admin-mock-paragraph', String(item.text || '')));
       return box;
     }
     if (item.type === 'summary') {
       const box = el(doc, 'div', 'ffb-admin-mock-summary');
-      box.appendChild(el(doc, 'strong', '', String(item.title || '')));
+      box.appendChild(el(doc, 'div', 'ffb-admin-mock-summary-title', String(item.title || '')));
+      for (let i = 0; i < SUMMARY_ROWS; i++) {
+        const row = el(doc, 'div', 'ffb-admin-mock-summary-row');
+        row.appendChild(el(doc, 'span', 'ffb-admin-mock-summary-q'));
+        row.appendChild(el(doc, 'span', 'ffb-admin-mock-summary-a'));
+        box.appendChild(row);
+      }
       return box;
     }
     if (item.type === 'divider') {

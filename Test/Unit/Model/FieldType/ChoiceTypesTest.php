@@ -31,7 +31,11 @@ class ChoiceTypesTest extends TestCase
     {
         $allowedCountries = $this->createStub(AllowedCountries::class);
         $allowedCountries->method('getAllowedCountries')->willReturn($allowed);
-        return new Country($allowedCountries, $this->createStub(\Magento\Framework\Locale\ListsInterface::class));
+        return new Country(
+            $allowedCountries,
+            $this->createStub(\Magento\Framework\Locale\ListsInterface::class),
+            $this->createStub(\Magento\Framework\Locale\ResolverInterface::class)
+        );
     }
 
     public function testItAcceptsOnlyConfiguredOptionValuesForSelectAndRadio(): void
@@ -141,7 +145,7 @@ class ChoiceTypesTest extends TestCase
         $this->assertSame(0, $file->getSettingsSpec()['max_size_mb']['min']);
         $this->assertSame([], $file->getSettingsSpec()['extensions']['default']);
         $this->assertSame(['min_selected', 'max_selected'], (new Checkboxes())->getAllowedRules());
-        $this->assertSame(0.0001, (new Range())->getSettingsSpec()['step']['min']);
-        $this->assertEquals(['min' => 3, 'max' => 10, 'default' => 5, 'type' => 'int'], (new Rating())->getSettingsSpec()['max']);
+        $this->assertArrayNotHasKey('min', (new Range())->getSettingsSpec()['step']);
+        $this->assertEquals(['min' => 3, 'max' => 10, 'default' => 5, 'type' => 'int', 'hint' => 'From 3 to 10.'], (new Rating())->getSettingsSpec()['max']);
     }
 }

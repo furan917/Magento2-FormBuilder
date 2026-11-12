@@ -1199,6 +1199,12 @@
       setState(model.movePage(state, page.id, index + dir));
     }
 
+    // Read-only preview of the storefront page title; the tabpanel label already names the page.
+    function pageHeading(page) {
+      const title = String(page.title || '').trim();
+      return title ? el(doc, 'div', { class: 'ffb-admin-page-heading', 'aria-hidden': 'true', text: title }) : null;
+    }
+
     function renderCanvas() {
       const canvas = refs.canvas;
       clear(canvas);
@@ -1216,7 +1222,7 @@
             pageButton(tr('Page texts'), 'data-ffb-page-settings', () => apply('select', page.id)),
           ]));
         }
-        canvas.appendChild(el(doc, 'div', { role: 'tabpanel', class: 'ffb-admin-tabpanel', 'aria-label': shown.title || tr('Page %1', pages.indexOf(page) + 1) }, [buildList(shown, null)]));
+        canvas.appendChild(el(doc, 'div', { role: 'tabpanel', class: 'ffb-admin-tabpanel', 'aria-label': shown.title || tr('Page %1', pages.indexOf(page) + 1) }, [groupMode ? null : pageHeading(shown), buildList(shown, null)]));
         return;
       }
       if (groupMode) {
@@ -1229,7 +1235,7 @@
       }
       canvas.appendChild(el(doc, 'div', { class: 'ffb-admin-tabbar' }, [buildTabs(), addBtn]));
       canvas.appendChild(buildPageBar(page));
-      canvas.appendChild(el(doc, 'div', { role: 'tabpanel', class: 'ffb-admin-tabpanel', 'aria-label': page.title || tr('Page %1', pages.indexOf(page) + 1) }, [buildList(page, null)]));
+      canvas.appendChild(el(doc, 'div', { role: 'tabpanel', class: 'ffb-admin-tabpanel', 'aria-label': page.title || tr('Page %1', pages.indexOf(page) + 1) }, [pageHeading(page), buildList(page, null)]));
     }
 
     function renderInspector() {

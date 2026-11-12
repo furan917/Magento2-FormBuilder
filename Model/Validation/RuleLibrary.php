@@ -6,10 +6,11 @@ namespace Furan\FormBuilder\Model\Validation;
 use Furan\FormBuilder\Model\ResourceModel\SavedRule\CollectionFactory;
 
 /**
- * @phpstan-type RuleEntry array{ref: string, label: string, group: string, pattern: string, message: string, example: string, saved: bool}
+ * @phpstan-type RuleEntry array{ref: string, label: string, group: string, group_code: string, pattern: string, message: string, example: string, saved: bool}
  *
  * Resolves the value of a `preset` rule: a built-in code such as `uk_postcode`, or `saved:<code>` for a rule
  * an admin saved. Fields keep the reference, so editing a saved rule changes every form that uses it.
+ * `group_code` is the built-in group's stable code; empty for saved rules and rules without one, which fit every type.
  */
 class RuleLibrary
 {
@@ -60,7 +61,7 @@ class RuleLibrary
     }
 
     /**
-     * @param array{label: string, group: string, pattern: string, message: string, example: string} $rule
+     * @param array{label: string, group: string, group_code: string, pattern: string, message: string, example: string} $rule
      * @return RuleEntry
      */
     private function builtInEntry(string $code, array $rule): array
@@ -69,6 +70,7 @@ class RuleLibrary
             'ref' => $code,
             'label' => (string)__($rule['label']),
             'group' => (string)__($rule['group']),
+            'group_code' => $rule['group_code'],
             'pattern' => $rule['pattern'],
             'message' => (string)__($rule['message']),
             'example' => $rule['example'],
@@ -89,6 +91,7 @@ class RuleLibrary
                     'ref' => $ref,
                     'label' => (string)$rule->getData('label'),
                     'group' => (string)__('Saved rules'),
+                    'group_code' => '',
                     'pattern' => (string)$rule->getData('pattern'),
                     'message' => (string)$rule->getData('message'),
                     'example' => (string)$rule->getData('example'),

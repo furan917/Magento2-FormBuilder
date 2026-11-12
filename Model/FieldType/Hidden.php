@@ -3,11 +3,16 @@ declare(strict_types=1);
 
 namespace Furan\FormBuilder\Model\FieldType;
 
+use Furan\FormBuilder\Api\FieldType\BuilderControlsInterface;
 use Furan\FormBuilder\Api\FieldType\FixedValueTypeInterface;
 use Furan\FormBuilder\Api\FieldType\ServerValueTypeInterface;
 use Furan\FormBuilder\Api\FieldType\StatsAwareTypeInterface;
 
-class Hidden extends AbstractFieldType implements StatsAwareTypeInterface, ServerValueTypeInterface, FixedValueTypeInterface
+class Hidden extends AbstractFieldType implements
+    StatsAwareTypeInterface,
+    ServerValueTypeInterface,
+    FixedValueTypeInterface,
+    BuilderControlsInterface
 {
     private const SOURCE_FIXED = 'static';
     private const SOURCE_CODE = '/^[a-z][a-z0-9_.-]{0,63}$/';
@@ -65,19 +70,25 @@ class Hidden extends AbstractFieldType implements StatsAwareTypeInterface, Serve
                 'default' => self::SOURCE_FIXED,
                 'values' => $this->sources,
                 'value_labels' => $this->valueLabels(),
+                'visible_when' => ['@prefill' => ['']],
                 'hint' => (string)__(
-                    "Fixed value saves the Default value. The other sources come from the visitor's browser, which can change them."
+                    "Fixed value saves the Default value. The other sources come from the visitor's browser, which can change them. A Prefill source replaces this setting."
                 ),
             ],
-            'query_param' => ['type' => 'string', 'default' => '', 'visible_when' => ['source' => ['query']]],
+            'query_param' => ['type' => 'string', 'default' => '', 'visible_when' => ['source' => ['query'], '@prefill' => ['']]],
         ];
     }
 
-    /** A prefill source fills the field instead, under the prefill rules. */
+    public function builderControls(): array
+    {
+        return ['placeholder' => false, 'help' => false, 'width' => false, 'css_class' => false, 'autocomplete' => false];
+    }
+
+    /** With a prefill source the Default is the guest's value and the prefill rules may replace it. */
     public function fixedValue(array $field): ?string
     {
         $source = is_array($field['settings'] ?? null) ? ($field['settings']['source'] ?? '') : '';
-        if (($field['prefill'] ?? '') !== '' || !in_array($source, ['', self::SOURCE_FIXED], true)) {
+        if (($field['prefill'] ?? '') === '' && !in_array($source, ['', self::SOURCE_FIXED], true)) {
             return null;
         }
         return is_scalar($field['default'] ?? null) ? (string)$field['default'] : '';

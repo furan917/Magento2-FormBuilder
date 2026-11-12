@@ -8,13 +8,16 @@ use Furan\FormBuilder\Api\FieldType\StatsAwareTypeInterface;
 use Furan\FormBuilder\Api\FieldType\StatsLabelInterface;
 use Magento\Directory\Model\AllowedCountries;
 use Magento\Framework\Locale\ListsInterface;
+use Magento\Framework\Locale\ResolverInterface;
 use Magento\Store\Model\ScopeInterface;
+use Furan\FormBuilder\Api\FieldType\BuilderControlsInterface;
 
-class Country extends AbstractFieldType implements StatsAwareTypeInterface, AdminViewTypeInterface, StatsLabelInterface
+class Country extends AbstractFieldType implements StatsAwareTypeInterface, AdminViewTypeInterface, StatsLabelInterface, BuilderControlsInterface
 {
     public function __construct(
         private readonly AllowedCountries $allowedCountries,
-        private readonly ListsInterface $lists
+        private readonly ListsInterface $lists,
+        private readonly ResolverInterface $localeResolver
     ) {
     }
 
@@ -64,12 +67,64 @@ class Country extends AbstractFieldType implements StatsAwareTypeInterface, Admi
 
     public function statsLabel(string $value, array $field): string
     {
-        $this->names ??= array_column($this->lists->getOptionCountries(), 'label', 'value');
-        return $this->names[$value] ?? $value;
+        return $this->names()[$value] ?? $value;
+    }
+
+    /** Any Magento country code: the store views decide at render which ones they offer. */
+    public function isValidDefault(string $default, array $field): bool
+    {
+        return isset($this->names()[$default]);
+    }
+
+    /** @return array<string, string> */
+    private function names(): array
+    {
+        if ($this->names === null) {
+            // The locale list also holds UN M49 region codes such as 150 (Europe), which are not countries.
+            $names = array_filter(
+                array_column($this->lists->getOptionCountries(), 'label', 'value'),
+                static fn (mixed $code): bool => preg_match('/^[A-Z]{2}$/D', (string)$code) === 1,
+                ARRAY_FILTER_USE_KEY
+            );
+            $this->names = $this->sortByLabel(array_map('strval', $names));
+        }
+        return $this->names;
+    }
+
+    /**
+     * Locale collation puts "Åland Islands" after "Afghanistan"; without intl the list keeps its order.
+     *
+     * @param array<string, string> $names
+     * @return array<string, string>
+     */
+    private function sortByLabel(array $names): array
+    {
+        if (!class_exists(\Collator::class)) {
+            return $names;
+        }
+        $locale = (string)$this->localeResolver->getLocale();
+        $collator = new \Collator($locale);
+        $sorted = $names;
+        return $collator->asort($sorted) ? $sorted : $names;
     }
 
     public function adminViewKind(array $field): ?string
     {
         return self::KIND_COUNTRY;
+    }
+
+    public function builderControls(): array
+    {
+        return ['placeholder' => false];
+    }
+
+    public function defaultChoices(): array
+    {
+        return $this->names();
+    }
+
+    public function defaultInput(): ?string
+    {
+        return 'option';
     }
 }

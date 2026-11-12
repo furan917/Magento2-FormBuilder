@@ -127,7 +127,7 @@ class Processor
         $storedFiles = [];
         try {
             $storeId = $input->storeId;
-            $schema = $this->withMessages($form->getSchema(), $display->getSchema());
+            $schema = $form->getSchema();
             $fields = SchemaFields::all($schema);
             $product = $this->lockedValues->product($input->productId, $storeId);
             $target = $this->editTargets->resolve($form, $settings, $input);
@@ -152,7 +152,7 @@ class Processor
                 $posted = array_merge($posted, array_fill_keys($consentNames, ''));
             }
             $result = $this->validator->validate(
-                $schema,
+                $this->withStoreTexts($schema, $display->getSchema()),
                 $posted,
                 $input->files,
                 $storeId,
@@ -292,24 +292,38 @@ class Processor
     }
 
     /**
-     * The default schema with the store view's rule messages, so 422 errors match what the browser shows.
+     * The validation schema with the store view's rule messages and option labels, so server errors read like the
+     * browser's and typed store-view labels match their options. Later steps keep the default texts.
      *
      * @param array<string, mixed> $schema
      * @param array<string, mixed> $display
      * @return array<string, mixed>
      */
-    private function withMessages(array $schema, array $display): array
+    private function withStoreTexts(array $schema, array $display): array
     {
         if ($schema === $display) {
             return $schema;
         }
-        $messages = [];
+        $texts = [];
         foreach (SchemaFields::all($display) as $field) {
-            $messages[$field['id'] ?? ''] = array_column($field['rules'] ?? [], 'message');
+            $labels = [];
+            foreach ((array)($field['options'] ?? []) as $option) {
+                if (is_array($option)) {
+                    $labels[(string)($option['value'] ?? '')] = $option['label'] ?? '';
+                }
+            }
+            $texts[$field['id'] ?? ''] = ['messages' => array_column($field['rules'] ?? [], 'message'), 'labels' => $labels];
         }
-        return SchemaFields::map($schema, static function (array $field) use ($messages): array {
+        return SchemaFields::map($schema, static function (array $field) use ($texts): array {
+            $own = $texts[$field['id'] ?? ''] ?? ['messages' => [], 'labels' => []];
             foreach ($field['rules'] ?? [] as $r => $rule) {
-                $field['rules'][$r]['message'] = $messages[$field['id'] ?? ''][$r] ?? ($rule['message'] ?? '');
+                $field['rules'][$r]['message'] = $own['messages'][$r] ?? ($rule['message'] ?? '');
+            }
+            foreach ((array)($field['options'] ?? []) as $o => $option) {
+                $value = is_array($option) ? (string)($option['value'] ?? '') : '';
+                if (is_array($option) && array_key_exists($value, $own['labels'])) {
+                    $field['options'][$o]['label'] = $own['labels'][$value];
+                }
             }
             return $field;
         });

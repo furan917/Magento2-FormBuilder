@@ -4,7 +4,8 @@ declare(strict_types=1);
 namespace Furan\FormBuilder\Model\FieldType;
 
 use Furan\FormBuilder\Api\FieldType\StatsAwareTypeInterface;
-class Select extends AbstractOptionType implements StatsAwareTypeInterface
+use Furan\FormBuilder\Api\FieldType\BuilderControlsInterface;
+class Select extends AbstractOptionType implements StatsAwareTypeInterface, BuilderControlsInterface
 {
     public function getCode(): string
     {
@@ -24,5 +25,10 @@ class Select extends AbstractOptionType implements StatsAwareTypeInterface
     public function statsKind(array $field): ?int
     {
         return self::KIND_CHOICE;
+    }
+
+    public function builderControls(): array
+    {
+        return ['placeholder' => false, 'option_description' => false];
     }
 }

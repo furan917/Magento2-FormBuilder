@@ -6,7 +6,7 @@ namespace Furan\FormBuilder\Api\FieldType;
 /**
  * Optional capability: how the admin submission view and My submissions lay out an answer of this type.
  *
- * Admin view only: emails, CSV and privacy exports keep using DisplayableTypeInterface / the generic fallback.
+ * The country and calendar kinds also apply to emails, summaries and the privacy export, in the reader's locale.
  * A type without it (or with a null kind) is shown as plain text.
  *
  * @api
@@ -15,7 +15,7 @@ interface AdminViewTypeInterface
 {
     /** Shown as Yes (any value) or No (empty); always counts as answered. */
     public const KIND_BOOLEAN = 'boolean';
-    /** ISO2 codes are shown as country names. */
+    /** ISO2 codes are shown as country names in the reader's locale. */
     public const KIND_COUNTRY = 'country';
     /** Typed text: never swapped for option labels. */
     public const KIND_FREE_TEXT = 'free_text';
@@ -33,6 +33,16 @@ interface AdminViewTypeInterface
     public const KIND_COLOR = 'color';
     /** Long text keeping its line breaks. */
     public const KIND_MULTILINE = 'multiline';
+    /** A Y-m-d date in the reader's locale. */
+    public const KIND_CALENDAR_DATE = 'calendar_date';
+    /** A Y-m-d\TH:i wall-clock date and time in the reader's locale, never converted between time zones. */
+    public const KIND_CALENDAR_DATETIME = 'calendar_datetime';
+    /** A Y-m month as month name and year in the reader's locale. */
+    public const KIND_CALENDAR_MONTH = 'calendar_month';
+    /** An H:i time in the reader's locale. */
+    public const KIND_CALENDAR_TIME = 'calendar_time';
+    /** A {start, end} pair of Y-m-d dates in the reader's locale. */
+    public const KIND_CALENDAR_RANGE = 'calendar_range';
 
     /**
      * @param array<string, mixed> $field schema field, or the name/label/type stub of a payload entry whose field was removed

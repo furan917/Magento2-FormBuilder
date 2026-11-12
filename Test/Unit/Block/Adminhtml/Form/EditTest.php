@@ -117,6 +117,8 @@ class EditTest extends TestCase
             'code' => 'text', 'label' => 'Text', 'category' => 'input', 'allowedRules' => ['min_length'],
             'settingsSpec' => [], 'hasOptions' => false, 'isFile' => false, 'isMultiValue' => false, 'emailAddress' => false, 'defaults' => [], 'relativeDate' => null, 'routable' => true,
             'personalByDefault' => false, 'conditionSource' => true,
+            'controls' => ['default' => 'text'], 'presets' => [], 'maxLength' => null,
+            'consent' => false, 'serverValue' => false, 'requiredAllowed' => true, 'draftAllowed' => true, 'defaultAllowed' => true,
         ]], $config['fieldTypes']);
         $this->assertSame([['code' => 'min_length', 'label' => 'Minimum length', 'valueType' => 'int']], $config['rules']);
         $this->assertCount(14, $config['operators']);
@@ -521,7 +523,8 @@ class EditTest extends TestCase
             $storeManager,
             $scopeConfig,
             new BuilderPhrases(),
-            $config
+            $config,
+            new \Furan\FormBuilder\Model\Validation\PresetFit()
         )];
     }
 

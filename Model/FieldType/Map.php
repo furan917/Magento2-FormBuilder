@@ -16,8 +16,10 @@ use Furan\FormBuilder\Model\Csp\MapMarker;
 use Furan\FormBuilder\Model\Submission\ValueFormatter;
 use Furan\FormBuilder\Model\Url\StorefrontUrls;
 use Magento\Framework\App\Config\ScopeConfigInterface;
+use Furan\FormBuilder\Api\Data\DisplayContext;
 use Magento\Framework\Escaper;
 use Magento\Store\Model\ScopeInterface;
+use Furan\FormBuilder\Api\FieldType\BuilderControlsInterface;
 
 /**
  * Map pin posted as name[lat], name[lng], name[zoom], name[label]. Coordinates are stored as fixed
@@ -32,7 +34,8 @@ class Map extends AbstractFieldType implements
     PersonalByDefaultInterface,
     ConditionSourceInterface,
     RoutableTypeInterface,
-    StatsAwareTypeInterface
+    StatsAwareTypeInterface,
+    BuilderControlsInterface
 {
     private const COORDINATE = '/^-?\d+(\.\d+)?$/D';
     private const MAX_ZOOM = 22;
@@ -178,7 +181,7 @@ class Map extends AbstractFieldType implements
         ]];
     }
 
-    protected function getMaxLength(): int
+    public function maxLength(): int
     {
         return 255;
     }
@@ -231,7 +234,7 @@ class Map extends AbstractFieldType implements
         return [0, 1];
     }
 
-    public function toText(array $field, mixed $value): string
+    public function toText(array $field, mixed $value, DisplayContext $context): string
     {
         if (!is_array($value) || !ValueFormatter::hasCoordinates($value)) {
             return '';
@@ -241,9 +244,9 @@ class Map extends AbstractFieldType implements
         return $label !== '' ? $label . ' (' . $coordinates . ')' : $coordinates;
     }
 
-    public function toHtml(array $field, mixed $value, Escaper $escaper): string
+    public function toHtml(array $field, mixed $value, Escaper $escaper, DisplayContext $context): string
     {
-        $html = $escaper->escapeHtml($this->toText($field, $value));
+        $html = $escaper->escapeHtml($this->toText($field, $value, $context));
         $links = self::links($value);
         if ($links === null) {
             return $html;
@@ -273,5 +276,15 @@ class Map extends AbstractFieldType implements
     public function statsKind(array $field): ?int
     {
         return self::KIND_NONE;
+    }
+
+    public function builderControls(): array
+    {
+        return ['placeholder' => false, 'autocomplete' => false];
+    }
+
+    public function defaultInput(): ?string
+    {
+        return null;
     }
 }

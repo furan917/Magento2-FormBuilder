@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace Furan\FormBuilder\Block;
 
+use Furan\FormBuilder\Model\Upload\ExtensionList;
 use Magento\Framework\Escaper;
 
 /** Template variables shared by every storefront field template and partial. */
@@ -10,11 +11,16 @@ class ItemContext
 {
     private const WIDTHS = ['full', 'two_thirds', 'half', 'third'];
 
+    public function __construct(private readonly ExtensionList $extensionList)
+    {
+    }
+
     /**
      * @param array<string, mixed> $item
+     * @param ?int $typeMaxLength the most characters the field type keeps, null when it has no text limit
      * @return array<string, mixed>
      */
-    public static function build(array $item, int $formId, int $instance, Escaper $escaper): array
+    public function build(array $item, int $formId, int $instance, Escaper $escaper, ?int $typeMaxLength = null): array
     {
         $name = (string)($item['name'] ?? '');
         $type = (string)($item['type'] ?? '');
@@ -77,6 +83,7 @@ class ItemContext
             'layout' => $layout,
             'labelHtml' => $labelHtml,
             'ruleValue' => $ruleValue,
+            'lengthLimit' => $this->lengthLimit($ruleValue('max_length'), $typeMaxLength),
             'attrs' => $attrs,
             'base' => $base,
             'dataAttrs' => $attrs([
@@ -89,6 +96,14 @@ class ItemContext
         ];
     }
 
+    /** The max_length rule, never above what the type keeps; the type's limit when there is no rule. */
+    private function lengthLimit(mixed $rule, ?int $typeMaxLength): ?int
+    {
+        $rule = is_numeric($rule) && (int)$rule > 0 ? (int)$rule : null;
+
+        return $rule === null || $typeMaxLength === null ? ($rule ?? $typeMaxLength) : min($rule, $typeMaxLength);
+    }
+
     /**
      * Explicit accept wins; otherwise the field extensions limited to the global allowlist
      * (the whole allowlist when the field names none).
@@ -96,15 +111,14 @@ class ItemContext
      * @param array<string, mixed> $settings
      * @param string[] $globalExtensions
      */
-    public static function fileAccept(array $settings, array $globalExtensions): string
+    public function fileAccept(array $settings, array $globalExtensions): string
     {
         $accept = (string)($settings['accept'] ?? '');
         if ($accept !== '') {
             return $accept;
         }
-        $normalise = static fn ($ext): string => strtolower(ltrim(trim((string)$ext), '.'));
-        $global = array_map($normalise, $globalExtensions);
-        $field = is_array($settings['extensions'] ?? null) ? array_filter(array_map($normalise, $settings['extensions'])) : [];
+        $global = $this->extensionList->normalise($globalExtensions);
+        $field = is_array($settings['extensions'] ?? null) ? $this->extensionList->normalise($settings['extensions']) : [];
         $allowed = $field === [] ? $global : array_values(array_intersect($field, $global));
 
         return implode(',', array_map(static fn (string $ext): string => '.' . $ext, array_unique($allowed)));

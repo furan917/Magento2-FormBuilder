@@ -46,8 +46,10 @@ class NormalizerMaskTest extends TestCase
             new SettingValues(new RedirectValidator($manager)),
             new PersonalData(FieldPools::builtIn()),
             new Sources(),
-            ConditionNormalizers::builtIn()
-        );
+            ConditionNormalizers::builtIn(),
+            \Furan\FormBuilder\Test\Unit\Helper\FieldChecksFactory::create(),
+        new \Furan\FormBuilder\Model\Validation\PresetFit()
+);
     }
 
     private function field(array $settings, array $rules = [], string $type = 'text'): array

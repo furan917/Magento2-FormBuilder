@@ -83,7 +83,7 @@ class SubmissionBuilder
             ->setReference(Reference::toString(Reference::generate()))
             ->setCreatedAt(gmdate('Y-m-d H:i:s'))
             ->setPayload($payload)
-            ->setSummary($this->summaryBuilder->build($fields, $values))
+            ->setSummary($this->summaryBuilder->build($fields, $values, $input->storeId))
             ->setRemoteIp($ip);
     }
 }

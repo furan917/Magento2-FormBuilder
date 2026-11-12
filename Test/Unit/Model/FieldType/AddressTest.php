@@ -34,6 +34,22 @@ class AddressTest extends TestCase
         ], $value);
     }
 
+    public function testItReportsAndKeepsTheSameLimitForEveryTypedPart(): void
+    {
+        $address = $this->type();
+        $limit = $address->maxLength();
+        $long = str_repeat('x', $limit + 20);
+        $value = $address->normalizeValue(
+            ['street' => [$long], 'city' => $long, 'region' => $long, 'postcode' => $long, 'country_id' => 'GB'],
+            []
+        );
+        $this->assertSame(255, $limit);
+        $this->assertNull($address->defaultInput());
+        foreach ([$value['street'][0], $value['city'], $value['region'], $value['postcode']] as $part) {
+            $this->assertSame($limit, mb_strlen($part));
+        }
+    }
+
     public function testItLimitsStreetLinesToTheConfiguredNumber(): void
     {
         $type = $this->type();

@@ -101,7 +101,8 @@ class InputTypesTest extends TestCase
             'prefix' => ['type' => 'string', 'translatable' => true, 'default' => '', 'max_length' => 20],
             'suffix' => ['type' => 'string', 'translatable' => true, 'default' => '', 'max_length' => 20],
         ];
-        $this->assertSame(['step' => ['type' => 'string', 'default' => 'any']] + $affixes, (new Number())->getSettingsSpec());
+        $step = ['type' => 'string', 'format' => 'step', 'default' => 'any', 'hint' => "'any' or a positive number. Steps count from the Minimum rule."];
+        $this->assertSame(['step' => $step] + $affixes, (new Number())->getSettingsSpec());
         $mask = ['mask' => ['type' => 'string', 'format' => 'mask', 'default' => '', 'max_length' => 40]];
         $this->assertSame($affixes + $mask, (new Text())->getSettingsSpec());
         $this->assertSame($mask, (new Tel())->getSettingsSpec());
@@ -109,9 +110,10 @@ class InputTypesTest extends TestCase
             'source' => [
                 'type' => 'enum', 'default' => 'static', 'values' => ['static', 'query', 'page_url', 'referrer'],
                 'value_labels' => ['static' => 'Fixed value', 'query' => 'Query parameter', 'page_url' => 'Page URL', 'referrer' => 'Referrer'],
-                'hint' => "Fixed value saves the Default value. The other sources come from the visitor's browser, which can change them.",
+                'visible_when' => ['@prefill' => ['']],
+                'hint' => "Fixed value saves the Default value. The other sources come from the visitor's browser, which can change them. A Prefill source replaces this setting.",
             ],
-            'query_param' => ['type' => 'string', 'default' => '', 'visible_when' => ['source' => ['query']]],
+            'query_param' => ['type' => 'string', 'default' => '', 'visible_when' => ['source' => ['query'], '@prefill' => ['']]],
         ], (new Hidden())->getSettingsSpec());
 
         foreach ($this->all() as $type) {

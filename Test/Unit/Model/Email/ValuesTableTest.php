@@ -17,7 +17,30 @@ class ValuesTableTest extends TestCase
     protected function setUp(): void
     {
         $pool = FieldPools::withFiles();
-        $this->table = new ValuesTable(EscaperFactory::create(), new AnswerView(new ValueFormatter($pool), $pool));
+        $this->table = new ValuesTable(EscaperFactory::create(), new AnswerView(new ValueFormatter($pool, new \Furan\FormBuilder\Model\Submission\AnswerDate()), $pool));
+    }
+
+    public function testItWritesDatesAndCountriesInTheGivenLocale(): void
+    {
+        $pool = FieldPools::adminView();
+        $table = new ValuesTable(EscaperFactory::create(), new AnswerView(new ValueFormatter($pool, new \Furan\FormBuilder\Model\Submission\AnswerDate()), $pool));
+        $payload = [
+            ['name' => 'when', 'label' => 'When', 'type' => 'datetime', 'value' => '2026-10-05T09:15'],
+            ['name' => 'stay', 'label' => 'Stay', 'type' => 'date_range', 'value' => ['start' => '2026-10-02', 'end' => '2026-10-04']],
+            ['name' => 'from', 'label' => 'From', 'type' => 'country', 'value' => 'GB'],
+            ['name' => 'home', 'label' => 'Home', 'type' => 'address', 'value' => ['street' => ['1 rue <b>'], 'city' => 'Lyon', 'country_id' => 'GB']],
+        ];
+
+        $this->assertSame([
+            ['label' => 'When', 'value' => '5 oct. 2026, 09:15'],
+            ['label' => 'Stay', 'value' => "2 oct. 2026 \u{2013} 4 oct. 2026"],
+            ['label' => 'From', 'value' => 'Royaume-Uni'],
+            ['label' => 'Home', 'value' => '1 rue <b>, Lyon, Royaume-Uni'],
+        ], $table->toList($payload, [], \Furan\FormBuilder\Api\Data\DisplayContext::forStore(1, 'fr_FR')));
+        $html = $table->toHtml($payload, [], \Furan\FormBuilder\Api\Data\DisplayContext::forStore(1, 'de_DE'));
+        $this->assertStringContainsString('<td valign="top" style="padding:4px 0">05.10.2026, 09:15</td>', $html);
+        $this->assertStringContainsString('1 rue &lt;b&gt;, Lyon, Vereinigtes Königreich', $html);
+        $this->assertStringNotContainsString('2026-10-05T09:15', $html);
     }
 
     public function testItEscapesLabelsAndValuesInTheValuesTable(): void
@@ -27,7 +50,7 @@ class ValuesTableTest extends TestCase
             ['name' => 'b', 'label' => 'Tags', 'type' => 'checkboxes', 'value' => ['x', '<y>']],
             ['name' => 'c', 'label' => 'CV', 'type' => 'file',
                 'value' => ['file' => 'furan_formbuilder/1/a.pdf', 'name' => '<cv>.pdf', 'size' => 2048, 'mime' => 'application/pdf']],
-        ], []);
+        ], [], \Furan\FormBuilder\Api\Data\DisplayContext::forStore(1, 'en_GB'));
 
         $this->assertStringStartsWith('<table', $html);
         $this->assertStringNotContainsString('<script>', $html);
@@ -44,7 +67,7 @@ class ValuesTableTest extends TestCase
         $list = $this->table->toList([
             ['name' => 'a', 'label' => 'Name', 'type' => 'text', 'value' => 'Bob <b>'],
             ['name' => 'b', 'label' => 'Tags', 'type' => 'checkboxes', 'value' => ['x', 'y']],
-        ], []);
+        ], [], \Furan\FormBuilder\Api\Data\DisplayContext::forStore(1, 'en_GB'));
 
         $this->assertSame([
             ['label' => 'Name', 'value' => 'Bob <b>'],
@@ -56,7 +79,7 @@ class ValuesTableTest extends TestCase
     {
         $list = $this->table->toList([
             ['name' => 'a', 'label' => '{{var x}}', 'type' => 'text', 'value' => '{{config path="a/b"}}'],
-        ], []);
+        ], [], \Furan\FormBuilder\Api\Data\DisplayContext::forStore(1, 'en_GB'));
 
         $this->assertSame([['label' => '&#123;&#123;var x&#125;&#125;', 'value' => '&#123;&#123;config path="a/b"&#125;&#125;']], $list);
     }
@@ -65,7 +88,7 @@ class ValuesTableTest extends TestCase
     {
         $html = $this->table->toHtml([
             ['name' => 'a', 'label' => '{{config path="x"}}', 'type' => 'text', 'value' => '{{var this.getTemplateFilter()}}'],
-        ], []);
+        ], [], \Furan\FormBuilder\Api\Data\DisplayContext::forStore(1, 'en_GB'));
 
         $this->assertStringNotContainsString('{{', $html);
         $this->assertStringNotContainsString('}}', $html);
@@ -73,7 +96,7 @@ class ValuesTableTest extends TestCase
 
     public function testItEncodesTemplateBracesInTheValuesTable(): void
     {
-        $html = $this->table->toHtml([['name' => 'a', 'label' => 'L{', 'type' => 'text', 'value' => '{v}']], []);
+        $html = $this->table->toHtml([['name' => 'a', 'label' => 'L{', 'type' => 'text', 'value' => '{v}']], [], \Furan\FormBuilder\Api\Data\DisplayContext::forStore(1, 'en_GB'));
 
         $this->assertStringContainsString('L&#123;', $html);
         $this->assertStringContainsString('&#123;v&#125;', $html);
@@ -85,10 +108,10 @@ class ValuesTableTest extends TestCase
         $payload = [['name' => 'cv', 'label' => 'CV', 'type' => 'file',
             'value' => ['name' => 'cv.pdf', 'size' => 2048, 'mime' => 'application/pdf']]];
 
-        $html = $this->table->toHtml($payload, []);
+        $html = $this->table->toHtml($payload, [], \Furan\FormBuilder\Api\Data\DisplayContext::forStore(1, 'en_GB'));
         $this->assertStringContainsString('cv.pdf (2 KB)', $html);
         $this->assertStringNotContainsString('application/pdf', $html);
-        $this->assertSame([['label' => 'CV', 'value' => 'cv.pdf (2 KB)']], $this->table->toList($payload, []));
+        $this->assertSame([['label' => 'CV', 'value' => 'cv.pdf (2 KB)']], $this->table->toList($payload, [], \Furan\FormBuilder\Api\Data\DisplayContext::forStore(1, 'en_GB')));
     }
 
     public function testItListsStructuredAnswersInTheNotificationEmailWithoutArrayToStringConversion(): void
@@ -104,14 +127,14 @@ class ValuesTableTest extends TestCase
             throw new \ErrorException($msg);
         });
         try {
-            $html = $this->table->toHtml($payload, []);
-            $text = implode("\n", array_column($this->table->toList($payload, []), 'value'));
+            $html = $this->table->toHtml($payload, [], \Furan\FormBuilder\Api\Data\DisplayContext::forStore(1, 'en_GB'));
+            $text = implode("\n", array_column($this->table->toList($payload, [], \Furan\FormBuilder\Api\Data\DisplayContext::forStore(1, 'en_GB')), 'value'));
         } finally {
             restore_error_handler();
         }
 
         $this->assertStringContainsString('1 &lt;High&gt; St, Leeds, LS1', $html);
-        $this->assertStringContainsString("2026-01-02 \u{2013} 2026-01-09", $html);
+        $this->assertStringContainsString("2 Jan 2026 \u{2013} 9 Jan 2026", $html);
         $this->assertStringContainsString('Home (51.500000, -0.127800)', $text);
         $this->assertStringNotContainsString('Array', $html . $text);
     }
@@ -120,14 +143,14 @@ class ValuesTableTest extends TestCase
     {
         $payload = [['name' => 'p', 'label' => 'Spot', 'type' => 'point', 'value' => ['x' => '<1>', 'y' => '{2}']]];
 
-        $this->assertStringContainsString('P[&lt;1&gt;|&#123;2&#125;]', $this->table->toHtml($payload, []));
-        $this->assertSame('P[<1>|&#123;2&#125;]', $this->table->toList($payload, [])[0]['value']);
+        $this->assertStringContainsString('P[&lt;1&gt;|&#123;2&#125;]', $this->table->toHtml($payload, [], \Furan\FormBuilder\Api\Data\DisplayContext::forStore(1, 'en_GB')));
+        $this->assertSame('P[<1>|&#123;2&#125;]', $this->table->toList($payload, [], \Furan\FormBuilder\Api\Data\DisplayContext::forStore(1, 'en_GB'))[0]['value']);
     }
 
     public function testItShowsOptionLabelsFromTheSchemaAndKeepsValuesWhoseOptionIsGone(): void
     {
         $pool = FieldPools::builtIn();
-        $table = new ValuesTable(EscaperFactory::create(), new AnswerView(new ValueFormatter($pool), $pool));
+        $table = new ValuesTable(EscaperFactory::create(), new AnswerView(new ValueFormatter($pool, new \Furan\FormBuilder\Model\Submission\AnswerDate()), $pool));
         $schema = ['pages' => [['items' => [
             ['kind' => 'field', 'type' => 'select', 'name' => 'topic', 'options' => [['value' => 'sales', 'label' => 'Ventes']]],
             ['kind' => 'field', 'type' => 'checkboxes', 'name' => 'tags', 'options' => [
@@ -144,19 +167,19 @@ class ValuesTableTest extends TestCase
             ['label' => 'Topic', 'value' => 'Ventes'],
             ['label' => 'Tags', 'value' => 'Bleu, gone'],
             ['label' => 'Old', 'value' => 'opt_9'],
-        ], $table->toList($payload, $schema));
-        $this->assertStringContainsString('Ventes', $table->toHtml($payload, $schema));
-        $this->assertStringNotContainsString('sales', $table->toHtml($payload, $schema));
+        ], $table->toList($payload, $schema, \Furan\FormBuilder\Api\Data\DisplayContext::forStore(1, 'en_GB')));
+        $this->assertStringContainsString('Ventes', $table->toHtml($payload, $schema, \Furan\FormBuilder\Api\Data\DisplayContext::forStore(1, 'en_GB')));
+        $this->assertStringNotContainsString('sales', $table->toHtml($payload, $schema, \Furan\FormBuilder\Api\Data\DisplayContext::forStore(1, 'en_GB')));
     }
 
     public function testItShowsYesOrNoForATickedOrUntickedAnswer(): void
     {
         $pool = FieldPools::builtIn();
-        $table = new ValuesTable(EscaperFactory::create(), new AnswerView(new ValueFormatter($pool), $pool));
+        $table = new ValuesTable(EscaperFactory::create(), new AnswerView(new ValueFormatter($pool, new \Furan\FormBuilder\Model\Submission\AnswerDate()), $pool));
         $list = $table->toList([
             ['name' => 'ok', 'label' => 'OK', 'type' => 'toggle', 'value' => 'yes'],
             ['name' => 'no', 'label' => 'No', 'type' => 'toggle', 'value' => ''],
-        ], []);
+        ], [], \Furan\FormBuilder\Api\Data\DisplayContext::forStore(1, 'en_GB'));
 
         $this->assertSame(['Yes', 'No'], array_column($list, 'value'));
     }
@@ -165,6 +188,6 @@ class ValuesTableTest extends TestCase
     {
         $payload = [['name' => 'cv', 'label' => 'CV', 'type' => 'file', 'value' => ['name' => 'a.txt', 'size' => 12]]];
 
-        $this->assertStringContainsString('a.txt (1 KB)', $this->table->toHtml($payload, []));
+        $this->assertStringContainsString('a.txt (1 KB)', $this->table->toHtml($payload, [], \Furan\FormBuilder\Api\Data\DisplayContext::forStore(1, 'en_GB')));
     }
 }

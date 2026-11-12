@@ -16,6 +16,7 @@ class FieldTemplatesTest extends TestCase
         'text', 'textarea', 'email', 'tel', 'url', 'number', 'date', 'time', 'datetime', 'color',
         'select', 'multiselect', 'country', 'file', 'range',
     ];
+    private const MAX_LENGTHS = ['text' => 1000, 'email' => 1000, 'tel' => 1000, 'url' => 1000, 'suggest' => 1000, 'textarea' => 20000, 'list' => 255, 'address' => 255];
 
     public function testItRendersFieldsWithIdsLabelsHelpAndErrorHooksPerTheMarkupContract(): void
     {
@@ -74,7 +75,7 @@ class FieldTemplatesTest extends TestCase
             $xpath = $this->xpath($this->render($type, ['help' => 'Hint']));
             $control = $xpath->query('/html/body//*[@id="ffb-7-first_name"]')->item(0);
             $this->assertNotNull($control, $type);
-            $this->assertSame('ffb-input', $control->getAttribute('class'), $type);
+            $this->assertContains('ffb-input', explode(' ', $control->getAttribute('class')), $type);
             $this->assertSame('ffb-7-first_name-help ffb-7-first_name-error', $control->getAttribute('aria-describedby'), $type);
             $this->assertSame('ffb-7-first_name', $xpath->query('/html/body/div/label')->item(0)->getAttribute('for'), $type);
             $this->assertSame(1, $xpath->query('/html/body/div/p[@id="ffb-7-first_name-error"][@data-ffb-error][@hidden]')->length, $type);
@@ -230,7 +231,7 @@ class FieldTemplatesTest extends TestCase
         $fromExt = $this->xpath($this->render('file', ['settings' => ['extensions' => ['pdf', 'png']]]))->query('/html/body//input')->item(0);
         $this->assertSame('.pdf,.png', $fromExt->getAttribute('accept'));
 
-        foreach (['email' => 'email', 'tel' => 'tel', 'url' => 'url', 'time' => 'time', 'color' => 'color'] as $type => $htmlType) {
+        foreach (['email' => 'email', 'tel' => 'tel', 'url' => 'url', 'time' => 'time'] as $type => $htmlType) {
             $this->assertSame($htmlType, $this->xpath($this->render($type, []))->query('/html/body//input')->item(0)->getAttribute('type'), $type);
         }
     }
@@ -336,6 +337,8 @@ class FieldTemplatesTest extends TestCase
         $this->assertSame('.pdf,.png,.jpg', $accept(['extensions' => []]));
         $this->assertSame('.pdf', $accept(['extensions' => ['pdf', 'exe']]));
         $this->assertSame('', $accept(['extensions' => ['exe', 'php']]));
+        $this->assertSame('.pdf,.png', $accept(['extensions' => [' .PDF ', 'png', 'p<n>g']]));
+        $this->assertSame('.pdf,.png,.jpg', $accept(['extensions' => ['<b>', ' ', ['pdf']]]));
         $this->assertFalse($this->xpath($this->render('file', ['settings' => ['extensions' => ['exe']]]))
             ->query('/html/body//input')->item(0)->hasAttribute('accept'));
     }
@@ -365,7 +368,7 @@ class FieldTemplatesTest extends TestCase
             'placeholder' => '', 'help' => '', 'default' => '', 'width' => 'full', 'required' => false,
             'rules' => [], 'options' => [], 'settings' => [], 'autocomplete' => '', 'css_class' => '',
         ];
-        $block = new FakeItemBlock(['item' => $item, 'form_id' => 7, 'parent_block' => new FakeFormParent($instance)], $stubs);
+        $block = new FakeItemBlock(['item' => $item, 'form_id' => 7, 'parent_block' => new FakeFormParent($instance, ['pdf', 'png', 'jpg'], self::MAX_LENGTHS)], $stubs);
 
         return $block->render('Furan_FormBuilder::item/' . $type . '.phtml');
     }
@@ -496,6 +499,85 @@ class FieldTemplatesTest extends TestCase
             'settings' => ['rows' => ['Speed'], 'require_all' => false],
         ]));
         $this->assertFalse($loose->query('//input[@type="radio"]')->item(0)->hasAttribute('required'));
+    }
+
+    public function testItAlwaysLimitsTypedTextToWhatTheServerKeeps(): void
+    {
+        foreach (self::MAX_LENGTHS as $type => $cap) {
+            $html = $this->render($type, []);
+            $control = $this->xpath($html)->query('/html/body//input[not(@type="hidden")] | /html/body//textarea')->item(0);
+            $this->assertSame((string)$cap, $control->getAttribute('maxlength'), $type);
+        }
+        foreach (['text' => 1000, 'textarea' => 20000] as $type => $cap) {
+            $tooLong = [['rule' => 'max_length', 'value' => $cap + 1, 'message' => '']];
+            $control = $this->xpath($this->render($type, ['rules' => $tooLong]))->query('/html/body//input | /html/body//textarea')->item(0);
+            $this->assertSame((string)$cap, $control->getAttribute('maxlength'), $type);
+        }
+        $this->assertFalse($this->xpath($this->render('number', []))->query('/html/body//input')->item(0)->hasAttribute('maxlength'));
+    }
+
+    public function testItLimitsEveryTypedAddressPartToWhatTheServerKeeps(): void
+    {
+        $xpath = $this->xpath($this->render('address', ['render' => ['street_lines' => 3]]));
+        $parts = $xpath->query('/html/body//div[contains(@class, "ffb-address")]//input[@type="text"]');
+        $this->assertSame(6, $parts->length);
+        foreach ($parts as $input) {
+            $this->assertSame('255', $input->getAttribute('maxlength'), $input->getAttribute('name'));
+        }
+        $this->assertFalse($xpath->query('//select[@data-ffb-region-list]')->item(0)->hasAttribute('maxlength'));
+    }
+
+    public function testItRendersAColourAsAPostedHiddenValueWithAnUnnamedPickerAndHexBox(): void
+    {
+        $xpath = $this->xpath($this->render('color', ['required' => true]));
+        $box = $xpath->query('/html/body/div/div[@class="ffb-color"]')->item(0);
+        $this->assertTrue($box->hasAttribute('data-ffb-color'));
+        $this->assertTrue($box->hasAttribute('data-ffb-empty'));
+        $this->assertFalse($box->hasAttribute('data-ffb-default'));
+        $value = $xpath->query('/html/body/div/div/input[@type="hidden"]')->item(0);
+        $this->assertSame('fields[first_name]', $value->getAttribute('name'));
+        $this->assertSame('', $value->getAttribute('value'));
+        $this->assertTrue($value->hasAttribute('data-ffb-color-value'));
+        $picker = $xpath->query('/html/body/div/div/input[@type="color"]')->item(0);
+        $this->assertFalse($picker->hasAttribute('name'));
+        $this->assertSame('-1', $picker->getAttribute('tabindex'));
+        $this->assertSame('true', $picker->getAttribute('aria-hidden'));
+        $hex = $xpath->query('/html/body/div/div/input[@type="text"]')->item(0);
+        $this->assertSame('ffb-7-first_name', $hex->getAttribute('id'));
+        $this->assertSame('ffb-7-first_name', $xpath->query('/html/body/div/label')->item(0)->getAttribute('for'));
+        $this->assertFalse($hex->hasAttribute('name'));
+        $this->assertSame('ffb-input ffb-color-hex', $hex->getAttribute('class'));
+        $this->assertSame('7', $hex->getAttribute('maxlength'));
+        $this->assertSame('#rrggbb', $hex->getAttribute('placeholder'));
+        $this->assertTrue($hex->hasAttribute('data-ffb-required-part'));
+        $this->assertTrue($hex->hasAttribute('required'));
+        $this->assertSame('ffb-7-first_name-error', $hex->getAttribute('aria-describedby'));
+        $clear = $xpath->query('/html/body/div/div/button[@data-ffb-color-clear]')->item(0);
+        $this->assertSame('button', $clear->getAttribute('type'));
+        $this->assertSame('Clear colour', $clear->getAttribute('aria-label'));
+        $this->assertSame('Clear', $clear->textContent);
+        $this->assertTrue($clear->hasAttribute('hidden'));
+
+        $xpath = $this->xpath($this->render('color', ['default' => '#A1B2C3']));
+        $box = $xpath->query('/html/body/div/div[@class="ffb-color"]')->item(0);
+        $this->assertFalse($box->hasAttribute('data-ffb-empty'));
+        $this->assertSame('#a1b2c3', $box->getAttribute('data-ffb-default'));
+        $this->assertSame('#a1b2c3', $xpath->query('//input[@type="hidden"]')->item(0)->getAttribute('value'));
+        $this->assertSame('#a1b2c3', $xpath->query('//input[@type="color"]')->item(0)->getAttribute('value'));
+        $this->assertSame('#a1b2c3', $xpath->query('//input[@type="text"]')->item(0)->getAttribute('value'));
+        $this->assertFalse($xpath->query('//button[@data-ffb-color-clear]')->item(0)->hasAttribute('hidden'));
+
+        $xpath = $this->xpath($this->render('color', ['default' => 'red"><b>']));
+        $this->assertSame('', $xpath->query('//input[@type="hidden"]')->item(0)->getAttribute('value'));
+        $this->assertSame(0, $xpath->query('//b')->length);
+    }
+
+    public function testItGivesRatingAndScaleTheirReviewStepWording(): void
+    {
+        $rating = $this->xpath($this->render('rating', ['settings' => ['max' => 7]]))->query('//div[@class="ffb-rating"]')->item(0);
+        $this->assertSame('%1 of 7', $rating->getAttribute('data-ffb-summary-text'));
+        $scale = $this->xpath($this->render('scale', ['settings' => ['min' => 0, 'max' => 10]]))->query('//div[@class="ffb-scale"]')->item(0);
+        $this->assertSame('%1 on a 0 to 10 scale', $scale->getAttribute('data-ffb-summary-text'));
     }
 
     public function testItRendersTheListAsOneArrayNamedRowWithAddAndRemoveButtons(): void

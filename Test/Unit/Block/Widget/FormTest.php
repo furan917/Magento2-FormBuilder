@@ -128,6 +128,8 @@ class FormTest extends TestCase
             new \Furan\FormBuilder\Model\Form\ScheduleGate($this->createStub(\Magento\Framework\Stdlib\DateTime\DateTime::class)),
             $this->createStub(\Furan\FormBuilder\Model\Directory\CountryOptions::class),
             new \Magento\Framework\Serialize\Serializer\JsonHexTag(),
+            $this->createStub(\Furan\FormBuilder\Model\Theme\HyvaDetector::class),
+            new \Furan\FormBuilder\Block\ItemContext(new \Furan\FormBuilder\Model\Upload\ExtensionList()),
             $repository,
             \Furan\FormBuilder\Test\Unit\Helper\TranslatorFactory::create($this->createStub(\Furan\FormBuilder\Model\Url\RedirectValidator::class)),
             $scripts,

@@ -18,6 +18,7 @@ use Furan\FormBuilder\Model\Thread\Messages;
 use Furan\FormBuilder\Model\Thread\ReplyPolicy;
 use Furan\FormBuilder\Test\Unit\Helper\EscaperFactory;
 use Furan\FormBuilder\Model\Account\SubmissionPolicy;
+use Furan\FormBuilder\Model\Submission\StoreDisplayContext;
 use Magento\Customer\Model\Session;
 use Magento\Framework\App\Config\ScopeConfigInterface;
 use Magento\Framework\App\Request\Http;
@@ -70,7 +71,7 @@ class SubmissionTest extends TestCase
         $session = $this->createStub(Session::class);
         $session->method('getCustomerId')->willReturn('7');
 
-        $view = (new Submission($context, $reader, $repository, new AnswerView(new ValueFormatter(FieldPools::withFiles()), FieldPools::withFiles()), new Json(), $session, $this->emptyThread(), $this->storeManager(), new MessageRenderer(EscaperFactory::create(), new MiniMarkdown()), $this->policy(), new SubmissionStatus(), $this->gate(), new SubmissionPolicy()))->getView();
+        $view = (new Submission($context, $reader, $repository, new AnswerView(new ValueFormatter(FieldPools::withFiles(), new \Furan\FormBuilder\Model\Submission\AnswerDate()), FieldPools::withFiles()), new Json(), $session, $this->emptyThread(), $this->storeManager(), new MessageRenderer(EscaperFactory::create(), new MiniMarkdown()), $this->policy(), new SubmissionStatus(), $this->gate(), new SubmissionPolicy(), $this->locales()))->getView();
 
         $encoded = json_encode($view);
         $this->assertStringNotContainsString('secret-campaign', $encoded);
@@ -82,6 +83,82 @@ class SubmissionTest extends TestCase
         $this->assertStringContainsString('kept', $encoded);
         $this->assertSame('Contact', $view['title']);
         $this->assertSame('0194f3a0-1111-7222-8333-444455556666', $view['reference']);
+    }
+
+    public function testItShowsDatesAndCountriesInTheLocaleOfTheStoreViewTheSubmissionWasMadeIn(): void
+    {
+        $schema = ['pages' => [['title' => 'P', 'items' => [
+            ['kind' => 'field', 'type' => 'datetime', 'name' => 'when', 'label' => 'When'],
+            ['kind' => 'field', 'type' => 'month', 'name' => 'month', 'label' => 'Month'],
+            ['kind' => 'field', 'type' => 'country', 'name' => 'from', 'label' => 'From'],
+            ['kind' => 'field', 'type' => 'address', 'name' => 'home', 'label' => 'Home'],
+        ]]]];
+        $payload = [
+            ['name' => 'when', 'label' => 'When', 'type' => 'datetime', 'value' => '2026-10-05T09:15'],
+            ['name' => 'month', 'label' => 'Month', 'type' => 'month', 'value' => '2026-09'],
+            ['name' => 'from', 'label' => 'From', 'type' => 'country', 'value' => 'GB'],
+            ['name' => 'home', 'label' => 'Home', 'type' => 'address', 'value' => ['street' => ['1 rue X'], 'city' => 'Lyon', 'country_id' => 'GB']],
+        ];
+        $reader = $this->createStub(SubmissionReader::class);
+        $reader->method('find')->willReturn([
+            'submission_id' => '9', 'form_id' => '1', 'status' => '0', 'store_id' => '2',
+            'created_at' => '2026-01-01 10:00:00', 'payload_json' => json_encode($payload),
+        ]);
+        $form = $this->createStub(FormInterface::class);
+        $form->method('getSchema')->willReturn($schema);
+        $repository = $this->createStub(FormRepositoryInterface::class);
+        $repository->method('getById')->willReturn($form);
+        $request = $this->createStub(Http::class);
+        $request->method('getParam')->willReturnCallback(static fn (string $key) => $key === 'id' ? '9' : null);
+        $context = $this->createStub(Context::class);
+        $context->method('getRequest')->willReturn($request);
+        $context->method('getEventManager')->willReturn($this->createStub(ManagerInterface::class));
+        $context->method('getScopeConfig')->willReturn($this->createStub(ScopeConfigInterface::class));
+        $session = $this->createStub(Session::class);
+        $session->method('getCustomerId')->willReturn('7');
+        $pool = FieldPools::adminView();
+
+        $view = (new Submission($context, $reader, $repository, new AnswerView(new ValueFormatter($pool, new \Furan\FormBuilder\Model\Submission\AnswerDate()), $pool), new Json(), $session, $this->emptyThread(), $this->storeManager(), new MessageRenderer(EscaperFactory::create(), new MiniMarkdown()), $this->policy(), new SubmissionStatus(), $this->gate(), new SubmissionPolicy(), $this->locales()))->getView();
+
+        $this->assertSame(
+            [['5 oct. 2026, 09:15'], ['septembre 2026'], ['Royaume-Uni'], ['1 rue X, Lyon, Royaume-Uni']],
+            array_column($view['groups'][0]['sections'][0]['entries'], 'values')
+        );
+    }
+
+    public function testItTranslatesYesAndNoAnswers(): void
+    {
+        $schema = ['pages' => [['title' => 'P', 'items' => [
+            ['kind' => 'field', 'type' => 'toggle', 'name' => 'on', 'label' => 'On'],
+            ['kind' => 'field', 'type' => 'consent', 'name' => 'off', 'label' => 'Off'],
+        ]]]];
+        $payload = [
+            ['name' => 'on', 'label' => 'On', 'type' => 'toggle', 'value' => 'yes'],
+            ['name' => 'off', 'label' => 'Off', 'type' => 'consent', 'value' => ''],
+        ];
+        $reader = $this->createStub(SubmissionReader::class);
+        $reader->method('find')->willReturn([
+            'submission_id' => '9', 'form_id' => '1', 'status' => '0', 'store_id' => '2',
+            'created_at' => '2026-01-01 10:00:00', 'payload_json' => json_encode($payload),
+        ]);
+        $form = $this->createStub(FormInterface::class);
+        $form->method('getSchema')->willReturn($schema);
+        $repository = $this->createStub(FormRepositoryInterface::class);
+        $repository->method('getById')->willReturn($form);
+        $request = $this->createStub(Http::class);
+        $request->method('getParam')->willReturnCallback(static fn (string $key) => $key === 'id' ? '9' : null);
+        $context = $this->createStub(Context::class);
+        $context->method('getRequest')->willReturn($request);
+        $context->method('getEventManager')->willReturn($this->createStub(ManagerInterface::class));
+        $context->method('getScopeConfig')->willReturn($this->createStub(ScopeConfigInterface::class));
+        $session = $this->createStub(Session::class);
+        $session->method('getCustomerId')->willReturn('7');
+        $pool = FieldPools::adminView();
+        $block = new Submission($context, $reader, $repository, new AnswerView(new ValueFormatter($pool, new \Furan\FormBuilder\Model\Submission\AnswerDate()), $pool), new Json(), $session, $this->emptyThread(), $this->storeManager(), new MessageRenderer(EscaperFactory::create(), new MiniMarkdown()), $this->policy(), new SubmissionStatus(), $this->gate(), new SubmissionPolicy(), $this->locales());
+
+        $view = \Furan\FormBuilder\Test\Unit\Helper\Translated::with('fr:', $block->getView(...));
+
+        $this->assertSame([['fr:Yes'], ['fr:No']], array_column($view['groups'][0]['sections'][0]['entries'], 'values'));
     }
 
     public function testItShowsOnlyTheFileNameOfACustomFileTypeToTheCustomer(): void
@@ -118,7 +195,7 @@ class SubmissionTest extends TestCase
         $session = $this->createStub(Session::class);
         $session->method('getCustomerId')->willReturn('7');
 
-        $view = (new Submission($context, $reader, $repository, new AnswerView(new ValueFormatter(FieldPools::withFiles()), FieldPools::withFiles()), new Json(), $session, $this->emptyThread(), $this->storeManager(), new MessageRenderer(EscaperFactory::create(), new MiniMarkdown()), $this->policy(), new SubmissionStatus(), $this->gate(), new SubmissionPolicy()))->getView();
+        $view = (new Submission($context, $reader, $repository, new AnswerView(new ValueFormatter(FieldPools::withFiles(), new \Furan\FormBuilder\Model\Submission\AnswerDate()), FieldPools::withFiles()), new Json(), $session, $this->emptyThread(), $this->storeManager(), new MessageRenderer(EscaperFactory::create(), new MiniMarkdown()), $this->policy(), new SubmissionStatus(), $this->gate(), new SubmissionPolicy(), $this->locales()))->getView();
 
         $encoded = json_encode($view);
         $this->assertSame(['a.pdf'], $view['groups'][0]['sections'][0]['entries'][1]['values']);
@@ -150,7 +227,7 @@ class SubmissionTest extends TestCase
         $session = $this->createStub(Session::class);
         $session->method('getCustomerId')->willReturn('7');
 
-        $view = (new Submission($context, $reader, $repository, new AnswerView(new ValueFormatter(FieldPools::withFiles()), FieldPools::withFiles()), new Json(), $session, $this->emptyThread(), $this->storeManager(), new MessageRenderer(EscaperFactory::create(), new MiniMarkdown()), $this->policy(), new SubmissionStatus(), $this->gate(), new SubmissionPolicy()))->getView();
+        $view = (new Submission($context, $reader, $repository, new AnswerView(new ValueFormatter(FieldPools::withFiles(), new \Furan\FormBuilder\Model\Submission\AnswerDate()), FieldPools::withFiles()), new Json(), $session, $this->emptyThread(), $this->storeManager(), new MessageRenderer(EscaperFactory::create(), new MiniMarkdown()), $this->policy(), new SubmissionStatus(), $this->gate(), new SubmissionPolicy(), $this->locales()))->getView();
 
         $this->assertSame(['P[1|2]'], $view['groups'][0]['sections'][0]['entries'][0]['values']);
     }
@@ -182,7 +259,7 @@ class SubmissionTest extends TestCase
         $session = $this->createStub(Session::class);
         $session->method('getCustomerId')->willReturn('7');
 
-        $view = (new Submission($context, $reader, $repository, new AnswerView(new ValueFormatter(FieldPools::withFiles()), FieldPools::withFiles()), new Json(), $session, $this->emptyThread(), $this->storeManager(), new MessageRenderer(EscaperFactory::create(), new MiniMarkdown()), $this->policy(), new SubmissionStatus(), $this->gate(), new SubmissionPolicy()))->getView();
+        $view = (new Submission($context, $reader, $repository, new AnswerView(new ValueFormatter(FieldPools::withFiles(), new \Furan\FormBuilder\Model\Submission\AnswerDate()), FieldPools::withFiles()), new Json(), $session, $this->emptyThread(), $this->storeManager(), new MessageRenderer(EscaperFactory::create(), new MiniMarkdown()), $this->policy(), new SubmissionStatus(), $this->gate(), new SubmissionPolicy(), $this->locales()))->getView();
 
         $this->assertSame($canEdit, $view['can_edit']);
         $this->assertSame($canDelete, $view['can_delete']);
@@ -220,7 +297,7 @@ class SubmissionTest extends TestCase
         $session = $this->createStub(Session::class);
         $session->method('getCustomerId')->willReturn('7');
 
-        $view = (new Submission($context, $reader, $repository, new AnswerView(new ValueFormatter(FieldPools::withFiles()), FieldPools::withFiles()), new Json(), $session, $this->emptyThread(), $this->storeManager(), new MessageRenderer(EscaperFactory::create(), new MiniMarkdown()), $this->policy(), new SubmissionStatus(), $this->gate(), new SubmissionPolicy()))->getView();
+        $view = (new Submission($context, $reader, $repository, new AnswerView(new ValueFormatter(FieldPools::withFiles(), new \Furan\FormBuilder\Model\Submission\AnswerDate()), FieldPools::withFiles()), new Json(), $session, $this->emptyThread(), $this->storeManager(), new MessageRenderer(EscaperFactory::create(), new MiniMarkdown()), $this->policy(), new SubmissionStatus(), $this->gate(), new SubmissionPolicy(), $this->locales()))->getView();
 
         $this->assertSame($canEdit, $view['can_edit']);
         $this->assertSame($editClosed, $view['edit_closed']);
@@ -252,7 +329,7 @@ class SubmissionTest extends TestCase
         $session = $this->createStub(Session::class);
         $session->method('getCustomerId')->willReturn('7');
 
-        $view = (new Submission($context, $reader, $repository, new AnswerView(new ValueFormatter(FieldPools::withFiles()), FieldPools::withFiles()), new Json(), $session, $this->emptyThread(), $this->storeManager(), new MessageRenderer(EscaperFactory::create(), new MiniMarkdown()), $this->policy(), new SubmissionStatus(), $this->gate(), new SubmissionPolicy()))->getView();
+        $view = (new Submission($context, $reader, $repository, new AnswerView(new ValueFormatter(FieldPools::withFiles(), new \Furan\FormBuilder\Model\Submission\AnswerDate()), FieldPools::withFiles()), new Json(), $session, $this->emptyThread(), $this->storeManager(), new MessageRenderer(EscaperFactory::create(), new MiniMarkdown()), $this->policy(), new SubmissionStatus(), $this->gate(), new SubmissionPolicy(), $this->locales()))->getView();
 
         $this->assertNotNull($view);
         $this->assertStringContainsString('Hello', json_encode($view['groups']));
@@ -312,12 +389,21 @@ class SubmissionTest extends TestCase
         $session = $this->createStub(Session::class);
         $session->method('getCustomerId')->willReturn('7');
 
-        $view = (new Submission($context, $reader, $repository, new AnswerView(new ValueFormatter(FieldPools::withFiles()), FieldPools::withFiles()), new Json(), $session, $this->emptyThread(), $this->storeManager(), new MessageRenderer(EscaperFactory::create(), new MiniMarkdown()), $this->policy(), new SubmissionStatus(), $this->gate(), new SubmissionPolicy()))->getView();
+        $view = (new Submission($context, $reader, $repository, new AnswerView(new ValueFormatter(FieldPools::withFiles(), new \Furan\FormBuilder\Model\Submission\AnswerDate()), FieldPools::withFiles()), new Json(), $session, $this->emptyThread(), $this->storeManager(), new MessageRenderer(EscaperFactory::create(), new MiniMarkdown()), $this->policy(), new SubmissionStatus(), $this->gate(), new SubmissionPolicy(), $this->locales()))->getView();
 
         $this->assertSame('', $view['groups'][0]['title']);
         $this->assertSame(['Subject'], array_column($view['groups'][0]['sections'][0]['entries'], 'label'));
         $this->assertSame('In progress', $view['status_label']);
         $this->assertFalse($view['one_response']);
+    }
+
+    private function locales(): StoreDisplayContext
+    {
+        $config = $this->createStub(ScopeConfigInterface::class);
+        $config->method('getValue')->willReturnCallback(
+            static fn (string $path, string $scope, mixed $store): string => $path === 'general/locale/code' && $store === 2 ? 'fr_FR' : 'en_GB'
+        );
+        return new StoreDisplayContext($config);
     }
 
     private function storeManager(string $storeName = 'My Shop'): StoreManagerInterface
@@ -389,7 +475,7 @@ class SubmissionTest extends TestCase
         $session = $this->createStub(Session::class);
         $session->method('getCustomerId')->willReturn('7');
 
-        return new Submission($context, $reader, $repository, new AnswerView(new ValueFormatter(FieldPools::withFiles()), FieldPools::withFiles()), new Json(), $session, $messages, $storeManager, new MessageRenderer(EscaperFactory::create(), new MiniMarkdown()), $policy ?? $this->policy(), new SubmissionStatus(), $this->gate(), new SubmissionPolicy());
+        return new Submission($context, $reader, $repository, new AnswerView(new ValueFormatter(FieldPools::withFiles(), new \Furan\FormBuilder\Model\Submission\AnswerDate()), FieldPools::withFiles()), new Json(), $session, $messages, $storeManager, new MessageRenderer(EscaperFactory::create(), new MiniMarkdown()), $policy ?? $this->policy(), new SubmissionStatus(), $this->gate(), new SubmissionPolicy(), $this->locales());
     }
 
     public function testItShowsTheConversationToTheOwner(): void

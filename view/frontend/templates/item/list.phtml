@@ -13,7 +13,7 @@ $addLabel = trim((string)($settings['add_label'] ?? ''));
         <ol class="ffb-list-items">
             <li class="ffb-list-row" data-ffb-list-row>
                 <input<?= /* @noEscape */ $attrs(['type' => 'text'] + ['name' => $base['name'] . '[]', 'required' => false] + $base + [
-                    'maxlength' => 255,
+                    'maxlength' => $lengthLimit,
                     'placeholder' => $item['placeholder'] ?? '',
                     'aria-label' => (string)__('Item %1', 1),
                 ]) ?>>

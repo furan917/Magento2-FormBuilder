@@ -6,6 +6,7 @@ namespace Furan\FormBuilder\Block\Widget;
 use Furan\FormBuilder\Api\Data\FormInterface;
 use Furan\FormBuilder\Api\FormRepositoryInterface;
 use Furan\FormBuilder\Block\Form as FormBlock;
+use Furan\FormBuilder\Block\ItemContext;
 use Furan\FormBuilder\Model\Config;
 use Furan\FormBuilder\Model\Content\MiniMarkdown;
 use Furan\FormBuilder\Model\Directory\CountryOptions;
@@ -13,6 +14,7 @@ use Furan\FormBuilder\Model\FieldType\Pool;
 use Furan\FormBuilder\Model\Form\ScheduleGate;
 use Furan\FormBuilder\Model\I18n\Translator;
 use Furan\FormBuilder\Model\Storefront\ConfigBuilder;
+use Furan\FormBuilder\Model\Theme\HyvaDetector;
 use Magento\Framework\Exception\NoSuchEntityException;
 use Magento\Framework\Serialize\Serializer\JsonHexTag;
 use Magento\Framework\View\Element\Template\Context;
@@ -39,13 +41,15 @@ class Form extends FormBlock implements BlockInterface
         ScheduleGate $schedule,
         CountryOptions $countries,
         JsonHexTag $jsonHexTag,
+        HyvaDetector $hyvaDetector,
+        ItemContext $itemContext,
         private readonly FormRepositoryInterface $formRepository,
         private readonly Translator $translator,
         array $scripts = [],
         array $styles = [],
         array $data = []
     ) {
-        parent::__construct($context, $configBuilder, $fieldTypes, $moduleConfig, $logger, $markdown, $schedule, $countries, $jsonHexTag, $scripts, $styles, $data);
+        parent::__construct($context, $configBuilder, $fieldTypes, $moduleConfig, $logger, $markdown, $schedule, $countries, $jsonHexTag, $hyvaDetector, $itemContext, $scripts, $styles, $data);
     }
 
     public function getForm(): ?FormInterface

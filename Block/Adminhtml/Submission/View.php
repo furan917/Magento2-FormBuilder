@@ -5,10 +5,12 @@ namespace Furan\FormBuilder\Block\Adminhtml\Submission;
 
 use Furan\FormBuilder\Api\Data\FormInterface;
 use Furan\FormBuilder\Api\Data\SubmissionInterface;
+use Furan\FormBuilder\Api\Data\DisplayContext;
 use Furan\FormBuilder\Api\FormRepositoryInterface;
 use Furan\FormBuilder\Api\SubmissionRepositoryInterface;
 use Furan\FormBuilder\Model\Customer\CustomerSummary;
 use Furan\FormBuilder\Model\Source\SubmissionStatus;
+use Furan\FormBuilder\Model\Submission\AnswerDate;
 use Furan\FormBuilder\Model\Submission\AnswerView;
 use Furan\FormBuilder\Model\Thread\MessageRenderer;
 use Furan\FormBuilder\Model\Thread\Messages;
@@ -17,6 +19,7 @@ use Magento\Backend\Block\Widget\Container;
 use Magento\Directory\Model\Currency;
 use Magento\Framework\Escaper;
 use Magento\Framework\Exception\NoSuchEntityException;
+use Magento\Framework\Locale\ResolverInterface;
 use Magento\Framework\Pricing\PriceCurrencyInterface;
 
 class View extends Container
@@ -27,6 +30,7 @@ class View extends Container
     private ?array $customerCard = null;
     /** @var array{messages: array<int, array<string, mixed>>, earlier: bool}|null */
     private ?array $threadPage = null;
+    private ?DisplayContext $displayContext = null;
 
     /** @param array<string, mixed> $data */
     public function __construct(
@@ -39,6 +43,8 @@ class View extends Container
         private readonly CustomerSummary $customerSummary,
         private readonly PriceCurrencyInterface $priceCurrency,
         private readonly MessageRenderer $renderer,
+        private readonly AnswerDate $answerDate,
+        private readonly ResolverInterface $localeResolver,
         array $data = []
     ) {
         parent::__construct($context, $data);
@@ -101,7 +107,7 @@ class View extends Container
      */
     public function getDisplayValues(array $entry): array
     {
-        return $this->answerView->values($entry);
+        return $this->answerView->values($entry, $this->displayContext());
     }
 
     /**
@@ -111,7 +117,7 @@ class View extends Container
      */
     public function getDisplayHtml(array $entry, Escaper $escaper): ?string
     {
-        return $this->answerView->html($entry, $escaper);
+        return $this->answerView->html($entry, $escaper, $this->displayContext());
     }
 
     /**
@@ -124,6 +130,36 @@ class View extends Container
         return $this->answerView->kind($entry);
     }
 
+    /**
+     * The answer as a date in the admin locale, or null when it is not a valid date answer.
+     *
+     * @param array<string, mixed> $entry
+     */
+    public function getDisplayDate(array $entry): ?string
+    {
+        return $this->answerDate->text(
+            $this->answerView->kind($entry),
+            $entry['value'] ?? null,
+            $this->displayContext()->locale
+        );
+    }
+
+    /**
+     * A server-owned answer the visitor never saw as a question.
+     *
+     * @param array<string, mixed> $entry
+     */
+    public function isHidden(array $entry): bool
+    {
+        return $this->answerView->isServerValue($entry);
+    }
+
+    /** @param array<string, mixed> $entry */
+    public function isBrowserValue(array $entry): bool
+    {
+        return $this->answerView->isBrowserValue($entry);
+    }
+
     /** @param array<string, mixed> $entry */
     public function isFile(array $entry): bool
     {
@@ -133,7 +169,7 @@ class View extends Container
     /** @param array<string, mixed> $entry */
     public function isAnswered(array $entry): bool
     {
-        return $this->answerView->isAnswered($entry);
+        return $this->answerView->isAnswered($entry, $this->displayContext());
     }
 
     public function getSubmittedAt(): string
@@ -344,5 +380,10 @@ class View extends Container
     private function getSubmissionId(): int
     {
         return (int)$this->getRequest()->getParam('id');
+    }
+
+    private function displayContext(): DisplayContext
+    {
+        return $this->displayContext ??= DisplayContext::forAdmin($this->localeResolver->getLocale());
     }
 }

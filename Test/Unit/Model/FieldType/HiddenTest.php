@@ -34,8 +34,10 @@ class HiddenTest extends TestCase
             new \Furan\FormBuilder\Model\Schema\SettingValues(new RedirectValidator($manager)),
             new PersonalData(FieldPools::builtIn()),
             new Sources(),
-            \Furan\FormBuilder\Test\Unit\Helper\ConditionNormalizers::builtIn()
-        );
+            \Furan\FormBuilder\Test\Unit\Helper\ConditionNormalizers::builtIn(),
+            \Furan\FormBuilder\Test\Unit\Helper\FieldChecksFactory::create(),
+        new \Furan\FormBuilder\Model\Validation\PresetFit()
+);
     }
 
     private function sourceAfterSave(Hidden $hidden, string $source): string
@@ -49,7 +51,7 @@ class HiddenTest extends TestCase
 
     public function testItShowsTheQueryParameterSettingOnlyForTheQuerySource(): void
     {
-        $this->assertSame(['source' => ['query']], (new Hidden())->getSettingsSpec()['query_param']['visible_when']);
+        $this->assertSame(['source' => ['query'], '@prefill' => ['']], (new Hidden())->getSettingsSpec()['query_param']['visible_when']);
     }
 
     public function testItExplainsWhereEachSourceGetsItsValue(): void
@@ -58,6 +60,22 @@ class HiddenTest extends TestCase
 
         $this->assertStringContainsString('Default value', $hint);
         $this->assertStringContainsString('browser', $hint);
+        $this->assertStringContainsString('Prefill source replaces this setting', $hint);
+    }
+
+    public function testItFixesThePrefilledAnswerToTheDefaultWhateverTheValueSource(): void
+    {
+        $hidden = new Hidden();
+        $field = ['type' => 'hidden', 'default' => 'd', 'prefill' => 'customer.email'];
+
+        $this->assertSame('d', $hidden->fixedValue($field + ['settings' => ['source' => 'query', 'query_param' => 'q']]));
+        $this->assertSame('d', $hidden->fixedValue($field + ['settings' => ['source' => 'referrer']]));
+        $this->assertNull($hidden->fixedValue(['prefill' => '', 'default' => 'd', 'settings' => ['source' => 'referrer']]));
+    }
+
+    public function testItCutsAStoredAnswerToTheHiddenMaximumLengthOf255Characters(): void
+    {
+        $this->assertSame(str_repeat('a', 255), (new Hidden())->normalizeValue(str_repeat('a', 300), []));
     }
 
     public function testItKeepsTheSettingsOfASavedHiddenFieldFreeOfSpecMetadata(): void

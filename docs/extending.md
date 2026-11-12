@@ -34,7 +34,7 @@ Other arguments extensions can fill:
 | --- | --- |
 | `Model\FieldType\Hidden`, `sources` | Extra hidden field sources, filled in the browser by `registry.hiddenSource`. A code, or `['code' => 'crm.id', 'label' => 'CRM contact id']` for a builder label. Codes match `^[a-z][a-z0-9_.-]{0,63}$` |
 | `Block\Form`, `scripts` and `styles` | Extra storefront files, see *Storefront JavaScript*. `Block\Widget\Form` inherits them |
-| `Model\Validation\BuiltInRules`, `rules` | Ready-made formats: `code => [label, group, pattern, message, example]` |
+| `Model\Validation\BuiltInRules`, `rules` | Ready-made formats: `code => [label, group, group_code, pattern, message, example]`. `group` is the translated heading; `group_code` is the stable code `PresetGroupsInterface` matches, and a rule without one fits every type |
 | `Block\Adminhtml\Form\BuilderPhrases`, `phrases` | English texts for builder scripts, translated with `__()` and passed to the builder JS |
 
 If a module providing a field type, operator, prefill source or setting is disabled, stored forms keep the value as saved and it is inert at runtime: the field is not shown, the operator is false and the source gives nothing.
@@ -48,13 +48,13 @@ A custom rule, operator or field type needs both a PHP pool item and a JS regist
 | Interface | Adds |
 | --- | --- |
 | `ExportableTypeInterface` | CSV columns: `csvHeaders`, `csvCells`, `csvPlainColumns`. Every cell is still formula-guarded |
-| `DisplayableTypeInterface` | `toText` (emails, My submissions, privacy export) and `toHtml` (admin view; escape every dynamic part) |
+| `DisplayableTypeInterface` | `toText` (emails, My submissions, privacy export) and `toHtml` (admin view; escape every dynamic part). Both take an `Api\Data\DisplayContext` last: `forStore($storeId, $locale)` for the submission's store view, `forAdmin($locale)` for the admin view |
 | `ClientMessagesInterface` | Keys merged into the field in the schema sent to the browser, e.g. `type_message` |
 | `StorefrontConfigInterface` | Extra top-level keys in the storefront config, once per type present. Existing keys are never overridden |
 | `StatsAwareTypeInterface` | Analytics chart kind (`KIND_*`). Without it the field only counts answers |
-| `FreeTextTypeInterface` | Latest answers listed as free text in analytics |
-| `ConsentTypeInterface` | Marker: records consent. Never required, never set by a condition, never drafted, blank under Login as Customer |
-| `ServerValueTypeInterface` | Marker: the server owns the value. A condition's `set_value` always overwrites it, and a draft never stores it |
+| `FreeTextTypeInterface` | Latest answers listed as free text in analytics. A free-text type with options (`hasOptions()`) treats them as suggestions: conditions cannot hide them, and `Model\FieldType\SuggestionMatcher::match()` stores a typed answer equal to an option's label, else its value, ignoring case, as that value. Suggest calls it from `normalizeValue()` |
+| `ConsentTypeInterface` | Marker: records consent. Never required, never set by a condition, never drafted, blank under Login as Customer. The builder hides Required, Save in draft and Default |
+| `ServerValueTypeInterface` | Marker: the server owns the value. A condition's `set_value` always overwrites it, a draft never stores it, and it cannot be required. The builder hides Required, Save in draft and Locked |
 | `FixedValueTypeInterface` | `fixedValue(array $field)`: the answer the server stores whatever the browser sends, or `null` to keep the posted answer. Hidden fields with the Fixed value source use it |
 | `EmailAddressTypeInterface` | Marker: the visitor's email address. Offered in the form's email pickers and as the notification reply-to |
 | `PersonalByDefaultInterface` | The "contains personal data" flag defaults to on |
@@ -62,11 +62,16 @@ A custom rule, operator or field type needs both a PHP pool item and a JS regist
 | `RoutableTypeInterface` | Whether notification routes may match on it (default yes unless it is a file) |
 | `RelativeDateSourceInterface` | Rules may compare the answer with a date relative to today; `relativeDateFormat()` is `Y-m-d` or `Y-m` |
 | `AvailabilityInterface` | `isAvailable(?int $storeId = null)` for a type that depends on something optional. While unavailable it is hidden from the palette and not rendered or validated; stored fields are kept |
-| `AdminViewTypeInterface` | `adminViewKind(array $field)`: how the admin view and My submissions lay out the answer, one of the `KIND_*` constants or `null` for plain text |
+| `AdminViewTypeInterface` | `adminViewKind(array $field)`: how the admin view and My submissions lay out the answer, one of the `KIND_*` constants or `null` for plain text. `KIND_COUNTRY` and `KIND_CALENDAR_*` answers are shown in the reader's locale: the admin's in the admin view, the submission's store view elsewhere |
 | `RenderHintsInterface` | `renderHints(array $field, int $storeId)`: data for the storefront template as `$item['render']`. Per form and store view, never per visitor: pages are cached |
 | `StatsLabelInterface` | `statsLabel(string $value, array $field)`: the chart label for a stored value, e.g. a country name for an ISO code |
+| `MaxLengthInterface` | `maxLength()`: the longest answer the type keeps. The type's `normalizeValue()` cuts longer text; `AbstractFieldType` does both. A `max_length` rule above it and a longer Default value are refused at save |
+| `DefaultValueInterface` | `defaultInput()` (`null` hides Default and clears it on save, else `text`, `option`, `number`, `date`, `datetime-local`, `month`, `time` or `color`), `defaultChoices()` (value => label for the picker when the field has no options, such as countries) and `isValidDefault(string $default, array $field)` (checked at save). `AbstractFieldType` provides free text checked by `validateValue()` |
+| `SettingsCheckInterface` | `settingsErrors(array $field)`: translated problems with the saved settings that the spec keys cannot express, each a fragment such as `the start is after the end`. Each one is refused at save as `Field "<label>": <fragment>.` |
+| `PresetGroupsInterface` | `presetGroups()`: the rule library group codes (`postcode`, `phone`, `finance`, `personal`, `store`, `content`) whose formats the type's `preset` rule accepts. Saved rules and library rules without a `group_code` always apply, so `[]` means saved rules only. Without it every format applies |
+| `BuilderControlsInterface` | `builderControls()`: builder display choices only. `placeholder`, `help`, `width`, `css_class`, `autocomplete` and `option_description` set to false hide the control; `options_title` names the Options tab and `option_add_label` its add button. A missing key keeps the control. Required, Save in draft and Default follow `ServerValueTypeInterface`, `ConsentTypeInterface`, `isFile()` and `DefaultValueInterface` |
 
-Settings spec entries are `name => [type, default, min, max, values, value_labels, label, translatable, hint, visible_when]`, with `type` one of `int`, `number`, `string`, `bool`, `enum`, `list`. The builder draws a control for each. `hint` is a line of help under the control. `visible_when` maps another setting to the values that show this one, for example `['source' => ['query']]`.
+Settings spec entries are `name => [type, default, min, max, values, value_labels, label, translatable, hint, visible_when, format, not_above, exclusive_min, no_limit]`, with `type` one of `int`, `number`, `string`, `bool`, `enum`, `list`. The builder draws a control for each. `hint` is a line of help under the control. `format` `mask` draws a mask picker, `date` a date input and `email_field` a picker of the form's email fields. `format` `date` values must be real dates and `step` values `any` or a number above 0. `not_above` names a sibling setting this one may not exceed, compared when both are set and the sibling is not at its `no_limit` value. `exclusive_min` is a number the value must be greater than. The builder and the save run the same checks. An `int` or `number` setting with `values` is a dropdown. `visible_when` maps another setting to the values that show this one, for example `['source' => ['query']]`. A key starting with `@` reads the field itself: `['@prefill' => ['']]` shows the setting only while Prefill is empty.
 
 ### Worked example
 
@@ -104,6 +109,7 @@ declare(strict_types=1);
 
 namespace Vendor\FormRating\Model\FieldType;
 
+use Furan\FormBuilder\Api\Data\DisplayContext;
 use Furan\FormBuilder\Api\FieldType\ClientMessagesInterface;
 use Furan\FormBuilder\Api\FieldType\DisplayableTypeInterface;
 use Furan\FormBuilder\Api\FieldType\ExportableTypeInterface;
@@ -187,7 +193,7 @@ class Satisfaction extends AbstractFieldType implements
         return [];
     }
 
-    public function toText(array $field, mixed $value): string
+    public function toText(array $field, mixed $value, DisplayContext $context): string
     {
         $score = $this->part($value, 'score');
         $comment = $this->part($value, 'comment');
@@ -198,9 +204,9 @@ class Satisfaction extends AbstractFieldType implements
         return $score . '/' . $this->max($field) . ($comment === '' ? '' : ': ' . $comment);
     }
 
-    public function toHtml(array $field, mixed $value, Escaper $escaper): string
+    public function toHtml(array $field, mixed $value, Escaper $escaper, DisplayContext $context): string
     {
-        return $escaper->escapeHtml($this->toText($field, $value));
+        return $escaper->escapeHtml($this->toText($field, $value, $context));
     }
 
     public function statsKind(array $field): ?int
@@ -293,7 +299,7 @@ The storefront script, `view/frontend/web/js/satisfaction.js`. It runs after `ff
 })();
 ```
 
-A type can also add `summary(field, wrapper, value, optionLabel)`, which returns the text a review step (summary block) shows for the answer; without it the generic text is used.
+A type can also add `summary(field, wrapper, value, optionLabel)`, which returns the text a review step (summary block) shows for the answer; without it the generic text is used. A fifth argument, `formatDate(value)`, formats a `Y-m-d` date in the store locale.
 
 The server message from `ClientMessagesInterface` (`type_message`) replaces the English text returned by `intrinsicDefault`, so the visitor sees the translated one.
 

@@ -31,7 +31,7 @@ class SubmissionBuilderTest extends TestCase
         return new SubmissionBuilder(
             $factory,
             new EmailHasher($config),
-            new SummaryBuilder(FieldPools::withFiles(), new \Furan\FormBuilder\Model\Submission\ValueFormatter(FieldPools::withFiles())),
+            new SummaryBuilder(FieldPools::withFiles(), new \Furan\FormBuilder\Model\Submission\ValueFormatter(FieldPools::withFiles(), new \Furan\FormBuilder\Model\Submission\AnswerDate()), new \Furan\FormBuilder\Model\Submission\StoreDisplayContext($this->createStub(\Magento\Framework\App\Config\ScopeConfigInterface::class))),
             new IpAnonymizer()
         );
     }

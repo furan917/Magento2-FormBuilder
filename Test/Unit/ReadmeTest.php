@@ -204,8 +204,8 @@ class ReadmeTest extends TestCase
         $this->assertSame(['Rate us (score)', 'Rate us (comment)'], $type->csvHeaders($field));
         $this->assertSame(['4', 'Good'], $type->csvCells($field, $value));
         $this->assertCount(count($type->csvHeaders($field)), $type->csvCells($field, null));
-        $this->assertStringNotContainsString('<script', $type->toHtml($field, ['score' => '1', 'comment' => '<script>'], new \Magento\Framework\Escaper()));
-        $this->assertSame('4/5: Good', $type->toText($field, $value));
+        $this->assertStringNotContainsString('<script', $type->toHtml($field, ['score' => '1', 'comment' => '<script>'], new \Magento\Framework\Escaper(), \Furan\FormBuilder\Api\Data\DisplayContext::forStore(1, 'en_GB')));
+        $this->assertSame('4/5: Good', $type->toText($field, $value, \Furan\FormBuilder\Api\Data\DisplayContext::forStore(1, 'en_GB')));
         $this->assertSame(
             \Furan\FormBuilder\Api\FieldType\StatsAwareTypeInterface::KIND_NONE,
             $type->statsKind($field)

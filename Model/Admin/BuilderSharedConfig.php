@@ -4,11 +4,14 @@ declare(strict_types=1);
 namespace Furan\FormBuilder\Model\Admin;
 
 use Furan\FormBuilder\Api\ConditionActionInterface;
+use Furan\FormBuilder\Api\FieldType\BuilderControlsInterface;
+use Furan\FormBuilder\Api\FieldType\DefaultValueInterface;
 use Furan\FormBuilder\Api\FieldType\ConditionSourceInterface;
 use Furan\FormBuilder\Api\FieldType\EmailAddressTypeInterface;
 use Furan\FormBuilder\Api\FieldType\PersonalByDefaultInterface;
 use Furan\FormBuilder\Api\FieldType\RelativeDateSourceInterface;
 use Furan\FormBuilder\Api\FieldType\RoutableTypeInterface;
+use Furan\FormBuilder\Api\FieldTypeInterface;
 use Furan\FormBuilder\Block\Adminhtml\Form\BuilderPhrases;
 use Furan\FormBuilder\Model\Condition\ActionPool;
 use Furan\FormBuilder\Model\Condition\ConditionNormalizer;
@@ -20,6 +23,7 @@ use Furan\FormBuilder\Model\Prefill\Sources;
 use Furan\FormBuilder\Model\Schema\ContentTypes;
 use Furan\FormBuilder\Model\Schema\PersonalData;
 use Furan\FormBuilder\Model\Validation\Mask;
+use Furan\FormBuilder\Model\Validation\PresetFit;
 use Furan\FormBuilder\Model\Validation\RuleLibrary;
 use Furan\FormBuilder\Model\Validation\RulePool;
 use Magento\Customer\Api\Data\GroupInterface;
@@ -59,7 +63,8 @@ class BuilderSharedConfig
         private readonly StoreManagerInterface $storeManager,
         private readonly ScopeConfigInterface $scopeConfig,
         private readonly BuilderPhrases $phrases,
-        private readonly Config $moduleConfig
+        private readonly Config $moduleConfig,
+        private readonly PresetFit $presetFit
     ) {
     }
 
@@ -85,6 +90,7 @@ class BuilderSharedConfig
             ],
             'widths' => $this->options(self::WIDTHS, 'value'),
             'autocomplete' => self::AUTOCOMPLETE,
+            'autocompleteLabels' => $this->autocompleteLabels(),
             'personalAutocomplete' => PersonalData::PERSONAL_AUTOCOMPLETE,
             'prefillSources' => $this->prefillSources(),
             'customerGroups' => $this->customerGroups(),
@@ -96,6 +102,30 @@ class BuilderSharedConfig
                 'allowedExtensions' => $this->moduleConfig->getAllowedExtensions(),
                 'maxMb' => $this->moduleConfig->getMaxUploadMb(),
             ],
+        ];
+    }
+
+    /** @return array<string, string> */
+    private function autocompleteLabels(): array
+    {
+        return [
+            'name' => (string)__('Full name'),
+            'given-name' => (string)__('First name'),
+            'family-name' => (string)__('Last name'),
+            'email' => (string)__('Email'),
+            'tel' => (string)__('Phone number'),
+            'organization' => (string)__('Company'),
+            'street-address' => (string)__('Street address (all lines)'),
+            'address-line1' => (string)__('Address line 1'),
+            'address-line2' => (string)__('Address line 2'),
+            'address-level1' => (string)__('State or region'),
+            'address-level2' => (string)__('City'),
+            'postal-code' => (string)__('Postcode'),
+            'country' => (string)__('Country code'),
+            'country-name' => (string)__('Country name'),
+            'bday' => (string)__('Date of birth'),
+            'url' => (string)__('Website'),
+            'off' => (string)__('Off (no browser suggestions)'),
         ];
     }
 
@@ -157,9 +187,92 @@ class BuilderSharedConfig
                 'routable' => !$type->isFile() && !($type instanceof RoutableTypeInterface && !$type->canBeRouted()),
                 'personalByDefault' => $type instanceof PersonalByDefaultInterface && $type->isPersonalByDefault(),
                 'conditionSource' => !($type instanceof ConditionSourceInterface) || $type->canBeConditionSource(),
-            ];
+                'controls' => $this->controls($type),
+                'presets' => $this->presets($type),
+                'maxLength' => $this->fieldTypePool->maxLength((string)$code),
+            ] + $this->serverFacts((string)$code, $type) + $this->defaultChoices($type);
         }
         return $types;
+    }
+
+    /**
+     * A list keeps the type's order in the browser, where numeric object keys would sort first.
+     *
+     * @param array<string, string> $choices
+     * @return list<array{value: string, label: string}>
+     */
+    private function choiceList(array $choices): array
+    {
+        $list = [];
+        foreach ($choices as $value => $label) {
+            $list[] = ['value' => (string)$value, 'label' => (string)$label];
+        }
+        return $list;
+    }
+
+    /**
+     * The type's display choices plus the Default input kind (`default`), which is absent when the type has no Default.
+     *
+     * @return array<string, bool|string>
+     */
+    private function controls(FieldTypeInterface $type): array
+    {
+        $controls = $type instanceof BuilderControlsInterface ? $type->builderControls() : [];
+        // The Default input comes only from DefaultValueInterface, whatever a type returns here.
+        unset($controls['default']);
+        $input = $this->defaultInput($type);
+        return $input === null ? $controls : $controls + ['default' => $input];
+    }
+
+    private function defaultInput(FieldTypeInterface $type): ?string
+    {
+        return $type instanceof DefaultValueInterface ? $type->defaultInput() : DefaultValueInterface::INPUT_TEXT;
+    }
+
+    /**
+     * @return array{defaultChoices?: list<array{value: string, label: string}>}
+     */
+    private function defaultChoices(FieldTypeInterface $type): array
+    {
+        $choices = $type instanceof DefaultValueInterface ? $type->defaultChoices() : null;
+        return $choices === null ? [] : ['defaultChoices' => $this->choiceList($choices)];
+    }
+
+    /**
+     * What the Normalizer enforces for the type, so the builder hides controls whose value the server would refuse.
+     *
+     * @return array{consent: bool, serverValue: bool, requiredAllowed: bool, draftAllowed: bool, defaultAllowed: bool}
+     */
+    private function serverFacts(string $code, FieldTypeInterface $type): array
+    {
+        $serverValue = $this->fieldTypePool->isServerValue($code);
+        $consent = $this->fieldTypePool->isConsent($code);
+        return [
+            'consent' => $consent,
+            'serverValue' => $serverValue,
+            'requiredAllowed' => !$serverValue && !$consent,
+            'draftAllowed' => !$serverValue && !$consent && !$type->isFile(),
+            'defaultAllowed' => !$consent && $this->defaultInput($type) !== null,
+        ];
+    }
+
+    /**
+     * Library references the type's `preset` rule accepts.
+     *
+     * @return list<string>
+     */
+    private function presets(FieldTypeInterface $type): array
+    {
+        if (!in_array('preset', $type->getAllowedRules(), true)) {
+            return [];
+        }
+        $refs = [];
+        foreach ($this->ruleLibrary->all() as $entry) {
+            if ($this->presetFit->fitsType($entry['group_code'], $type)) {
+                $refs[] = $entry['ref'];
+            }
+        }
+        return $refs;
     }
 
     /**

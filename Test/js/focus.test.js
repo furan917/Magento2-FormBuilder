@@ -110,11 +110,11 @@ test('it moves focus to the new page and announces the step after a plain next',
   t.q('[data-ffb-next]').click();
   assert.equal(t.q('[data-ffb-next]').hidden, false);
   assert.equal(t.doc.activeElement, t.q('[data-ffb-page="p_bbbb02"] .ffb-page-title'));
-  assert.equal(t.q('[data-ffb-status]').textContent, 'Step 2 of 3');
+  assert.equal(t.q('[data-ffb-step-status]').textContent, 'Step 2 of 3');
   t.q('[data-ffb-prev]').focus();
   t.q('[data-ffb-prev]').click();
   assert.equal(t.doc.activeElement, t.q('[data-ffb-page="p_aaaa01"] .ffb-page-title'));
-  assert.equal(t.q('[data-ffb-status]').textContent, 'Step 1 of 3');
+  assert.equal(t.q('[data-ffb-step-status]').textContent, 'Step 1 of 3');
 });
 
 test('it focuses the page itself when the new page has no heading or legend', async () => {
@@ -272,10 +272,10 @@ test('it announces the step after a summary edit jumps back', async () => {
   t.q('[data-ffb-next]').click();
   t.type('message', 'this is long enough');
   t.q('[data-ffb-next]').click();
-  assert.equal(t.q('[data-ffb-status]').textContent, 'Step 3 of 3');
+  assert.equal(t.q('[data-ffb-step-status]').textContent, 'Step 3 of 3');
   t.q('.ffb-summary-edit').click();
   assert.equal(t.q('[data-ffb-page="p_aaaa01"]').hidden, false);
-  assert.equal(t.q('[data-ffb-status]').textContent, 'Step 1 of 3');
+  assert.equal(t.q('[data-ffb-step-status]').textContent, 'Step 1 of 3');
 });
 
 test('it waits with a blur error while focus stays inside the same field', async () => {

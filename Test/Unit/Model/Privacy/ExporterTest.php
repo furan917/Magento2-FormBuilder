@@ -107,7 +107,7 @@ class ExporterTest extends TestCase
             copy($this->uploads . '/' . $path, $local);
         });
         $read->expects($this->never())->method('getAbsolutePath');
-        $this->exporter = new Exporter($resource, $this->hasher, $filesystem, $storage, new ValueFormatter(FieldPools::withFiles()), $this->accounts, FieldPools::withFiles(), new SubmissionStatus());
+        $this->exporter = new Exporter($resource, $this->hasher, $filesystem, $storage, new ValueFormatter(FieldPools::withFiles(), new \Furan\FormBuilder\Model\Submission\AnswerDate()), $this->accounts, FieldPools::withFiles(), new SubmissionStatus(), new \Furan\FormBuilder\Model\Submission\StoreDisplayContext($this->locales()));
     }
 
     protected function tearDown(): void
@@ -263,9 +263,20 @@ class ExporterTest extends TestCase
 
         $csv = $this->open($this->exporter->exportCustomer(7))->getFromName('data.csv');
 
-        $this->assertStringContainsString('Address: 1 Main St, Austin, Texas, 78701', $csv);
-        $this->assertStringContainsString('Stay: 2026-12-10', $csv);
+        $this->assertStringContainsString('Address: 1 Main St, Austin, Texas, 78701, États-Unis', $csv);
+        $this->assertStringContainsString("Stay: 10 déc. 2026 \u{2013} 14 déc. 2026", $csv);
         $this->assertStringNotContainsString('"street"', $csv);
+        $json = (string)$this->open($this->exporter->exportCustomer(7))->getFromName('data.json');
+        $this->assertStringContainsString('"2026-12-10"', $json);
+    }
+
+    private function locales(): \Magento\Framework\App\Config\ScopeConfigInterface
+    {
+        $config = $this->createStub(\Magento\Framework\App\Config\ScopeConfigInterface::class);
+        $config->method('getValue')->willReturnCallback(
+            static fn (string $path, string $scope, mixed $store): string => $store === 1 ? 'fr_FR' : 'en_GB'
+        );
+        return $config;
     }
 
     public function testItPacksFilesOfACustomFileTypeIntoTheExport(): void

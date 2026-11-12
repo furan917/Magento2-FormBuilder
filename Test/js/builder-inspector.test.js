@@ -529,11 +529,11 @@ test('it offers prefill sources in the field inspector', () => {
   let ui = mount(state);
   assert.deepEqual(Array.from(ui.q('prefill').options).map((o) => o.value), ['', 'customer.email']);
   assert.equal(ui.q('prefill').options[1].textContent, 'Customer email');
-  assert.equal(ui.q('locked').disabled, false);
+  assert.equal(ui.q('locked'), null);
   ui.q('prefill').value = 'customer.email';
   ui.fire(ui.q('prefill'), 'change');
   assert.deepEqual(ui.calls[0], ['updateItem', made[0].id, { prefill: 'customer.email' }]);
-  assert.equal(Array.from(mount(model.select(state, made[1].id)).q('prefill').options).length, 1);
+  assert.equal(mount(model.select(state, made[1].id)).q('prefill'), null);
   ui = mount(model.select(state, made[2].id));
   assert.equal(ui.q('prefill').value, 'product.price');
   assert.equal(ui.q('locked').checked, true);

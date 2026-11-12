@@ -46,8 +46,11 @@ class FileValidator
         'ods' => 'application/vnd.oasis.opendocument.spreadsheet',
     ];
 
-    public function __construct(private readonly Config $config, private readonly PhpCodeDetector $codeDetector)
-    {
+    public function __construct(
+        private readonly Config $config,
+        private readonly PhpCodeDetector $codeDetector,
+        private readonly ExtensionList $extensionList
+    ) {
     }
 
     /** @return string[] extensions whose content can be verified */
@@ -142,6 +145,8 @@ class FileValidator
     }
 
     /**
+     * The field's list only narrows the store allowlist; a list that shares nothing with it allows nothing.
+     *
      * @return string[]
      * @param array<string, mixed> $field
      */
@@ -149,12 +154,9 @@ class FileValidator
     {
         $global = $this->config->getAllowedExtensions();
         $fieldList = $field['settings']['extensions'] ?? [];
-        if (!is_array($fieldList) || $fieldList === []) {
-            return $global;
-        }
-        $fieldList = array_map(static fn($e): string => strtolower((string)$e), $fieldList);
+        $fieldList = is_array($fieldList) ? $this->extensionList->normalise($fieldList) : [];
 
-        return array_values(array_intersect($global, $fieldList));
+        return $fieldList === [] ? $global : array_values(array_intersect($global, $fieldList));
     }
 
     private function contentMatches(string $tmp, string $extension): bool

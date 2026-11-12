@@ -6,7 +6,6 @@ namespace Furan\FormBuilder\Model\Schema;
 use Furan\FormBuilder\Api\Exception\InvalidSchemaException;
 use Furan\FormBuilder\Api\FieldType\ConditionSourceInterface;
 use Furan\FormBuilder\Api\FieldType\ConsentTypeInterface;
-use Furan\FormBuilder\Api\FieldType\ServerValueTypeInterface;
 use Furan\FormBuilder\Api\FieldTypeInterface;
 use Furan\FormBuilder\Model\Condition\ConditionNormalizer;
 use Furan\FormBuilder\Model\FieldType\Pool;
@@ -14,6 +13,7 @@ use Furan\FormBuilder\Model\Prefill\Sources;
 use Furan\FormBuilder\Model\Validation\Mask;
 use Furan\FormBuilder\Model\Validation\PatternMatcher;
 use Furan\FormBuilder\Model\Validation\Rule\Preset;
+use Furan\FormBuilder\Model\Validation\PresetFit;
 use Furan\FormBuilder\Model\Validation\RulePool;
 
 /**
@@ -70,7 +70,9 @@ class Normalizer
         private readonly SettingValues $settingValues,
         private readonly PersonalData $personalData,
         private readonly Sources $prefillSources,
-        private readonly ConditionNormalizer $conditions
+        private readonly ConditionNormalizer $conditions,
+        private readonly FieldChecks $checks,
+        private readonly PresetFit $presetFit
     ) {
     }
 
@@ -335,11 +337,13 @@ class Normalizer
         if (isset($settings['email_field'])) {
             $this->emailFieldRefs[] = ['label' => $label, 'name' => (string)$settings['email_field']];
         }
+        $this->checks->bounds($type, ['settings' => $settings, 'rules' => $rules, 'options' => $options], $label, $errors);
         $isConsent = $type instanceof ConsentTypeInterface;
-        if ($isConsent) {
-            if ($this->toBool($raw['required'] ?? false, false)) {
-                $errors[] = (string)__('Field "%1" cannot be required: consent must be freely given.', $label);
-            }
+        $requested = $this->toBool($raw['required'] ?? false, false);
+        if ($isConsent && $requested) {
+            $errors[] = (string)__('Field "%1" cannot be required: consent must be freely given.', $label);
+        } elseif ($this->fieldTypes->isServerValue($typeCode) && $requested) {
+            $errors[] = (string)__('Field "%1" cannot be required: its value is set by the server, not the visitor.', $label);
         }
         $field = [
             'id' => $id,
@@ -349,9 +353,15 @@ class Normalizer
             'label' => $label,
             'placeholder' => $this->cleanString($raw['placeholder'] ?? '', 255),
             'help' => $this->cleanString($raw['help'] ?? '', 1000, true),
-            'default' => $isConsent ? '' : $this->cleanString($raw['default'] ?? '', 1000),
+            'default' => $isConsent ? '' : $this->checks->defaultValue(
+                $type,
+                ['settings' => $settings, 'rules' => $rules, 'options' => $options],
+                $this->cleanString($raw['default'] ?? '', FieldChecks::MAX_DEFAULT_LENGTH + 1),
+                $label,
+                $errors
+            ),
             'width' => $this->normalizeWidth($raw['width'] ?? null),
-            'required' => !$isConsent && $this->toBool($raw['required'] ?? false, false),
+            'required' => !$isConsent && $requested,
             'rules' => $rules,
             'options' => $options,
             'settings' => $settings,
@@ -362,7 +372,7 @@ class Normalizer
                 $errors,
                 ['kind' => 'field', 'type' => $type, 'field' => ['name' => $name, 'options' => $options, 'settings' => $settings]]
             ),
-            'draft' => $this->normalizeDraft($raw['draft'] ?? true, $type),
+            'draft' => $this->normalizeDraft($raw['draft'] ?? true, $type, $typeCode),
             'autocomplete' => $this->normalizeAutocomplete($raw['autocomplete'] ?? ''),
             'css_class' => $this->normalizeCssClass($raw['css_class'] ?? ''),
         ];
@@ -515,9 +525,10 @@ class Normalizer
     private function normalizeSettings(mixed $raw, FieldTypeInterface $type, string $label, array &$errors): array
     {
         $problems = [];
-        $settings = $this->settingValues->normalize(is_array($raw) ? $raw : [], $type->getSettingsSpec(), $problems);
+        $spec = $type->getSettingsSpec();
+        $settings = $this->settingValues->normalize(is_array($raw) ? $raw : [], $spec, $problems);
         foreach ($problems as [$kind, $key, $argument]) {
-            $errors[] = match ($kind) {
+            $errors[] = $this->checks->settingProblem($kind, $key, $argument, $spec, $label) ?? match ($kind) {
                 SettingValues::PROBLEM_MIN_ITEMS => (string)__('Field "%1": "%2" needs at least %3 entries.', $label, $key, $argument),
                 SettingValues::PROBLEM_MASK => (string)__(
                     'Field "%1": the mask must be a preset or use only 9, a, *, spaces and - + ( ) . , / : # _ (at most %2 characters).',
@@ -527,6 +538,9 @@ class Normalizer
                 default => (string)__('Field "%1": "%2" must be a relative path or a URL on this store.', $label, $key),
             };
         }
+        if ($type->isFile() && is_array($settings['extensions'] ?? null)) {
+            $settings['extensions'] = $this->checks->extensions($settings['extensions'], $label, $errors);
+        }
         if (isset($settings['query_param'])
             && preg_match(self::QUERY_PARAM_PATTERN, (string)$settings['query_param']) !== 1
         ) {
@@ -535,9 +549,9 @@ class Normalizer
         return $settings;
     }
 
-    private function normalizeDraft(mixed $raw, FieldTypeInterface $type): bool
+    private function normalizeDraft(mixed $raw, FieldTypeInterface $type, string $typeCode): bool
     {
-        if ($type->isFile() || $type instanceof ServerValueTypeInterface || $type instanceof ConsentTypeInterface) {
+        if ($type->isFile() || $this->fieldTypes->isServerValue($typeCode) || $type instanceof ConsentTypeInterface) {
             return false;
         }
         return $this->toBool($raw, true);
@@ -633,6 +647,9 @@ class Normalizer
                 continue;
             }
             $value = $this->coerceRuleValue($code, $rawRule['value'] ?? null, $fieldLabel, $earlierNames, $errors);
+            if ($code === 'preset' && !$this->presetFits($value, $type, $fieldLabel, $errors)) {
+                continue;
+            }
             // A field may use several library formats, but each other rule once.
             $key = $code === 'preset' ? $code . ':' . $value : $code;
             unset($rules[$key]);
@@ -643,6 +660,22 @@ class Normalizer
             ];
         }
         return array_values($rules);
+    }
+
+    /**
+     * The builder offers a type only the library formats of its groups; saved formats fit every type.
+     *
+     * @param string[] $errors
+     */
+    private function presetFits(mixed $ref, FieldTypeInterface $type, string $fieldLabel, array &$errors): bool
+    {
+        $preset = $this->rulePool->get('preset');
+        $entry = is_string($ref) && $preset instanceof Preset ? $preset->resolve($ref) : null;
+        if ($entry === null || $this->presetFit->fitsType($entry['group_code'], $type)) {
+            return true;
+        }
+        $errors[] = (string)__('Field "%1": the format "%2" does not apply to this field type.', $fieldLabel, $entry['label']);
+        return false;
     }
 
     /**

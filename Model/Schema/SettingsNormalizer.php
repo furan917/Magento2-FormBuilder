@@ -250,10 +250,19 @@ class SettingsNormalizer
             $ext[$code] = $this->settingValues->normalize($raw, $spec, $problems);
             foreach ($problems as [$kind, $key, $argument]) {
                 $key = $spec[$key]['label'] ?? $key;
+                $label = $contributor->getLabel();
                 $errors[] = match ($kind) {
-                    SettingValues::PROBLEM_MIN_ITEMS => (string)__('Settings "%1": "%2" needs at least %3 entries.', $contributor->getLabel(), $key, $argument),
-                    SettingValues::PROBLEM_MASK => (string)__('Settings "%1": "%2" is not a valid mask.', $contributor->getLabel(), $key),
-                    default => (string)__('Settings "%1": "%2" must be a relative path or a URL on this store.', $contributor->getLabel(), $key),
+                    SettingValues::PROBLEM_MIN_ITEMS => (string)__('Settings "%1": "%2" needs at least %3 entries.', $label, $key, $argument),
+                    SettingValues::PROBLEM_MASK => (string)__('Settings "%1": "%2" is not a valid mask.', $label, $key),
+                    SettingValues::PROBLEM_ABOVE => (string)__(
+                        'Settings "%1": %2.',
+                        $label,
+                        __('"%1" is greater than "%2"', $key, $spec[(string)$argument]['label'] ?? (string)$argument)
+                    ),
+                    SettingValues::PROBLEM_EXCLUSIVE_MIN => (string)__('Settings "%1": %2.', $label, __('"%1" must be greater than %2', $key, $argument)),
+                    SettingValues::PROBLEM_DATE => (string)__('Settings "%1": %2.', $label, __('"%1" must be a date such as 2025-01-31', $key)),
+                    SettingValues::PROBLEM_STEP => (string)__('Settings "%1": %2.', $label, __('"%1" must be "any" or a number greater than 0', $key)),
+                    default => (string)__('Settings "%1": "%2" must be a relative path or a URL on this store.', $label, $key),
                 };
             }
         }

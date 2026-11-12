@@ -4,13 +4,12 @@
 $form = $block->getData('parent_block');
 extract($form->getItemContext((array)$block->getData('item'), $escaper), EXTR_SKIP);
 $minLength = $ruleValue('min_length');
-$maxLength = $ruleValue('max_length');
 ?>
 <?= /* @noEscape */ $form->renderPartial($block, 'item/_open.phtml', ['group' => false]) ?>
     <textarea<?= /* @noEscape */ $attrs($base + [
         'rows' => (int)($settings['rows'] ?? 5),
         'minlength' => $minLength === null ? null : (int)$minLength,
-        'maxlength' => $maxLength === null ? null : (int)$maxLength,
+        'maxlength' => $lengthLimit,
         'placeholder' => $item['placeholder'] ?? '',
         'autocomplete' => $item['autocomplete'] ?? '',
     ]) ?>><?= $escaper->escapeHtml((string)($item['default'] ?? '')) ?></textarea>

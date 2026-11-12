@@ -57,4 +57,9 @@ abstract class AbstractOptionType extends AbstractFieldType
     {
         return (string)__('Please choose a valid option.');
     }
+
+    public function defaultInput(): ?string
+    {
+        return 'option';
+    }
 }

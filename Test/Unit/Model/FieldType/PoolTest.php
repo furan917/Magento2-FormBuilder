@@ -39,11 +39,19 @@ class PoolTest extends TestCase
         $this->assertTrue($pool->isFile('doc'));
     }
 
-    public function testItTreatsTheHiddenCodeAsAServerValueEvenWhenItsClassLacksTheInterfaceOrIsNotRegistered(): void
+    public function testItAsksATypeWhetherItIsAServerValue(): void
     {
-        $this->assertTrue((new Pool([]))->isServerValue('hidden'));
-        $this->assertTrue((new Pool(['hidden' => new Text()]))->isServerValue('hidden'));
-        $this->assertFalse((new Pool(['text' => new Text()]))->isServerValue('text'));
+        $pool = new Pool(['hidden' => new \Furan\FormBuilder\Model\FieldType\Hidden(), 'text' => new Text()]);
+        $this->assertTrue($pool->isServerValue('hidden'));
+        $this->assertFalse($pool->isServerValue('text'));
+        $this->assertFalse($pool->isServerValue('gone'));
+    }
+
+    public function testItDerivesSuggestionOptionsFromAFreeTextTypeWithOptions(): void
+    {
+        $pool = new Pool(['suggest' => new \Furan\FormBuilder\Model\FieldType\Suggest(), 'text' => new Text(),
+            'select' => new \Furan\FormBuilder\Model\FieldType\Select()]);
+        $this->assertSame([true, false, false, false], array_map($pool->hasSuggestionOptions(...), ['suggest', 'text', 'select', 'gone']));
     }
 
     public function testItAsksATypeWhetherItIsAnEmailAddress(): void

@@ -30,7 +30,12 @@ class Number extends AbstractPatternType implements StatsAwareTypeInterface, Cli
     public function getSettingsSpec(): array
     {
         return [
-            'step' => ['type' => 'string', 'default' => 'any'],
+            'step' => [
+                'type' => 'string',
+                'format' => 'step',
+                'default' => 'any',
+                'hint' => (string)__("'any' or a positive number. Steps count from the Minimum rule."),
+            ],
             'prefix' => ['type' => 'string', 'translatable' => true, 'default' => '', 'max_length' => 20],
             'suffix' => ['type' => 'string', 'translatable' => true, 'default' => '', 'max_length' => 20],
         ];
@@ -59,6 +64,7 @@ class Number extends AbstractPatternType implements StatsAwareTypeInterface, Cli
 
         return abs($steps - round($steps)) <= self::STEP_TOLERANCE * max(1.0, abs($steps)) ? null : $this->stepMessage($field);
     }
+
 
     public function getClientMessages(array $field): array
     {
@@ -118,5 +124,10 @@ class Number extends AbstractPatternType implements StatsAwareTypeInterface, Cli
     public function statsKind(array $field): ?int
     {
         return self::KIND_NUMBER;
+    }
+
+    public function defaultInput(): ?string
+    {
+        return 'number';
     }
 }

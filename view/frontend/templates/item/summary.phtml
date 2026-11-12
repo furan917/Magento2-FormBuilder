@@ -5,7 +5,8 @@ $item = $block->getData('item');
 $width = in_array($item['width'] ?? '', ['full', 'two_thirds', 'half', 'third'], true) ? $item['width'] : 'full';
 ?>
 <div class="ffb-item ffb-content ffb-content-summary ffb-w-<?= $escaper->escapeHtmlAttr($width) ?>" data-ffb-item="<?= $escaper->escapeHtmlAttr($item['id'] ?? '') ?>">
-    <div class="ffb-summary" data-ffb-summary data-ffb-edit-label="<?= $escaper->escapeHtmlAttr(__('Edit')) ?>" data-ffb-yes-label="<?= $escaper->escapeHtmlAttr(__('Yes')) ?>">
+    <div class="ffb-summary" data-ffb-summary data-ffb-edit-label="<?= $escaper->escapeHtmlAttr(__('Edit')) ?>" data-ffb-yes-label="<?= $escaper->escapeHtmlAttr(__('Yes')) ?>"
+         data-ffb-no-label="<?= $escaper->escapeHtmlAttr(__('No')) ?>" data-ffb-back-label="<?= $escaper->escapeHtmlAttr(__('Back to review')) ?>">
         <h3 class="ffb-summary-title"><?= $escaper->escapeHtml($item['title'] ?? '') ?></h3>
         <dl class="ffb-summary-list"></dl>
     </div>

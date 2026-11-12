@@ -6,6 +6,7 @@ namespace Furan\FormBuilder\Test\Unit\Helper;
 use Furan\FormBuilder\Api\FieldType\DisplayableTypeInterface;
 use Furan\FormBuilder\Api\FieldType\ExportableTypeInterface;
 use Furan\FormBuilder\Model\FieldType\AbstractFieldType;
+use Furan\FormBuilder\Api\Data\DisplayContext;
 use Magento\Framework\Escaper;
 
 /**
@@ -43,13 +44,13 @@ class PointType extends AbstractFieldType implements ExportableTypeInterface, Di
         return $this->plainColumns;
     }
 
-    public function toText(array $field, mixed $value): string
+    public function toText(array $field, mixed $value, DisplayContext $context): string
     {
         return 'P[' . ($value['x'] ?? '') . '|' . ($value['y'] ?? '') . ']';
     }
 
-    public function toHtml(array $field, mixed $value, Escaper $escaper): string
+    public function toHtml(array $field, mixed $value, Escaper $escaper, DisplayContext $context): string
     {
-        return '<b>' . $escaper->escapeHtml($this->toText($field, $value)) . '</b>';
+        return '<b>' . $escaper->escapeHtml($this->toText($field, $value, $context)) . '</b>';
     }
 }

@@ -7,6 +7,7 @@ use Furan\FormBuilder\Api\FieldType\AvailabilityInterface;
 use Furan\FormBuilder\Api\FieldType\ConsentTypeInterface;
 use Furan\FormBuilder\Api\FieldType\EmailAddressTypeInterface;
 use Furan\FormBuilder\Api\FieldType\FixedValueTypeInterface;
+use Furan\FormBuilder\Api\FieldType\MaxLengthInterface;
 use Furan\FormBuilder\Api\FieldType\ServerValueTypeInterface;
 use Furan\FormBuilder\Api\FieldTypeInterface;
 
@@ -58,10 +59,22 @@ class Pool
         return ($this->types[$code] ?? null) instanceof EmailAddressTypeInterface;
     }
 
-    /** `hidden` is always a server value, registered or not (fail closed). */
     public function isServerValue(string $code): bool
     {
-        return $code === 'hidden' || ($this->types[$code] ?? null) instanceof ServerValueTypeInterface;
+        return ($this->types[$code] ?? null) instanceof ServerValueTypeInterface;
+    }
+
+    /** Null when the type is not registered or does not state its length. */
+    public function maxLength(string $code): ?int
+    {
+        $type = $this->types[$code] ?? null;
+        return $type instanceof MaxLengthInterface ? $type->maxLength() : null;
+    }
+
+    /** Options of a free-text type are suggestions (SuggestionMatcher); false for a code that is not registered. */
+    public function hasSuggestionOptions(string $code): bool
+    {
+        return isset($this->types[$code]) && SuggestionMatcher::appliesTo($this->types[$code]);
     }
 
     /**

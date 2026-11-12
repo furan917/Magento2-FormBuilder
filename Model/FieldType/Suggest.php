@@ -3,9 +3,10 @@ declare(strict_types=1);
 
 namespace Furan\FormBuilder\Model\FieldType;
 
-use Furan\FormBuilder\Api\FieldType\AdminViewTypeInterface;
 use Furan\FormBuilder\Api\FieldType\FreeTextTypeInterface;
-class Suggest extends AbstractFieldType implements FreeTextTypeInterface, AdminViewTypeInterface
+use Furan\FormBuilder\Api\FieldType\BuilderControlsInterface;
+
+class Suggest extends AbstractFieldType implements FreeTextTypeInterface, BuilderControlsInterface
 {
     public function getCode(): string
     {
@@ -27,13 +28,19 @@ class Suggest extends AbstractFieldType implements FreeTextTypeInterface, AdminV
         return ['min_length', 'max_length', 'pattern', 'preset', 'alpha', 'alphanumeric', 'matches'];
     }
 
+    public function normalizeValue(mixed $raw, array $field): string|array|null
+    {
+        $text = parent::normalizeValue($raw, $field);
+        return is_string($text) ? SuggestionMatcher::match($text, (array)($field['options'] ?? [])) : $text;
+    }
+
     public function isFreeText(): bool
     {
         return true;
     }
 
-    public function adminViewKind(array $field): ?string
+    public function builderControls(): array
     {
-        return self::KIND_FREE_TEXT;
+        return ['option_description' => false];
     }
 }

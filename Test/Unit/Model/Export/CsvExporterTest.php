@@ -126,7 +126,7 @@ class CsvExporterTest extends TestCase
             $this->filesystem(),
             $resource,
             $keyset,
-            new ValueFormatter($pool ?? FieldPools::withFiles()),
+            new ValueFormatter($pool ?? FieldPools::withFiles(), new \Furan\FormBuilder\Model\Submission\AnswerDate()),
             new \Furan\FormBuilder\Model\Source\SubmissionStatus()
         );
     }

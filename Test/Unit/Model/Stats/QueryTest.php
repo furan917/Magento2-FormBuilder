@@ -61,7 +61,8 @@ class QueryTest extends TestCase
         $this->query = new Query($resource, $timezone, new ChartShape(new \Furan\FormBuilder\Model\FieldType\Pool([
             'country' => new \Furan\FormBuilder\Model\FieldType\Country(
                 $this->createStub(\Magento\Directory\Model\AllowedCountries::class),
-                $lists
+                $lists,
+                $this->createStub(\Magento\Framework\Locale\ResolverInterface::class)
             ),
         ]), new \Furan\FormBuilder\Model\Stats\Histogram(new \Furan\FormBuilder\Model\Stats\Bucket())));
     }

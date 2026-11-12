@@ -70,7 +70,7 @@ class SubmissionUpdaterTest extends TestCase
         $factory->method('create')->willReturn($this->stored);
 
         return new SubmissionUpdater(
-            $resource, $this->json, $this->journal, $this->registry, new SummaryBuilder(FieldPools::withFiles(), new \Furan\FormBuilder\Model\Submission\ValueFormatter(FieldPools::withFiles())), $factory, $this->events,
+            $resource, $this->json, $this->journal, $this->registry, new SummaryBuilder(FieldPools::withFiles(), new \Furan\FormBuilder\Model\Submission\ValueFormatter(FieldPools::withFiles(), new \Furan\FormBuilder\Model\Submission\AnswerDate()), new \Furan\FormBuilder\Model\Submission\StoreDisplayContext($this->createStub(\Magento\Framework\App\Config\ScopeConfigInterface::class))), $factory, $this->events,
             $this->createStub(\Psr\Log\LoggerInterface::class),
             new \Furan\FormBuilder\Model\Customer\Impersonation($this->session),
             $this->pool ?? FieldPools::withFiles(),

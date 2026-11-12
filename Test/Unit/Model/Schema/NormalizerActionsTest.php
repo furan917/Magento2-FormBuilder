@@ -44,8 +44,10 @@ class NormalizerActionsTest extends TestCase
             new \Furan\FormBuilder\Model\Schema\SettingValues(new RedirectValidator($manager)),
             new PersonalData(FieldPools::builtIn()),
             new Sources(),
-            ConditionNormalizers::builtIn([], $types)
-        );
+            ConditionNormalizers::builtIn([], $types),
+            \Furan\FormBuilder\Test\Unit\Helper\FieldChecksFactory::create(),
+        new \Furan\FormBuilder\Model\Validation\PresetFit()
+);
     }
 
     private function rule(string $field = 'source', string $operator = 'equals', string $value = 'x'): array

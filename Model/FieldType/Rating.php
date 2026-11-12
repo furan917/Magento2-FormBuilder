@@ -6,7 +6,8 @@ namespace Furan\FormBuilder\Model\FieldType;
 use Furan\FormBuilder\Api\FieldType\AdminViewTypeInterface;
 use Furan\FormBuilder\Api\FieldType\RenderHintsInterface;
 use Furan\FormBuilder\Api\FieldType\StatsAwareTypeInterface;
-class Rating extends AbstractFieldType implements StatsAwareTypeInterface, AdminViewTypeInterface, RenderHintsInterface
+use Furan\FormBuilder\Api\FieldType\BuilderControlsInterface;
+class Rating extends AbstractFieldType implements StatsAwareTypeInterface, AdminViewTypeInterface, RenderHintsInterface, BuilderControlsInterface
 {
     private const DEFAULT_MAX = 5;
 
@@ -27,7 +28,7 @@ class Rating extends AbstractFieldType implements StatsAwareTypeInterface, Admin
 
     public function getSettingsSpec(): array
     {
-        return ['max' => ['type' => 'int', 'default' => self::DEFAULT_MAX, 'min' => 3, 'max' => 10]];
+        return ['max' => ['type' => 'int', 'default' => self::DEFAULT_MAX, 'min' => 3, 'max' => 10, 'hint' => (string)__('From 3 to 10.')]];
     }
 
     public function validateValue(string|array $value, array $field, array $context): ?string
@@ -69,5 +70,15 @@ class Rating extends AbstractFieldType implements StatsAwareTypeInterface, Admin
     public function renderHints(array $field, int $storeId): array
     {
         return ['layout' => 'inline'];
+    }
+
+    public function builderControls(): array
+    {
+        return ['placeholder' => false, 'autocomplete' => false];
+    }
+
+    public function defaultInput(): ?string
+    {
+        return 'number';
     }
 }

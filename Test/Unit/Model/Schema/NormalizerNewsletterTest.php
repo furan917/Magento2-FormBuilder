@@ -40,8 +40,10 @@ class NormalizerNewsletterTest extends TestCase
             \Furan\FormBuilder\Test\Unit\Helper\PrefillSourcePools::builtIn([
                 'customer.loyalty' => new \Furan\FormBuilder\Test\Unit\Helper\ArrayPrefillSource(),
             ]),
-            ConditionNormalizers::builtIn()
-        );
+            ConditionNormalizers::builtIn(),
+            \Furan\FormBuilder\Test\Unit\Helper\FieldChecksFactory::create(),
+        new \Furan\FormBuilder\Model\Validation\PresetFit()
+);
     }
 
     private function newsletter(array $over = []): array

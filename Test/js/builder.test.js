@@ -358,7 +358,7 @@ test('it renders an inert preview of each field control', () => {
   assert.equal(first.querySelector('.ffb-admin-mock').getAttribute('aria-hidden'), 'true');
   assert.equal(first.querySelectorAll('.ffb-admin-preview input, .ffb-admin-preview select, .ffb-admin-preview textarea').length, 0);
   const sel = t.q('[data-ffb-card="f_sel111"]');
-  assert.match(sel.querySelector('.ffb-admin-mock').textContent, /Alpha/);
+  assert.match(sel.querySelector('.ffb-admin-mock').textContent, /Please select/);
   assert.match(sel.textContent, /Conditional/);
   assert.ok(t.q('[data-ffb-card="c_head11"] .ffb-admin-mock-h1'));
   t.w.close();
@@ -735,5 +735,35 @@ test('it keeps the toolbar actions in one group so a narrow screen wraps them to
   assert.ok(actions.contains(t.q('[data-ffb-undo]')));
   assert.equal(t.q('[data-ffb-save]').parentElement, t.q('[data-ffb-save-continue]').parentElement);
   assert.ok(t.q('[data-ffb-save]').parentElement.classList.contains('ffb-admin-toolbar-save'));
+  t.w.close();
+});
+
+test('it previews the page title above the page content like the storefront', () => {
+  const t = boot();
+  const heading = t.q('.ffb-admin-tabpanel > .ffb-admin-page-heading');
+  assert.equal(heading.textContent, 'One');
+  assert.equal(heading.getAttribute('aria-hidden'), 'true');
+  assert.equal(heading.nextElementSibling, t.q('[data-ffb-list="p_aaaa11"]'));
+  assert.equal(t.qa('[data-ffb-page-title]').length, 1);
+  t.w.close();
+});
+
+test('it shows no page title preview for an untitled page', () => {
+  const form = JSON.parse(JSON.stringify(config.form));
+  form.schema.pages[0].title = '';
+  const t = boot({ form });
+  assert.equal(t.q('.ffb-admin-page-heading'), null);
+  t.w.close();
+});
+
+test('it saves a newsletter field without an email field on the first click', () => {
+  const form = JSON.parse(JSON.stringify(config.form));
+  form.schema.pages[0].items.push({ id: 'f_dddd44', kind: 'field', type: 'newsletter', name: 'news', label: 'News', placeholder: '', help: '', default: '', width: 'full', required: false, rules: [], options: [], settings: { email_field: '' }, condition: null, draft: false, autocomplete: '', css_class: '' });
+  const newsletter = { code: 'newsletter', label: 'Newsletter', category: 'choice', allowedRules: [], hasOptions: false, isFile: false, isMultiValue: false,
+    settingsSpec: { email_field: { type: 'string', default: '', format: 'email_field' } } };
+  const t = boot({ form, fieldTypes: config.fieldTypes.concat([newsletter]) });
+  t.click(t.q('[data-ffb-save]'));
+  assert.equal(t.submitted.length, 1);
+  assert.equal(t.q('[data-ffb-summary]').hidden, true);
   t.w.close();
 });

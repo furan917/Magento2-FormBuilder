@@ -40,7 +40,7 @@ class LockedValues
     }
 
     /**
-     * Overwrites posted answers of locked prefill fields and fields of fixed-value types with server-side data.
+     * Overwrites posted answers of server-owned prefill fields and fields of fixed-value types with server-side data.
      *
      * @param list<array<string, mixed>> $fields schema field items
      * @param array<string, mixed>|null $product
@@ -55,10 +55,10 @@ class LockedValues
                 $posted[(string)$field['name']] = $fixed;
             }
         }
-        $locked = array_filter($fields, fn(array $f): bool => !empty($f['locked']) && (string)($f['prefill'] ?? '') !== '');
-        // A lock never falls back to the browser: unknown, removed or unsuitable sources blank the answer.
+        $owned = array_filter($fields, $this->ownsPrefill(...));
+        // An owned answer never falls back to the browser: unknown, removed or unsuitable sources blank it.
         $usable = [];
-        foreach ($locked as $field) {
+        foreach ($owned as $field) {
             if ($this->sources->suits($field['prefill'], (string)($field['type'] ?? ''))) {
                 $usable[] = $field;
             } else {
@@ -86,13 +86,18 @@ class LockedValues
             if ($customerId > 0) {
                 $value = $customerValues[$code] ?? '';
                 $posted[$field['name']] = is_array($value) ? $value : (string)$value;
+            } elseif ($this->fieldTypes->isServerValue((string)($field['type'] ?? ''))
+                && $this->fieldTypes->fixedValue($field) === null
+            ) {
+                // Server-value types without a fixed value; the others got theirs in the first loop.
+                $posted[$field['name']] = '';
             }
         }
         return $posted;
     }
 
     /**
-     * Locked fields whose answer apply() takes from the server; they are never required of the visitor.
+     * Prefilled fields whose answer apply() takes from the server; they are never required of the visitor.
      *
      * @param list<array<string, mixed>> $fields schema field items
      * @return list<string>
@@ -102,12 +107,24 @@ class LockedValues
         $names = [];
         foreach ($fields as $field) {
             $code = (string)($field['prefill'] ?? '');
-            if (!empty($field['locked']) && $code !== '' && ($customerId > 0 || $this->sources->isProduct($code)
-                || !$this->sources->suits($code, (string)($field['type'] ?? '')))) {
+            $type = (string)($field['type'] ?? '');
+            if ($this->ownsPrefill($field) && ($customerId > 0 || $this->sources->isProduct($code)
+                || $this->fieldTypes->isServerValue($type) || !$this->sources->suits($code, $type))) {
                 $names[] = (string)$field['name'];
             }
         }
         return $names;
+    }
+
+    /**
+     * The server stores this field's prefill answer: locked fields and server-value fields with a source.
+     *
+     * @param array<string, mixed> $field
+     */
+    public function ownsPrefill(array $field): bool
+    {
+        return (string)($field['prefill'] ?? '') !== ''
+            && (!empty($field['locked']) || $this->fieldTypes->isServerValue((string)($field['type'] ?? '')));
     }
 
     /** @param array<string, mixed>|null $product */

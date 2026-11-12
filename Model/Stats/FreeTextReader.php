@@ -8,6 +8,7 @@ use Furan\FormBuilder\Api\FieldType\FreeTextTypeInterface;
 use Furan\FormBuilder\Model\FieldType\Pool;
 use Furan\FormBuilder\Model\ResourceModel\Submission\KeysetIndex;
 use Furan\FormBuilder\Model\Schema\PersonalData;
+use Furan\FormBuilder\Model\Submission\ValueFormatter;
 use Magento\Framework\App\ResourceConnection;
 use Magento\Framework\Serialize\Serializer\Json;
 
@@ -27,7 +28,8 @@ class FreeTextReader
         private readonly Json $json,
         private readonly PersonalData $personalData,
         private readonly KeysetIndex $keysetIndex,
-        private readonly Pool $types
+        private readonly Pool $types,
+        private readonly ValueFormatter $formatter
     ) {
     }
 
@@ -40,10 +42,12 @@ class FreeTextReader
     public function read(int $formId, array $fields, array $filters = [], ?string $only = null, ?int $cursor = null): array
     {
         $names = [];
+        $labels = [];
         foreach ($fields as $field) {
             $name = (string)($field['name'] ?? '');
             if ($name !== '' && ($only === null || $only === $name) && $this->isEligible($field)) {
                 $names[] = $name;
+                $labels[$name] = $this->formatter->optionLabels($field);
             }
         }
         if ($names === []) {
@@ -62,7 +66,7 @@ class FreeTextReader
                 if (isset($full[$name]) || $text === '') {
                     continue;
                 }
-                $result[$name]['answers'][] = ['id' => $id, 'text' => $text];
+                $result[$name]['answers'][] = ['id' => $id, 'text' => (string)ValueFormatter::withLabels($labels[$name], $text)];
                 if (count($result[$name]['answers']) >= self::ANSWER_LIMIT) {
                     $full[$name] = true;
                     $result[$name]['cursor'] = $id;

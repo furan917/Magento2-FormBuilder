@@ -3,12 +3,14 @@ declare(strict_types=1);
 
 namespace Furan\FormBuilder\Model\Submission;
 
+use Furan\FormBuilder\Api\Data\DisplayContext;
 use Furan\FormBuilder\Api\FieldType\AdminViewTypeInterface;
+use Furan\FormBuilder\Api\FieldType\FixedValueTypeInterface;
 use Furan\FormBuilder\Model\FieldType\Pool;
 use Magento\Framework\Escaper;
 
 /**
- * Lays stored answers out by the form's pages and sections for the admin view.
+ * Lays stored answers out by the form's pages and sections for the admin view, My submissions and emails.
  */
 class AnswerView
 {
@@ -33,6 +35,23 @@ class AnswerView
     {
         return $this->fieldTypes->isServerValue((string)($entry['type'] ?? ''))
             || $this->fieldTypes->isServerValue((string)($entry['field']['type'] ?? ''));
+    }
+
+    /**
+     * Whether a server-owned answer came from the visitor's browser; false for a removed or retyped field.
+     *
+     * @param array<string, mixed> $entry
+     */
+    public function isBrowserValue(array $entry): bool
+    {
+        $field = is_array($entry['field'] ?? null) ? $entry['field'] : [];
+        $code = (string)($entry['type'] ?? '');
+        if ($field === [] || (string)($field['type'] ?? '') !== $code || !$this->fieldTypes->isServerValue($code)
+            || !$this->fieldTypes->has($code) || !$this->fieldTypes->get($code) instanceof FixedValueTypeInterface
+        ) {
+            return false;
+        }
+        return ($field['prefill'] ?? '') === '' && $this->fieldTypes->fixedValue($field) === null;
     }
 
     /**
@@ -96,28 +115,29 @@ class AnswerView
     }
 
     /**
-     * Display strings for an answer: option labels, affixes and country names applied.
+     * Display strings for an answer in the reader's locale: option labels, affixes, dates, country names and a
+     * translated Yes or No applied.
      *
      * @param array<string, mixed> $entry
      * @return string[]
      */
-    public function values(array $entry): array
+    public function values(array $entry, DisplayContext $context): array
     {
         $kind = $this->kind($entry);
         $field = is_array($entry['field'] ?? null) ? $entry['field'] : [];
         $value = $entry['value'] ?? '';
+        $local = $this->formatter->localText($this->fieldOf($entry), $value, $context);
+        if ($local !== null) {
+            return [$local];
+        }
         if ($this->formatter->isDisplayable($this->fieldOf($entry))) {
-            $text = $this->formatter->toText($this->fieldOf($entry), $value);
+            $text = $this->formatter->toText($this->fieldOf($entry), $value, $context);
             return $text === '' ? [] : [$text];
         }
-        $raw = is_array($value) ? array_values(array_filter($value, is_scalar(...))) : (is_scalar($value) ? [$value] : []);
-        $raw = array_values(array_filter(array_map('strval', $raw), static fn (string $v) => $v !== ''));
+        $raw = $this->raw($value);
 
         if ($kind === AdminViewTypeInterface::KIND_BOOLEAN) {
-            return [$raw ? 'Yes' : 'No'];
-        }
-        if ($kind === AdminViewTypeInterface::KIND_COUNTRY) {
-            return array_map($this->formatter->countryName(...), $raw);
+            return [(string)($raw !== [] ? __('Yes') : __('No'))];
         }
 
         $labels = $this->formatter->optionLabels($this->fieldOf($entry));
@@ -135,9 +155,9 @@ class AnswerView
      *
      * @param array<string, mixed> $entry
      */
-    public function html(array $entry, Escaper $escaper): ?string
+    public function html(array $entry, Escaper $escaper, DisplayContext $context): ?string
     {
-        return $this->formatter->customHtml($this->fieldOf($entry), $entry['value'] ?? '', $escaper);
+        return $this->formatter->customHtml($this->fieldOf($entry), $entry['value'] ?? '', $escaper, $context);
     }
 
     /**
@@ -155,16 +175,27 @@ class AnswerView
     /**
      * @param array<string, mixed> $entry
      */
-    public function isAnswered(array $entry): bool
+    public function isAnswered(array $entry, DisplayContext $context): bool
     {
         if ($this->kind($entry) === AdminViewTypeInterface::KIND_BOOLEAN) {
-            return true;
+            return $this->raw($entry['value'] ?? '') !== [];
         }
         $value = $entry['value'] ?? '';
         if ($this->isFile($entry)) {
             return is_array($value) && !empty($value['name']);
         }
-        return $this->values($entry) !== [];
+        return $this->values($entry, $context) !== [];
+    }
+
+    /**
+     * The non-empty scalar parts of a stored answer.
+     *
+     * @return list<string>
+     */
+    private function raw(mixed $value): array
+    {
+        $raw = is_array($value) ? array_values(array_filter($value, is_scalar(...))) : (is_scalar($value) ? [$value] : []);
+        return array_values(array_filter(array_map('strval', $raw), static fn (string $v) => $v !== ''));
     }
 
     /**

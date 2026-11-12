@@ -226,7 +226,7 @@ class ProcessorTest extends TestCase
         return new \Furan\FormBuilder\Model\Submission\SubmissionBuilder(
             $this->factory(),
             new EmailHasher($this->deploymentConfig),
-            new SummaryBuilder(FieldPools::withFiles(), new \Furan\FormBuilder\Model\Submission\ValueFormatter(FieldPools::withFiles())),
+            new SummaryBuilder(FieldPools::withFiles(), new \Furan\FormBuilder\Model\Submission\ValueFormatter(FieldPools::withFiles(), new \Furan\FormBuilder\Model\Submission\AnswerDate()), new \Furan\FormBuilder\Model\Submission\StoreDisplayContext($this->createStub(\Magento\Framework\App\Config\ScopeConfigInterface::class))),
             new \Furan\FormBuilder\Model\Http\IpAnonymizer()
         );
     }
@@ -1426,6 +1426,59 @@ class ProcessorTest extends TestCase
         $this->assertSame('Name', $this->submission->getPayload()[0]['label']);
     }
 
+    public function testItMatchesASuggestAnswerTypedInTheStoreViewsLabelToItsOptionValue(): void
+    {
+        $schema = ['pages' => [['id' => 'p_aaaa', 'title' => 'Page', 'items' => [[
+            'id' => 'f_col01', 'kind' => 'field', 'type' => 'suggest', 'name' => 'colour', 'label' => 'Colour',
+            'options' => [['value' => 'red', 'label' => 'Red'], ['value' => 'blue', 'label' => 'Blue']],
+        ]]]]];
+        $form = ModelFixtures::model(\Furan\FormBuilder\Model\Form::class, 7);
+        $form->setSchema($schema)->setSettings([])->setTranslations([2 => [
+            'items' => ['f_col01' => [
+                'label' => ['t' => 'Couleur', 's' => 'Colour'],
+                'options' => ['red' => ['label' => ['t' => 'Rouge', 's' => 'Red']]],
+            ]],
+        ]]);
+        $validated = null;
+        $this->validator->method('validate')->willReturnCallback(function (array $schema) use (&$validated) {
+            $validated = $schema;
+            return new ValidationResult(['colour' => 'red'], [], []);
+        });
+        $suggest = new \Furan\FormBuilder\Model\FieldType\Suggest();
+        $processor = $this->processor(pool: new Pool(['suggest' => $suggest]), storeManager: $this->storeManager());
+
+        $processor->process($form, $this->request(['colour' => 'rouge']));
+
+        $field = $validated['pages'][0]['items'][0];
+        $this->assertSame('red', $suggest->normalizeValue('rouge', $field));
+        $this->assertSame([['value' => 'red', 'label' => 'Rouge'], ['value' => 'blue', 'label' => 'Blue']], $field['options']);
+        $this->assertSame('Colour', $field['label']);
+        $this->assertSame([['name' => 'colour', 'label' => 'Colour', 'type' => 'suggest', 'value' => 'red']], $this->submission->getPayload());
+    }
+
+    public function testItValidatesASelectWithTheStoreViewsOptionLabelsButStoresItsValue(): void
+    {
+        $schema = ['pages' => [['id' => 'p_aaaa', 'title' => 'Page', 'items' => [[
+            'id' => 'f_size1', 'kind' => 'field', 'type' => 'select', 'name' => 'size', 'label' => 'Size',
+            'options' => [['value' => 's', 'label' => 'Small'], ['value' => 'l', 'label' => 'Large']],
+        ]]]]];
+        $form = ModelFixtures::model(\Furan\FormBuilder\Model\Form::class, 7);
+        $form->setSchema($schema)->setSettings([])->setTranslations([2 => [
+            'items' => ['f_size1' => ['options' => ['s' => ['label' => ['t' => 'Petit', 's' => 'Small']]]]],
+        ]]);
+        $validated = null;
+        $this->validator->method('validate')->willReturnCallback(function (array $schema) use (&$validated) {
+            $validated = $schema;
+            return new ValidationResult(['size' => 's'], [], []);
+        });
+        $processor = $this->processor(pool: new Pool(['select' => new \Furan\FormBuilder\Model\FieldType\Select()]), storeManager: $this->storeManager());
+
+        $processor->process($form, $this->request(['size' => 's']));
+
+        $this->assertSame([['value' => 's', 'label' => 'Petit'], ['value' => 'l', 'label' => 'Large']], $validated['pages'][0]['items'][0]['options']);
+        $this->assertSame([['name' => 'size', 'label' => 'Size', 'type' => 'select', 'value' => 's']], $this->submission->getPayload());
+    }
+
     public function testItRefusesSubmissionsThatBreakTheAccessRulesWith403(): void
     {
         $repository = $this->createMock(SubmissionRepositoryInterface::class);
@@ -1521,6 +1574,41 @@ class ProcessorTest extends TestCase
 
         $pool = new Pool(['file' => new File(), 'text' => new Text(), 'hidden' => new \Furan\FormBuilder\Model\FieldType\Hidden()]);
         $this->processor([], $pool)->process($this->form([], $schema), $this->request(['campaign' => 'tampered', 'utm' => 'news']));
+    }
+
+    private function prefilledHiddenSchema(): array
+    {
+        return ['version' => 1, 'pages' => [['id' => 'p_aaaa01', 'title' => '', 'items' => [
+            ['id' => 'f_mail01', 'kind' => 'field', 'type' => 'hidden', 'name' => 'mail', 'label' => 'Mail',
+                'default' => 'guest', 'settings' => ['source' => 'query', 'query_param' => 'm'],
+                'prefill' => 'customer.email', 'locked' => false],
+        ]]]];
+    }
+
+    public function testItValidatesAPrefilledHiddenFieldWithItsDefaultForAGuestWhateverWasPosted(): void
+    {
+        $validator = $this->createMock(Validator::class);
+        $this->fixture(validator: $validator);
+        $validator->expects($this->once())->method('validate')
+            ->with($this->anything(), ['mail' => 'guest'], $this->anything(), $this->anything(), ['mail'])
+            ->willReturn(new ValidationResult(['mail' => 'guest'], [], []));
+
+        $pool = new Pool(['file' => new File(), 'text' => new Text(), 'hidden' => new \Furan\FormBuilder\Model\FieldType\Hidden()]);
+        $this->processor([], $pool)->process($this->form([], $this->prefilledHiddenSchema()), $this->request(['mail' => 'victim@example.com']));
+    }
+
+    public function testItValidatesAPrefilledHiddenFieldWithTheAccountValueForACustomer(): void
+    {
+        $validator = $this->createMock(Validator::class);
+        $this->fixture(validator: $validator);
+        $this->customer(1, 'ann@example.com');
+        $this->prefill->method('valuesFor')->willReturn(['customer.email' => 'ann@example.com']);
+        $validator->expects($this->once())->method('validate')
+            ->with($this->anything(), ['mail' => 'ann@example.com'])
+            ->willReturn(new ValidationResult(['mail' => 'ann@example.com'], [], []));
+
+        $pool = new Pool(['file' => new File(), 'text' => new Text(), 'hidden' => new \Furan\FormBuilder\Model\FieldType\Hidden()]);
+        $this->processor([], $pool)->process($this->form([], $this->prefilledHiddenSchema()), $this->request(['mail' => 'mallory@example.com']));
     }
 
     public function testItNeverRequiresALockedFieldWhoseAnswerTheServerOwns(): void

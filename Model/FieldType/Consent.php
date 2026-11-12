@@ -19,8 +19,14 @@ class Consent extends Checkbox
     {
         return [
             'details' => ['type' => 'string', 'translatable' => true, 'default' => '', 'max_length' => 1000],
-            'privacy_url' => ['type' => 'string', 'translatable' => true, 'default' => '', 'format' => 'url'],
-            'privacy_label' => ['type' => 'string', 'translatable' => true, 'default' => 'Privacy policy', 'max_length' => 100],
+            'privacy_url' => [
+                'type' => 'string',
+                'translatable' => true,
+                'default' => '',
+                'format' => 'url',
+                'hint' => (string)__('A path such as /privacy, or a full URL on this store.'),
+            ],
+            'privacy_label' => ['type' => 'string', 'translatable' => true, 'default' => '', 'max_length' => 100],
         ];
     }
 

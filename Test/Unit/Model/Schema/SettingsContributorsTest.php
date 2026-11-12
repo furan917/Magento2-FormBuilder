@@ -86,6 +86,30 @@ class SettingsContributorsTest extends TestCase
         }
     }
 
+    public function testItRefusesContributorValuesThatBreakTheDeclaredBounds(): void
+    {
+        $spec = [
+            'from' => ['type' => 'string', 'default' => '', 'format' => 'date', 'not_above' => 'to', 'label' => 'From'],
+            'to' => ['type' => 'string', 'default' => '', 'format' => 'date', 'label' => 'To'],
+            'rate' => ['type' => 'number', 'default' => 1, 'exclusive_min' => 0, 'label' => 'Rate'],
+            'step' => ['type' => 'string', 'default' => 'any', 'format' => 'step', 'label' => 'Step'],
+        ];
+        $pool = ArraySettingsContributor::pool(new ArraySettingsContributor('acme_crm', $spec));
+        try {
+            $this->normalizer($pool)->normalize(
+                ['ext' => ['acme_crm' => ['from' => '2025-02-01', 'to' => '2025-01-01', 'rate' => 0, 'step' => 'x']]],
+                $this->schema()
+            );
+            $this->fail('Expected an invalid settings error');
+        } catch (InvalidSchemaException $e) {
+            $this->assertSame([
+                'Settings "Acme CRM": "Rate" must be greater than 0.',
+                'Settings "Acme CRM": "Step" must be "any" or a number greater than 0.',
+                'Settings "Acme CRM": "From" is greater than "To".',
+            ], $e->getErrors());
+        }
+    }
+
     public function testItKeepsStoredSettingsOfAContributorThatIsNoLongerRegistered(): void
     {
         $stored = ['ext' => ['gone_ext' => ['token_id' => 7], 'acme_crm' => ['list_id' => 'old']]];

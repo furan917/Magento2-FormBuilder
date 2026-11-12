@@ -17,7 +17,7 @@ class Toggle extends Checkbox
 
     public function getSettingsSpec(): array
     {
-        return ['on_value' => ['type' => 'string', 'default' => 'yes']];
+        return ['on_value' => ['type' => 'string', 'default' => 'yes', 'hint' => (string)__('Saved when on; conditions compare against it.')]];
     }
 
     /**

@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace Furan\FormBuilder\Block\Account;
 
+use Furan\FormBuilder\Api\Data\DisplayContext;
 use Furan\FormBuilder\Api\Data\SubmissionInterface;
 use Furan\FormBuilder\Api\FormRepositoryInterface;
 use Furan\FormBuilder\Model\Account\SubmissionPolicy;
@@ -10,6 +11,7 @@ use Furan\FormBuilder\Model\Account\SubmissionReader;
 use Furan\FormBuilder\Model\Form\ScheduleGate;
 use Furan\FormBuilder\Model\Source\SubmissionStatus;
 use Furan\FormBuilder\Model\Submission\AnswerView;
+use Furan\FormBuilder\Model\Submission\StoreDisplayContext;
 use Furan\FormBuilder\Model\Thread\MessageRenderer;
 use Furan\FormBuilder\Model\Thread\Messages;
 use Furan\FormBuilder\Model\Thread\ReplyPolicy;
@@ -42,6 +44,7 @@ class Submission extends Template
         private readonly SubmissionStatus $statuses,
         private readonly ScheduleGate $schedule,
         private readonly SubmissionPolicy $accountPolicy,
+        private readonly StoreDisplayContext $displayContexts,
         array $data = []
     ) {
         parent::__construct($context, $data);
@@ -76,7 +79,7 @@ class Submission extends Template
         $payload = $this->json->unserialize((string)$row['payload_json']);
         $submissionId = (int)$row['submission_id'];
         $before = Messages::beforeParam($this->getRequest()->getParam('before'));
-        // Settings and the store's name come from the store the submission was made in, not the one being browsed.
+        // Settings, the store's name and the answers' locale come from the store the submission was made in, not the one being browsed.
         $storeId = isset($row['store_id']) ? (int)$row['store_id'] : null;
         $page = $this->messages->pageForCustomer($submissionId, $this->storeName($storeId), $before);
         $replyState = $this->replyState($status, $settings, $submissionId, $storeId);
@@ -97,7 +100,12 @@ class Submission extends Template
             'thread' => $page['messages'],
             'earlier' => $page['earlier'],
             'before' => $before,
-            'groups' => $this->visibleGroups($schema, is_array($payload) ? $payload : [], $title),
+            'groups' => $this->visibleGroups(
+                $schema,
+                is_array($payload) ? $payload : [],
+                $title,
+                $this->displayContexts->forStore($storeId)
+            ),
         ];
         return $this->view;
     }
@@ -180,7 +188,7 @@ class Submission extends Template
      * @param array<int, mixed> $payload
      * @return list<array<string, mixed>>
      */
-    private function visibleGroups(array $schema, array $payload, string $formTitle): array
+    private function visibleGroups(array $schema, array $payload, string $formTitle, DisplayContext $context): array
     {
         $groups = [];
         foreach ($this->answerView->group($schema, $payload) as $group) {
@@ -192,7 +200,7 @@ class Submission extends Template
                         continue;
                     }
                     $values = array_values(array_filter(
-                        $this->entryValues($entry),
+                        $this->entryValues($entry, $context),
                         static fn ($value): bool => trim((string)$value) !== ''
                     ));
                     if ($values === []) {
@@ -218,12 +226,12 @@ class Submission extends Template
      * @param array<string, mixed> $entry
      * @return string[]
      */
-    private function entryValues(array $entry): array
+    private function entryValues(array $entry, DisplayContext $context): array
     {
         if ($this->answerView->isFile($entry)) {
             $name = is_array($entry['value'] ?? null) ? (string)($entry['value']['name'] ?? '') : '';
             return $name === '' ? [] : [$name];
         }
-        return $this->answerView->values($entry);
+        return $this->answerView->values($entry, $context);
     }
 }

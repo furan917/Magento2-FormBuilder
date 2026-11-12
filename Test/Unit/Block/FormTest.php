@@ -45,6 +45,8 @@ class FormTest extends TestCase
     private array $styles = [];
     /** @var string[] */
     private array $tmpFiles = [];
+    private ?\Magento\Framework\App\Config\ScopeConfigInterface $scopeConfig = null;
+    private bool $hyva = false;
 
     protected function setUp(): void
     {
@@ -67,6 +69,36 @@ class FormTest extends TestCase
                 unlink($file);
             }
         }
+    }
+
+    public function testItGivesTheRenderingStoreViewsLocaleAndDropsAMalformedOne(): void
+    {
+        $locale = 'en_GB';
+        $this->scopeConfig = $this->createMock(\Magento\Framework\App\Config\ScopeConfigInterface::class);
+        $this->scopeConfig->expects($this->exactly(2))->method('getValue')
+            ->with('general/locale/code', 'store', 1)
+            ->willReturnCallback(static function () use (&$locale): string {
+                return $locale;
+            });
+        $block = $this->block($this->form($this->schema()));
+        $this->assertSame('en_GB', $block->getLocale());
+        $locale = 'en"><script>';
+        $this->assertSame('', $block->getLocale());
+    }
+
+    public function testItCapsTypedTextAtWhatTheFieldTypeKeeps(): void
+    {
+        $plain = $this->createStub(FieldTypeInterface::class);
+        $this->pool = new Pool(['text' => new \Furan\FormBuilder\Model\FieldType\Text(), 'plain' => $plain]);
+        $block = $this->block($this->form($this->schema()));
+        $escaper = \Furan\FormBuilder\Test\Unit\Helper\EscaperFactory::create();
+        $limit = static fn (array $item): mixed => $block->getItemContext($item + ['name' => 'a'], $escaper)['lengthLimit'];
+
+        $this->assertSame(1000, $limit(['type' => 'text']));
+        $this->assertSame(40, $limit(['type' => 'text', 'rules' => [['rule' => 'max_length', 'value' => 40]]]));
+        $this->assertSame(1000, $limit(['type' => 'text', 'rules' => [['rule' => 'max_length', 'value' => 5000]]]));
+        $this->assertNull($limit(['type' => 'plain']));
+        $this->assertNull($limit(['type' => 'gone']));
     }
 
     public function testItExposesCacheIdentitiesForTheForm(): void
@@ -620,6 +652,26 @@ class FormTest extends TestCase
         return ['version' => 1, 'pages' => $pages ?? [['id' => 'p_aaaa', 'title' => 'Page', 'items' => []]]];
     }
 
+    public function testItLinksTheHyvaThemeStylesOnlyForThemeStyleFormsOnAHyvaTheme(): void
+    {
+        $hyvaCss = fn (array $settings): int => $this->xpath($this->block($this->form($this->schema(), $settings))->toHtml())
+            ->query('//link[@rel="stylesheet"][@href="https://static.test/Furan_FormBuilder/css/ffb-hyva.css"]')->length;
+        $fresh = function (bool $hyva): void {
+            $this->hyva = $hyva;
+            $this->layout = $this->createStub(LayoutInterface::class);
+        };
+
+        $fresh(true);
+        $this->assertSame(1, $hyvaCss(['style' => 'theme']));
+        $fresh(true);
+        $this->assertSame(0, $hyvaCss([]));
+        $this->assertSame(0, $hyvaCss(['style' => 'module']));
+        $this->assertSame(1, $hyvaCss(['style' => 'theme']), 'a later theme style form on the page still gets it');
+        $this->assertSame(0, $hyvaCss(['style' => 'theme']), 'once per page');
+        $fresh(false);
+        $this->assertSame(0, $hyvaCss(['style' => 'theme']));
+    }
+
     public function testItAppliesTheStyleModeAndAValidatedAccentColour(): void
     {
         $root = fn (array $settings) => $this->xpath($this->block($this->form($this->schema(), $settings))->toHtml())
@@ -1026,7 +1078,7 @@ class FormTest extends TestCase
         $context->method('getStoreManager')->willReturn($storeManager);
         $this->eventManager = $this->double('eventManager', ManagerInterface::class);
         $context->method('getEventManager')->willReturn($this->eventManager);
-        $context->method('getScopeConfig')->willReturn($this->createStub(\Magento\Framework\App\Config\ScopeConfigInterface::class));
+        $context->method('getScopeConfig')->willReturn($this->scopeConfig ?? $this->createStub(\Magento\Framework\App\Config\ScopeConfigInterface::class));
         $context->method('getLayout')->willReturn($this->layout);
         $context->method('getRequest')->willReturn($request);
         $context->method('getEscaper')->willReturn(\Furan\FormBuilder\Test\Unit\Helper\EscaperFactory::create());
@@ -1063,6 +1115,8 @@ class FormTest extends TestCase
             new \Furan\FormBuilder\Model\Form\ScheduleGate($this->clock()),
             $this->countryOptions ?? $this->createStub(CountryOptions::class),
             new \Magento\Framework\Serialize\Serializer\JsonHexTag(),
+            $this->hyvaDetector(),
+            new \Furan\FormBuilder\Block\ItemContext(new \Furan\FormBuilder\Model\Upload\ExtensionList()),
             $this->scripts,
             $this->styles
         );
@@ -1075,6 +1129,13 @@ class FormTest extends TestCase
 
     /** @var array<string, string> */
     private array $tmpTemplates = [];
+
+    private function hyvaDetector(): \Furan\FormBuilder\Model\Theme\HyvaDetector
+    {
+        $detector = $this->createStub(\Furan\FormBuilder\Model\Theme\HyvaDetector::class);
+        $detector->method('isHyva')->willReturn($this->hyva);
+        return $detector;
+    }
 
     private function stubTemplate(string $templateId, string $php): void
     {

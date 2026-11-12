@@ -31,7 +31,8 @@ class PublicSchemaTest extends TestCase
                     $this->createStub(\Furan\FormBuilder\Model\Directory\AddressRules::class),
                     \Furan\FormBuilder\Test\Unit\Helper\StorefrontUrlsFactory::create()
                 )]),
-            $config
+            $config,
+            new \Furan\FormBuilder\Model\Upload\ExtensionList()
         );
         $schema = ['version' => 1, 'pages' => [['id' => 'p_aaaa', 'title' => 'T', 'condition' => null, 'items' => $items]]];
         return $publicSchema->build($schema)['pages'][0]['items'];
@@ -253,5 +254,26 @@ class PublicSchemaTest extends TestCase
         ], extraTypes: ['hidden' => new \Furan\FormBuilder\Model\FieldType\Hidden()]);
 
         $this->assertSame([false, true, true], array_map(static fn (array $f): bool => $f['overwritable'] ?? false, $items));
+    }
+
+    public function testItMarksServerValueFieldsSoTheBrowserNeverRequiresThem(): void
+    {
+        $base = ['kind' => 'field', 'label' => 'L', 'rules' => []];
+        $items = $this->build([
+            ['id' => 'f_aaaa', 'type' => 'text', 'name' => 'plain', 'locked' => true] + $base,
+            ['id' => 'f_cccc', 'type' => 'hidden', 'name' => 'ref'] + $base,
+        ], extraTypes: ['hidden' => new \Furan\FormBuilder\Model\FieldType\Hidden()]);
+
+        $this->assertSame([false, true], array_map(static fn (array $f): bool => $f['server_value'] ?? false, $items));
+    }
+
+    public function testItNormalisesTheFieldsFileTypesBeforeNarrowingTheAcceptList(): void
+    {
+        $items = $this->build([
+            ['id' => 'f_aaaa', 'kind' => 'field', 'type' => 'file', 'name' => 'a', 'rules' => [],
+             'settings' => ['extensions' => [' .PNG', '', 'p df']]],
+        ]);
+
+        $this->assertSame('.png', $items[0]['settings']['accept']);
     }
 }

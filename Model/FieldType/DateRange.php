@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace Furan\FormBuilder\Model\FieldType;
 
+use Furan\FormBuilder\Api\FieldType\AdminViewTypeInterface;
 use Furan\FormBuilder\Api\FieldType\StatsAwareTypeInterface;
 use Furan\FormBuilder\Api\FieldType\ClientMessagesInterface;
 use Furan\FormBuilder\Api\FieldType\ConditionSourceInterface;
@@ -10,7 +11,9 @@ use Furan\FormBuilder\Api\FieldType\DisplayableTypeInterface;
 use Furan\FormBuilder\Api\FieldType\ExportableTypeInterface;
 use Furan\FormBuilder\Api\FieldType\RoutableTypeInterface;
 use Furan\FormBuilder\Model\Submission\ValueFormatter;
+use Furan\FormBuilder\Api\Data\DisplayContext;
 use Magento\Framework\Escaper;
+use Furan\FormBuilder\Api\FieldType\BuilderControlsInterface;
 
 /**
  * Start and end date posted as name[start], name[end]. Length is inclusive (same day = 1) and
@@ -22,7 +25,9 @@ class DateRange extends AbstractFieldType implements
     ClientMessagesInterface,
     ConditionSourceInterface,
     RoutableTypeInterface,
-    StatsAwareTypeInterface
+    StatsAwareTypeInterface,
+    AdminViewTypeInterface,
+    BuilderControlsInterface
 {
     private const DATE_PATTERN = '/^[0-9]{4}-[0-9]{2}-[0-9]{2}$/D';
     private const MAX_PART_LENGTH = 32;
@@ -51,12 +56,19 @@ class DateRange extends AbstractFieldType implements
     public function getSettingsSpec(): array
     {
         $label = ['type' => 'string', 'translatable' => true, 'max_length' => 60, 'default' => ''];
-        $date = ['type' => 'string', 'max_length' => 10, 'default' => ''];
-        $days = ['type' => 'int', 'default' => 0, 'min' => 0, 'max' => self::MAX_DAYS];
+        $date = ['type' => 'string', 'format' => 'date', 'max_length' => 10, 'default' => ''];
+        $days = [
+            'type' => 'int',
+            'default' => 0,
+            'min' => 0,
+            'max' => self::MAX_DAYS,
+            'hint' => (string)__('Counts the start and end days. 0 = no limit.'),
+            'no_limit' => 0,
+        ];
         return [
-            'min_days' => $days,
+            'min_days' => $days + ['not_above' => 'max_days'],
             'max_days' => $days,
-            'min_date' => $date,
+            'min_date' => $date + ['not_above' => 'max_date'],
             'max_date' => $date,
             'start_label' => $label,
             'end_label' => $label,
@@ -96,6 +108,7 @@ class DateRange extends AbstractFieldType implements
         return $failure === null ? null : $messages[$failure];
     }
 
+
     public function getClientMessages(array $field): array
     {
         return ['messages' => $this->messages($field)];
@@ -125,14 +138,9 @@ class DateRange extends AbstractFieldType implements
     private function getSettings(array $field): array
     {
         $raw = $field['settings'] ?? [];
-        $minDays = $this->clampDays($raw['min_days'] ?? 0);
-        $maxDays = $this->clampDays($raw['max_days'] ?? 0);
-        if ($minDays > 0 && $maxDays > 0 && $minDays > $maxDays) {
-            $maxDays = 0;
-        }
         return [
-            'min_days' => $minDays,
-            'max_days' => $maxDays,
+            'min_days' => $this->clampDays($raw['min_days'] ?? 0),
+            'max_days' => $this->clampDays($raw['max_days'] ?? 0),
             'min_date' => $this->cleanBound($raw['min_date'] ?? ''),
             'max_date' => $this->cleanBound($raw['max_date'] ?? ''),
         ];
@@ -193,7 +201,7 @@ class DateRange extends AbstractFieldType implements
         return [];
     }
 
-    public function toText(array $field, mixed $value): string
+    public function toText(array $field, mixed $value, DisplayContext $context): string
     {
         if (!is_array($value)) {
             return ValueFormatter::flatten($value);
@@ -203,9 +211,9 @@ class DateRange extends AbstractFieldType implements
         return $start === '' && $end === '' ? '' : $start . " \u{2013} " . $end;
     }
 
-    public function toHtml(array $field, mixed $value, Escaper $escaper): string
+    public function toHtml(array $field, mixed $value, Escaper $escaper, DisplayContext $context): string
     {
-        return $escaper->escapeHtml($this->toText($field, $value));
+        return $escaper->escapeHtml($this->toText($field, $value, $context));
     }
 
     private function part(mixed $value, string $key): string
@@ -216,5 +224,20 @@ class DateRange extends AbstractFieldType implements
     public function statsKind(array $field): ?int
     {
         return self::KIND_DATE_RANGE;
+    }
+
+    public function adminViewKind(array $field): ?string
+    {
+        return AdminViewTypeInterface::KIND_CALENDAR_RANGE;
+    }
+
+    public function builderControls(): array
+    {
+        return ['placeholder' => false, 'autocomplete' => false];
+    }
+
+    public function defaultInput(): ?string
+    {
+        return null;
     }
 }

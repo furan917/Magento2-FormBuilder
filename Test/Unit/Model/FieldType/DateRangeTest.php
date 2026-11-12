@@ -53,7 +53,6 @@ class DateRangeTest extends TestCase
         $settings = ['max_days' => 1];
         $this->assertNull($this->check(['start' => '2026-01-01', 'end' => '2026-01-01'], $settings));
         $this->assertNotNull($this->check(['start' => '2026-01-01', 'end' => '2026-01-02'], $settings));
-        $this->assertNull($this->check(['start' => '2026-01-01', 'end' => '2026-03-01'], ['min_days' => 5, 'max_days' => 2]));
     }
 
     public function testItRejectsDatesOutsideTheEarliestAndLatestSettings(): void

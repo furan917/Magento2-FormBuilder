@@ -29,7 +29,7 @@ class Validator
      * @param array<string, mixed> $schema
      * @param array<string, mixed> $postedFields
      * @param array<string, array<string, mixed>> $files
-     * @param string[] $exemptRequired field names that are never required (stored files, newsletter consent)
+     * @param string[] $exemptRequired further field names that are never required (stored files, newsletter consent)
      */
     public function validate(
         array $schema,
@@ -42,6 +42,10 @@ class Validator
         $fields = $this->collectFields($schema, $storeId);
         $normalized = [];
         foreach ($fields as $field) {
+            // The visitor has no control to answer a server-value field with.
+            if ($this->fieldTypes->isServerValue($field['type'])) {
+                $exemptRequired[] = $field['name'];
+            }
             $type = $this->fieldTypes->get($field['type']);
             if ($type->isFile()) {
                 continue;

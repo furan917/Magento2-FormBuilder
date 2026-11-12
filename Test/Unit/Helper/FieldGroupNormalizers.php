@@ -36,8 +36,10 @@ class FieldGroupNormalizers
             new \Furan\FormBuilder\Model\Schema\SettingValues($redirects),
             new PersonalData(FieldPools::builtIn()),
             new Sources(),
-            ConditionNormalizers::builtIn([], $types, $extraActions)
-        );
+            ConditionNormalizers::builtIn([], $types, $extraActions),
+            \Furan\FormBuilder\Test\Unit\Helper\FieldChecksFactory::create(),
+        new \Furan\FormBuilder\Model\Validation\PresetFit()
+);
         return new GroupNormalizer($normalizer, TranslatorFactory::create($redirects, $types));
     }
 }

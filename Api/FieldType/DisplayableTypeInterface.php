@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace Furan\FormBuilder\Api\FieldType;
 
+use Furan\FormBuilder\Api\Data\DisplayContext;
 use Magento\Framework\Escaper;
 
 /**
@@ -18,14 +19,16 @@ interface DisplayableTypeInterface
     /**
      * @param array<string, mixed> $field schema field or payload stub
      * @param mixed $value stored answer
+     * @param DisplayContext $context the reader: the submission's store view for customers and emails, the admin otherwise
      */
-    public function toText(array $field, mixed $value): string;
+    public function toText(array $field, mixed $value, DisplayContext $context): string;
 
     /**
      * The result is printed unescaped, so the implementation must escape every dynamic part.
      *
      * @param array<string, mixed> $field schema field or payload stub
      * @param mixed $value stored answer
+     * @param DisplayContext $context the reader
      */
-    public function toHtml(array $field, mixed $value, Escaper $escaper): string;
+    public function toHtml(array $field, mixed $value, Escaper $escaper, DisplayContext $context): string;
 }

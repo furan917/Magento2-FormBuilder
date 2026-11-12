@@ -5,8 +5,9 @@ namespace Furan\FormBuilder\Model\FieldType;
 
 use Furan\FormBuilder\Api\FieldType\PersonalByDefaultInterface;
 use Furan\FormBuilder\Model\Validation\Patterns;
+use Furan\FormBuilder\Api\FieldType\PresetGroupsInterface;
 
-class Tel extends AbstractPatternType implements PersonalByDefaultInterface
+class Tel extends AbstractPatternType implements PersonalByDefaultInterface, PresetGroupsInterface
 {
     public function getCode(): string
     {
@@ -43,4 +44,10 @@ class Tel extends AbstractPatternType implements PersonalByDefaultInterface
     protected function getPattern(): string
     {
         return Patterns::PHONE;
-    }}
+    }
+
+    public function presetGroups(): array
+    {
+        return ['phone'];
+    }
+}

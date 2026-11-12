@@ -5,9 +5,9 @@ namespace Furan\FormBuilder\Model\Schema;
 
 use Furan\FormBuilder\Api\FieldType\ClientMessagesInterface;
 use Furan\FormBuilder\Api\FieldType\RelativeDateSourceInterface;
-use Furan\FormBuilder\Api\FieldType\ServerValueTypeInterface;
 use Furan\FormBuilder\Model\Config;
 use Furan\FormBuilder\Model\FieldType\Pool;
+use Furan\FormBuilder\Model\Upload\ExtensionList;
 use Furan\FormBuilder\Model\Validation\Rule\Preset;
 use Furan\FormBuilder\Model\Validation\RulePool;
 
@@ -16,7 +16,8 @@ class PublicSchema
     public function __construct(
         private readonly RulePool $rules,
         private readonly Pool $fieldTypes,
-        private readonly Config $config
+        private readonly Config $config,
+        private readonly ExtensionList $extensionList
     ) {
     }
 
@@ -78,8 +79,15 @@ class PublicSchema
             $field['type_message'] = $message;
         }
         // The browser may only show a condition's set value as a default unless the server overwrites it too.
-        if (!empty($field['locked']) || $type instanceof ServerValueTypeInterface) {
+        $serverValue = $this->fieldTypes->isServerValue((string)$field['type']);
+        if (!empty($field['locked']) || $serverValue) {
             $field['overwritable'] = true;
+        }
+        if ($serverValue) {
+            $field['server_value'] = true;
+        }
+        if ($this->fieldTypes->hasSuggestionOptions((string)$field['type'])) {
+            $field['suggestions'] = true;
         }
         if ($type instanceof RelativeDateSourceInterface) {
             $field['relative_date'] = $type->relativeDateFormat();
@@ -136,8 +144,8 @@ class PublicSchema
     private function accept(mixed $fieldExtensions): string
     {
         $allowed = $this->config->getAllowedExtensions();
-        if (is_array($fieldExtensions) && $fieldExtensions) {
-            $wanted = array_map(static fn ($e): string => strtolower(ltrim((string)$e, '.')), $fieldExtensions);
+        $wanted = is_array($fieldExtensions) ? $this->extensionList->normalise($fieldExtensions) : [];
+        if ($wanted !== []) {
             $allowed = array_values(array_intersect($allowed, $wanted));
         }
         return implode(',', array_map(static fn (string $e): string => '.' . $e, $allowed));

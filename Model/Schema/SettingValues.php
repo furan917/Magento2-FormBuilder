@@ -16,6 +16,10 @@ class SettingValues
     public const PROBLEM_MIN_ITEMS = 'min_items';
     public const PROBLEM_URL = 'url';
     public const PROBLEM_MASK = 'mask';
+    public const PROBLEM_ABOVE = 'above';
+    public const PROBLEM_EXCLUSIVE_MIN = 'exclusive_min';
+    public const PROBLEM_DATE = 'date';
+    public const PROBLEM_STEP = 'step';
 
     private const LIST_LIMIT = 50;
 
@@ -45,8 +49,56 @@ class SettingValues
                 $problems[] = [self::PROBLEM_URL, (string)$key, null];
                 $values[$key] = '';
             }
+            $this->checkValue($values[$key], (string)$key, $definition, $problems);
+        }
+        foreach ($spec as $key => $definition) {
+            $sibling = $definition['not_above'] ?? null;
+            if (is_string($sibling) && isset($spec[$sibling]) && $this->isAbove($values[$key], $values[$sibling], $spec[$sibling])) {
+                $problems[] = [self::PROBLEM_ABOVE, (string)$key, $sibling];
+            }
         }
         return $values;
+    }
+
+    /**
+     * @param SettingSpec $spec
+     * @param array<int, array{0: string, 1: string, 2: mixed}> $problems
+     */
+    private function checkValue(mixed $value, string $key, array $spec, array &$problems): void
+    {
+        $format = $spec['format'] ?? '';
+        if ($format === 'date' && is_string($value) && $value !== '' && !$this->isDate($value)) {
+            $problems[] = [self::PROBLEM_DATE, $key, null];
+        }
+        if ($format === 'step' && is_string($value) && !in_array($value, ['', 'any'], true)
+            && !(preg_match('/^\d+(\.\d+)?$/D', $value) === 1 && (float)$value > 0)
+        ) {
+            $problems[] = [self::PROBLEM_STEP, $key, null];
+        }
+        if (isset($spec['exclusive_min']) && is_numeric($value) && $value <= $spec['exclusive_min']) {
+            $problems[] = [self::PROBLEM_EXCLUSIVE_MIN, $key, $spec['exclusive_min']];
+        }
+    }
+
+    /**
+     * Empty values, invalid dates and a sibling at its `no_limit` value are never compared.
+     *
+     * @param SettingSpec $siblingSpec
+     */
+    private function isAbove(mixed $value, mixed $sibling, array $siblingSpec): bool
+    {
+        if (array_key_exists('no_limit', $siblingSpec) && $sibling == $siblingSpec['no_limit']) {
+            return false;
+        }
+        if (is_numeric($value) && is_numeric($sibling)) {
+            return (float)$value > (float)$sibling;
+        }
+        return is_string($value) && is_string($sibling) && $this->isDate($value) && $this->isDate($sibling) && $value > $sibling;
+    }
+
+    private function isDate(string $value): bool
+    {
+        return preg_match('/^(\d{4})-(\d{2})-(\d{2})$/D', $value, $m) === 1 && checkdate((int)$m[2], (int)$m[3], (int)$m[1]);
     }
 
     public function cleanString(mixed $value, int $maxLength, bool $keepNewlines = false): string

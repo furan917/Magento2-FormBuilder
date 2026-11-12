@@ -4,11 +4,12 @@ declare(strict_types=1);
 namespace Furan\FormBuilder\Model\FieldType;
 
 use Furan\FormBuilder\Api\FieldType\AdminViewTypeInterface;
+use Furan\FormBuilder\Api\FieldType\BuilderControlsInterface;
 
 /**
  * Repeatable text: one input per item with an "add another" button. Posted as name[]; empty items are dropped.
  */
-class ItemList extends AbstractFieldType implements AdminViewTypeInterface
+class ItemList extends AbstractFieldType implements AdminViewTypeInterface, BuilderControlsInterface
 {
     protected const MAX_LENGTH = 255;
     private const DEFAULT_MAX_ITEMS = 5;
@@ -32,7 +33,13 @@ class ItemList extends AbstractFieldType implements AdminViewTypeInterface
     public function getSettingsSpec(): array
     {
         return [
-            'max_items' => ['type' => 'int', 'default' => self::DEFAULT_MAX_ITEMS, 'min' => 2, 'max' => 20],
+            'max_items' => [
+                'type' => 'int',
+                'default' => self::DEFAULT_MAX_ITEMS,
+                'min' => 2,
+                'max' => 20,
+                'hint' => (string)__('From 2 to 20.'),
+            ],
             'add_label' => ['type' => 'string', 'translatable' => true, 'default' => '', 'max_length' => 40],
         ];
     }
@@ -85,5 +92,15 @@ class ItemList extends AbstractFieldType implements AdminViewTypeInterface
     public function adminViewKind(array $field): ?string
     {
         return self::KIND_LIST;
+    }
+
+    public function builderControls(): array
+    {
+        return ['autocomplete' => false];
+    }
+
+    public function defaultInput(): ?string
+    {
+        return null;
     }
 }

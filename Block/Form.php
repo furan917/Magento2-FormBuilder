@@ -13,12 +13,14 @@ use Furan\FormBuilder\Model\Form\ScheduleGate;
 use Furan\FormBuilder\Model\Schema\ContentTypes;
 use Furan\FormBuilder\Model\Schema\SchemaFields;
 use Furan\FormBuilder\Model\Storefront\ConfigBuilder;
+use Furan\FormBuilder\Model\Theme\HyvaDetector;
 use Magento\Framework\App\Request\Http;
 use Magento\Framework\DataObject\IdentityInterface;
 use Magento\Framework\Escaper;
 use Magento\Framework\Serialize\Serializer\JsonHexTag;
 use Magento\Framework\View\Element\Template;
 use Magento\Framework\View\Element\Template\Context;
+use Magento\Store\Model\ScopeInterface;
 use Psr\Log\LoggerInterface;
 
 class Form extends Template implements IdentityInterface
@@ -53,6 +55,8 @@ class Form extends Template implements IdentityInterface
         private readonly ScheduleGate $schedule,
         private readonly CountryOptions $countries,
         private readonly JsonHexTag $jsonHexTag,
+        private readonly HyvaDetector $hyvaDetector,
+        private readonly ItemContext $itemContext,
         private readonly array $scripts = [],
         private readonly array $styles = [],
         array $data = []
@@ -105,6 +109,14 @@ class Form extends Template implements IdentityInterface
         return $heading !== '' && count($pages) === 1 && mb_strtolower($heading) === mb_strtolower(trim($pageTitle));
     }
 
+    /** The rendering store view's locale code (en_GB); the review step formats dates with it. */
+    public function getLocale(): string
+    {
+        $code = (string)$this->_scopeConfig->getValue('general/locale/code', ScopeInterface::SCOPE_STORE, $this->getStoreId());
+
+        return preg_match('/^[a-z]{2,3}(_[A-Za-z0-9]{2,8})*$/D', $code) === 1 ? $code : '';
+    }
+
     public function getIdentities(): array
     {
         $form = $this->getForm();
@@ -137,13 +149,19 @@ class Form extends Template implements IdentityInterface
      */
     public function getItemContext(array $item, Escaper $escaper): array
     {
-        return ItemContext::build($item, (int)$this->getForm()?->getId(), $this->getInstanceNumber(), $escaper);
+        return $this->itemContext->build(
+            $item,
+            (int)$this->getForm()?->getId(),
+            $this->getInstanceNumber(),
+            $escaper,
+            $this->fieldTypes->maxLength((string)($item['type'] ?? ''))
+        );
     }
 
     /** @param array<string, mixed> $settings */
     public function getFileAccept(array $settings): string
     {
-        return ItemContext::fileAccept($settings, $this->moduleConfig->getAllowedExtensions($this->getStoreId()));
+        return $this->itemContext->fileAccept($settings, $this->moduleConfig->getAllowedExtensions($this->getStoreId()));
     }
 
     /**
@@ -282,6 +300,22 @@ class Form extends Template implements IdentityInterface
         return true;
     }
 
+    public function usesHyvaThemeStyles(): bool
+    {
+        return $this->hyvaDetector->isHyva();
+    }
+
+    /** True once per page, for the first Theme styles only form on a Hyvä theme; the caller checks the style mode. */
+    public function shouldRenderHyvaStyles(): bool
+    {
+        $state = $this->layoutState();
+        if ($state->hyvaStylesPrinted || !$this->usesHyvaThemeStyles()) {
+            return false;
+        }
+        $state->hyvaStylesPrinted = true;
+        return true;
+    }
+
     protected function _toHtml(): string
     {
         $form = $this->getForm();
@@ -337,7 +371,7 @@ class Form extends Template implements IdentityInterface
     private function layoutState(): \stdClass
     {
         self::$layoutState ??= new \WeakMap();
-        return self::$layoutState[$this->getLayout()] ??= (object)['assetsPrinted' => false, 'instances' => []];
+        return self::$layoutState[$this->getLayout()] ??= (object)['assetsPrinted' => false, 'hyvaStylesPrinted' => false, 'instances' => []];
     }
 
     private function getStoreId(): int
