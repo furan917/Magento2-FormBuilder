@@ -8,6 +8,7 @@ use Furan\FormBuilder\Api\FieldType\ConsentTypeInterface;
 use Furan\FormBuilder\Api\FieldType\RelativeDateSourceInterface;
 use Furan\FormBuilder\Api\FieldTypeInterface;
 use Furan\FormBuilder\Model\FieldType\Pool;
+use Furan\FormBuilder\Model\FieldType\SuggestionMatcher;
 use Furan\FormBuilder\Model\Schema\SettingValues;
 
 class ConditionNormalizer
@@ -164,11 +165,12 @@ class ConditionNormalizer
         return [['action' => 'show']];
     }
 
-    /** Consent is neither required nor pre-filled by a condition. */
+    /** Consent is neither required nor pre-filled by a condition, and suggestions cannot be hidden. */
     // phpcs:ignore Magento2.Functions.StaticFunction -- a pure rule shared with the builder config
     public static function actionFits(ConditionActionInterface $action, FieldTypeInterface $type): bool
     {
-        return !($type instanceof ConsentTypeInterface && in_array($action->getCode(), self::CONSENT_REFUSED_ACTIONS, true));
+        return !($type instanceof ConsentTypeInterface && in_array($action->getCode(), self::CONSENT_REFUSED_ACTIONS, true))
+            && !(SuggestionMatcher::appliesTo($type) && $action->needsParam() === ConditionActionInterface::PARAM_OPTIONS);
     }
 
     /**
@@ -386,7 +388,9 @@ class ConditionNormalizer
         }
         $type = $target['type'] ?? null;
         if ($type instanceof FieldTypeInterface && !self::actionFits($action, $type)) {
-            $errors[] = (string)__('"%1": consent cannot be required or pre-filled by a condition.', $label);
+            $errors[] = SuggestionMatcher::appliesTo($type)
+                ? (string)__('"%1": options of a suggestion field cannot be hidden.', $label)
+                : (string)__('"%1": consent cannot be required or pre-filled by a condition.', $label);
             return null;
         }
         $param = $this->normalizeParam($action, $entry['param'] ?? null, $target, $label, $errors);
@@ -449,7 +453,7 @@ class ConditionNormalizer
         if ($type->isFile() || $type->isMultiValue()) {
             return false;
         }
-        if ($type->hasOptions()) {
+        if ($type->hasOptions() && !SuggestionMatcher::appliesTo($type)) {
             return in_array($value, $this->optionValues($field), true);
         }
         if ($type->normalizeValue($value, $field) !== $value) {

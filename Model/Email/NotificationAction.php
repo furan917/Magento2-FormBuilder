@@ -9,6 +9,7 @@ use Furan\FormBuilder\Api\Data\SubmissionInterface;
 use Furan\FormBuilder\Api\DeferrableActionInterface;
 use Furan\FormBuilder\Api\RetryableActionInterface;
 use Furan\FormBuilder\Model\Config;
+use Furan\FormBuilder\Model\Submission\StoreDisplayContext;
 use Furan\FormBuilder\Model\Submission\SubmissionStore;
 use Furan\FormBuilder\Model\FieldType\Pool;
 use Furan\FormBuilder\Model\Schema\SchemaFields;
@@ -32,7 +33,8 @@ class NotificationAction implements DeferrableActionInterface, RetryableActionIn
         private readonly EmailConditions $conditions,
         private readonly Pool $fieldTypes,
         private readonly LoggerInterface $logger,
-        private readonly SubmissionMailer $mailer
+        private readonly SubmissionMailer $mailer,
+        private readonly StoreDisplayContext $displayContexts
     ) {
     }
 
@@ -84,6 +86,8 @@ class NotificationAction implements DeferrableActionInterface, RetryableActionIn
         $subject = $subject !== '' ? $subject : (string)__('New submission: %1', $form->getTitle());
         $subject = trim((string)preg_replace('/[\r\n]+/', ' ', $subject));
 
+        // The store view's locale, like the template and subject.
+        $display = $this->displayContexts->forStore($storeId);
         $this->inlineTranslation->suspend();
         try {
             $builder = $this->transportBuilderFactory->create();
@@ -91,11 +95,11 @@ class NotificationAction implements DeferrableActionInterface, RetryableActionIn
                 ->setTemplateOptions(['area' => Area::AREA_FRONTEND, 'store' => $storeId])
                 ->setTemplateVars([
                     'form_title' => MessageRenderer::braces($form->getTitle()),
-                    'values_html' => $this->valuesTable->toHtml($submission->getPayload(), $form->getSchema()),
+                    'values_html' => $this->valuesTable->toHtml($submission->getPayload(), $form->getSchema(), $display),
                     'product_html' => $this->valuesTable->contextHtml($submission->getContext()),
                     'submission_id' => $submission->getId(),
                     'submission' => $this->submissionVars->toArray($submission),
-                    'values' => $this->valuesTable->toList($submission->getPayload(), $form->getSchema()),
+                    'values' => $this->valuesTable->toList($submission->getPayload(), $form->getSchema(), $display),
                     'subject' => MessageRenderer::braces($subject),
                 ])
                 ->setFromByScope($this->config->getSenderIdentity($storeId), $storeId);

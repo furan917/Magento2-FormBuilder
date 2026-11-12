@@ -5,7 +5,8 @@ namespace Furan\FormBuilder\Model\FieldType;
 
 use Furan\FormBuilder\Api\FieldType\AdminViewTypeInterface;
 use Furan\FormBuilder\Api\FieldType\StatsAwareTypeInterface;
-class Checkbox extends AbstractFieldType implements StatsAwareTypeInterface, AdminViewTypeInterface
+use Furan\FormBuilder\Api\FieldType\BuilderControlsInterface;
+class Checkbox extends AbstractFieldType implements StatsAwareTypeInterface, AdminViewTypeInterface, BuilderControlsInterface
 {
     public function getCode(): string
     {
@@ -24,7 +25,7 @@ class Checkbox extends AbstractFieldType implements StatsAwareTypeInterface, Adm
 
     public function getSettingsSpec(): array
     {
-        return ['checked_value' => ['type' => 'string', 'default' => 'yes']];
+        return ['checked_value' => ['type' => 'string', 'default' => 'yes', 'hint' => (string)__('Saved when on; conditions compare against it.')]];
     }
 
     public function validateValue(string|array $value, array $field, array $context): ?string
@@ -57,5 +58,15 @@ class Checkbox extends AbstractFieldType implements StatsAwareTypeInterface, Adm
     public function adminViewKind(array $field): ?string
     {
         return self::KIND_BOOLEAN;
+    }
+
+    public function builderControls(): array
+    {
+        return ['placeholder' => false, 'autocomplete' => false];
+    }
+
+    public function defaultInput(): ?string
+    {
+        return null;
     }
 }

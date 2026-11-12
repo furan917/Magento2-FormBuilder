@@ -9,7 +9,7 @@ $name = static fn (string $key): string => $base['name'] . '[' . $key . ']';
 $hintId = $part('hint');
 $sub = static fn (string $key, string $label) => '<label class="ffb-sublabel" for="'
     . $escaper->escapeHtmlAttr($part($key)) . '">' . $escaper->escapeHtml($label) . '</label>';
-$plain = ['class' => 'ffb-input'];
+$plain = ['class' => 'ffb-input', 'maxlength' => $lengthLimit];
 ?>
 <?= /* @noEscape */ $form->renderPartial($block, 'item/_open.phtml', ['group' => true]) ?>
     <div class="ffb-address">
@@ -34,7 +34,7 @@ $plain = ['class' => 'ffb-input'];
         </div>
         <div class="ffb-address-part ffb-address-region">
             <?= /* @noEscape */ $sub('region', (string)__('Region')) ?>
-            <select<?= /* @noEscape */ $attrs(['id' => $part('region-id'), 'name' => $name('region_id'), 'hidden' => true, 'data-ffb-region-list' => true] + $plain) ?>>
+            <select<?= /* @noEscape */ $attrs(['id' => $part('region-id'), 'name' => $name('region_id'), 'hidden' => true, 'data-ffb-region-list' => true, 'class' => 'ffb-input']) ?>>
                 <option value=""><?= $escaper->escapeHtml(__('Please select')) ?></option>
             </select>
             <input<?= /* @noEscape */ $attrs(['type' => 'text', 'id' => $part('region'), 'name' => $name('region'), 'autocomplete' => 'address-level1', 'data-ffb-region-text' => true] + $plain) ?>>

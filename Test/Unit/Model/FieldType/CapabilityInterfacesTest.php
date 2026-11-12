@@ -56,8 +56,10 @@ class CapabilityInterfacesTest extends TestCase
             new \Furan\FormBuilder\Model\Schema\SettingValues(new RedirectValidator($manager)),
             new PersonalData(FieldPools::builtIn()),
             new Sources(),
-            ConditionNormalizers::builtIn([], $types)
-        );
+            ConditionNormalizers::builtIn([], $types),
+            \Furan\FormBuilder\Test\Unit\Helper\FieldChecksFactory::create(),
+        new \Furan\FormBuilder\Model\Validation\PresetFit()
+);
     }
 
     private function schema(array $target): array
@@ -131,7 +133,7 @@ class CapabilityInterfacesTest extends TestCase
         );
 
         $config = $this->createStub(Config::class);
-        $public = (new PublicSchema(new RulePool(), $pool, $config))->build(['version' => 1, 'pages' => [[
+        $public = (new PublicSchema(new RulePool(), $pool, $config, new \Furan\FormBuilder\Model\Upload\ExtensionList()))->build(['version' => 1, 'pages' => [[
             'id' => 'p_aaaa', 'title' => 'T', 'condition' => null, 'items' => [
                 ['id' => 'f_aaaa', 'kind' => 'field', 'type' => StampType::CODE, 'name' => 'tag', 'label' => 'Tag', 'rules' => []],
             ],
@@ -149,10 +151,11 @@ class CapabilityInterfacesTest extends TestCase
         ]]]], ['a' => 'x', 'tag' => 'posted']);
         $this->assertSame('server', $state->values()['tag']);
 
-        $summary = new SummaryBuilder($pool, new \Furan\FormBuilder\Model\Submission\ValueFormatter($pool));
+        $summary = new SummaryBuilder($pool, new \Furan\FormBuilder\Model\Submission\ValueFormatter($pool, new \Furan\FormBuilder\Model\Submission\AnswerDate()), new \Furan\FormBuilder\Model\Submission\StoreDisplayContext($this->createStub(\Magento\Framework\App\Config\ScopeConfigInterface::class)));
         $this->assertSame('Ann', $summary->build(
             [['name' => 'tag', 'type' => StampType::CODE], ['name' => 'name', 'type' => 'text']],
-            ['tag' => 'secret', 'name' => 'Ann']
+            ['tag' => 'secret', 'name' => 'Ann'],
+            1
         ));
     }
 

@@ -15,9 +15,11 @@ use Furan\FormBuilder\Api\FieldType\StorefrontConfigInterface;
 use Furan\FormBuilder\Model\Directory\CountryName;
 use Furan\FormBuilder\Model\Submission\ValueFormatter;
 use Furan\FormBuilder\Model\Url\StorefrontUrls;
+use Furan\FormBuilder\Api\Data\DisplayContext;
 use Magento\Framework\Escaper;
 
 use Furan\FormBuilder\Model\Directory\AddressRules;
+use Furan\FormBuilder\Api\FieldType\BuilderControlsInterface;
 
 class Address extends AbstractFieldType implements
     ExportableTypeInterface,
@@ -28,10 +30,13 @@ class Address extends AbstractFieldType implements
     PersonalByDefaultInterface,
     ConditionSourceInterface,
     RoutableTypeInterface,
-    StatsAwareTypeInterface
+    StatsAwareTypeInterface,
+    BuilderControlsInterface
 {
     private const MAX_PART = 255;
     private const MAX_STREET_LINES = 4;
+    // CSV exports name countries in English whoever downloads them.
+    private const EXPORT_LOCALE = 'en';
 
     public function __construct(private readonly AddressRules $rules, private readonly StorefrontUrls $urls)
     {
@@ -142,6 +147,17 @@ class Address extends AbstractFieldType implements
         ]];
     }
 
+    /** Each typed part (street line, city, region, postcode) is kept up to this length. */
+    public function maxLength(): int
+    {
+        return self::MAX_PART;
+    }
+
+    public function defaultInput(): ?string
+    {
+        return null;
+    }
+
     private function clean(mixed $raw): string
     {
         if (!is_scalar($raw)) {
@@ -158,7 +174,7 @@ class Address extends AbstractFieldType implements
 
     public function csvCells(array $field, mixed $value): array
     {
-        return [$this->toText($field, $value)];
+        return [$this->toText($field, $value, DisplayContext::forAdmin(self::EXPORT_LOCALE))];
     }
 
     public function csvPlainColumns(array $field): array
@@ -166,7 +182,7 @@ class Address extends AbstractFieldType implements
         return [];
     }
 
-    public function toText(array $field, mixed $value): string
+    public function toText(array $field, mixed $value, DisplayContext $context): string
     {
         if (!is_array($value)) {
             return ValueFormatter::flatten($value);
@@ -177,20 +193,25 @@ class Address extends AbstractFieldType implements
         }
         array_push($parts, $value['city'] ?? '', $value['region'] ?? '', $value['postcode'] ?? '');
         $country = is_scalar($value['country_id'] ?? null) ? (string)$value['country_id'] : '';
-        $parts[] = $country !== '' ? CountryName::of($country) : '';
+        $parts[] = $country !== '' ? CountryName::of($country, $context->locale) : '';
         return implode(', ', array_filter(array_map(
             static fn($part): string => is_scalar($part) ? trim((string)$part) : '',
             $parts
         ), static fn(string $part): bool => $part !== ''));
     }
 
-    public function toHtml(array $field, mixed $value, Escaper $escaper): string
+    public function toHtml(array $field, mixed $value, Escaper $escaper, DisplayContext $context): string
     {
-        return $escaper->escapeHtml($this->toText($field, $value));
+        return $escaper->escapeHtml($this->toText($field, $value, $context));
     }
 
     public function statsKind(array $field): ?int
     {
         return self::KIND_ADDRESS;
+    }
+
+    public function builderControls(): array
+    {
+        return ['placeholder' => false, 'autocomplete' => false];
     }
 }

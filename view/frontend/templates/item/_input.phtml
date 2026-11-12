@@ -14,9 +14,8 @@ if ($suggest) {
     $extra += ['list' => $listId];
 }
 $minLength = $ruleValue('min_length');
-$maxLength = $ruleValue('max_length');
 if (in_array($inputType, ['text', 'email', 'tel', 'url'], true)) {
-    $extra += ['minlength' => $minLength === null ? null : (int)$minLength, 'maxlength' => $maxLength === null ? null : (int)$maxLength];
+    $extra += ['minlength' => $minLength === null ? null : (int)$minLength, 'maxlength' => $lengthLimit];
 }
 if ($inputType === 'number') {
     $extra += ['min' => $ruleValue('min'), 'max' => $ruleValue('max'), 'step' => $settings['step'] ?? 'any'];

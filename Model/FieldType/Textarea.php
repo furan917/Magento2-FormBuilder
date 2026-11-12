@@ -5,7 +5,8 @@ namespace Furan\FormBuilder\Model\FieldType;
 
 use Furan\FormBuilder\Api\FieldType\AdminViewTypeInterface;
 use Furan\FormBuilder\Api\FieldType\FreeTextTypeInterface;
-class Textarea extends AbstractFieldType implements FreeTextTypeInterface, AdminViewTypeInterface
+use Furan\FormBuilder\Api\FieldType\PresetGroupsInterface;
+class Textarea extends AbstractFieldType implements FreeTextTypeInterface, AdminViewTypeInterface, PresetGroupsInterface
 {
     public function getCode(): string
     {
@@ -41,5 +42,10 @@ class Textarea extends AbstractFieldType implements FreeTextTypeInterface, Admin
     public function adminViewKind(array $field): ?string
     {
         return self::KIND_MULTILINE;
+    }
+
+    public function presetGroups(): array
+    {
+        return ['content'];
     }
 }

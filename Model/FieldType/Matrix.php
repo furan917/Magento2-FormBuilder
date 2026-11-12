@@ -7,12 +7,13 @@ use Furan\FormBuilder\Api\FieldType\AdminViewTypeInterface;
 use Furan\FormBuilder\Api\FieldType\StatsAwareTypeInterface;
 use Furan\FormBuilder\Api\FieldType\ClientMessagesInterface;
 use Furan\FormBuilder\Api\FieldType\ConditionSourceInterface;
+use Furan\FormBuilder\Api\FieldType\BuilderControlsInterface;
 
 /**
  * Likert grid: options are the columns, settings.rows the rows. Posted as name[<row index>]=<column value>
  * and stored as "<row label>: <column label>" strings.
  */
-class Matrix extends AbstractFieldType implements ClientMessagesInterface, ConditionSourceInterface, StatsAwareTypeInterface, AdminViewTypeInterface
+class Matrix extends AbstractFieldType implements ClientMessagesInterface, ConditionSourceInterface, StatsAwareTypeInterface, AdminViewTypeInterface, BuilderControlsInterface
 {
     /** Stands in for a posted entry that names no valid row or column, so validateValue can reject it. */
     public const INVALID_ENTRY = "\0";
@@ -50,7 +51,15 @@ class Matrix extends AbstractFieldType implements ClientMessagesInterface, Condi
     public function getSettingsSpec(): array
     {
         return [
-            'rows' => ['type' => 'list', 'translatable' => true, 'default' => ['Row 1', 'Row 2'], 'min_items' => 1, 'max_items' => 20, 'multiline' => true],
+            'rows' => [
+                'type' => 'list',
+                'translatable' => true,
+                'default' => ['Row 1', 'Row 2'],
+                'min_items' => 1,
+                'max_items' => 20,
+                'multiline' => true,
+                'hint' => (string)__('One row per line; options are the columns.'),
+            ],
             'require_all' => ['type' => 'bool', 'default' => true],
         ];
     }
@@ -143,5 +152,21 @@ class Matrix extends AbstractFieldType implements ClientMessagesInterface, Condi
     public function adminViewKind(array $field): ?string
     {
         return self::KIND_PAIRS;
+    }
+
+    public function builderControls(): array
+    {
+        return [
+            'placeholder' => false,
+            'autocomplete' => false,
+            'option_description' => false,
+            'options_title' => (string)__('Columns'),
+            'option_add_label' => (string)__('Add column'),
+        ];
+    }
+
+    public function defaultInput(): ?string
+    {
+        return null;
     }
 }

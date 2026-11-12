@@ -6,7 +6,7 @@ namespace Furan\FormBuilder\Api;
 /**
  * @phpstan-type FieldDefinition array<string, mixed>
  * @phpstan-type AnswerValue string|array<int|string, mixed>
- * @phpstan-type SettingSpec array{type: string, default: mixed, label?: string, translatable?: bool, min?: int|float, max?: int|float, values?: string[], value_labels?: array<string, string>, max_length?: int, format?: string, min_items?: int, max_items?: int, multiline?: bool}
+ * @phpstan-type SettingSpec array{type: string, default: mixed, label?: string, translatable?: bool, min?: int|float, max?: int|float, values?: string[], value_labels?: array<string, string>, max_length?: int, format?: string, min_items?: int, max_items?: int, multiline?: bool, hint?: string, visible_when?: array<string, list<string>>, not_above?: string, exclusive_min?: int|float, no_limit?: int|float}
  * @api
  */
 interface FieldTypeInterface
@@ -27,7 +27,12 @@ interface FieldTypeInterface
 
     /**
      * String settings may add `max_length` and `format` ('url'; 'mask' = an input mask: a preset code or a custom
-     * pattern of 9 a *, which also formats the value server-side); list settings `min_items`, `max_items` and `multiline`.
+     * pattern of 9 a *, which also formats the value server-side; 'date' and 'email_field' pick the builder input);
+     * list settings `min_items`, `max_items` and `multiline`. 'date' values must be real dates and 'step' is "any" or a
+     * number above 0. `not_above` names a sibling setting this one may not exceed (empty values, and a sibling at its
+     * `no_limit` value, are not compared); `exclusive_min` is a number the value must be greater than. An int setting with `values` is offered as a dropdown.
+     * `hint` is a translated line under the control; `visible_when` maps a sibling setting, or `@prefill` for the
+     * field's own key, to the values that show this one.
      * `label` is the already translated builder caption (the humanised key is used without it). `translatable` marks
      * a string or list setting that store views may translate; it is then listed in the form's translation texts.
      * An enum setting may add `value_labels` (value => translated caption) for the builder dropdown; a value without

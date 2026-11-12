@@ -6,7 +6,8 @@ namespace Furan\FormBuilder\Model\FieldType;
 use Furan\FormBuilder\Api\FieldType\AdminViewTypeInterface;
 use Furan\FormBuilder\Api\FieldType\RenderHintsInterface;
 use Furan\FormBuilder\Api\FieldType\StatsAwareTypeInterface;
-class Scale extends AbstractFieldType implements StatsAwareTypeInterface, AdminViewTypeInterface, RenderHintsInterface
+use Furan\FormBuilder\Api\FieldType\BuilderControlsInterface;
+class Scale extends AbstractFieldType implements StatsAwareTypeInterface, AdminViewTypeInterface, RenderHintsInterface, BuilderControlsInterface
 {
     public const DEFAULT_MIN = 1;
     public const DEFAULT_MAX = 5;
@@ -29,7 +30,7 @@ class Scale extends AbstractFieldType implements StatsAwareTypeInterface, AdminV
     public function getSettingsSpec(): array
     {
         return [
-            'min' => ['type' => 'int', 'default' => self::DEFAULT_MIN, 'min' => 0, 'max' => 1],
+            'min' => ['type' => 'int', 'default' => self::DEFAULT_MIN, 'min' => 0, 'max' => 1, 'values' => ['0', '1']],
             'max' => ['type' => 'int', 'default' => self::DEFAULT_MAX, 'min' => 2, 'max' => 10],
             'low_label' => ['type' => 'string', 'translatable' => true, 'default' => '', 'max_length' => 60],
             'high_label' => ['type' => 'string', 'translatable' => true, 'default' => '', 'max_length' => 60],
@@ -78,5 +79,15 @@ class Scale extends AbstractFieldType implements StatsAwareTypeInterface, AdminV
     public function renderHints(array $field, int $storeId): array
     {
         return ['layout' => 'inline'];
+    }
+
+    public function builderControls(): array
+    {
+        return ['placeholder' => false, 'autocomplete' => false];
+    }
+
+    public function defaultInput(): ?string
+    {
+        return 'number';
     }
 }

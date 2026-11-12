@@ -6,8 +6,9 @@ namespace Furan\FormBuilder\Model\FieldType;
 use Furan\FormBuilder\Api\FieldType\EmailAddressTypeInterface;
 use Furan\FormBuilder\Api\FieldType\PersonalByDefaultInterface;
 use Furan\FormBuilder\Model\Validation\Patterns;
+use Furan\FormBuilder\Api\FieldType\PresetGroupsInterface;
 
-class Email extends AbstractPatternType implements PersonalByDefaultInterface, EmailAddressTypeInterface
+class Email extends AbstractPatternType implements PersonalByDefaultInterface, EmailAddressTypeInterface, PresetGroupsInterface
 {
     public function getCode(): string
     {
@@ -39,4 +40,10 @@ class Email extends AbstractPatternType implements PersonalByDefaultInterface, E
     protected function getPattern(): string
     {
         return Patterns::EMAIL;
-    }}
+    }
+
+    public function presetGroups(): array
+    {
+        return [];
+    }
+}

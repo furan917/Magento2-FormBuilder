@@ -35,7 +35,14 @@ class FreeTextReaderTest extends TestCase
         $resource = $this->createStub(ResourceConnection::class);
         $resource->method('getConnection')->willReturn($connection);
         $resource->method('getTableName')->willReturnArgument(0);
-        return new FreeTextReader($resource, new Json(), new PersonalData($pool), $this->createStub(\Furan\FormBuilder\Model\ResourceModel\Submission\KeysetIndex::class), $pool);
+        return new FreeTextReader(
+            $resource,
+            new Json(),
+            new PersonalData($pool),
+            $this->createStub(\Furan\FormBuilder\Model\ResourceModel\Submission\KeysetIndex::class),
+            $pool,
+            new \Furan\FormBuilder\Model\Submission\ValueFormatter($pool, new \Furan\FormBuilder\Model\Submission\AnswerDate())
+        );
     }
 
     private function row(int $id, array $values): array
@@ -45,6 +52,17 @@ class FreeTextReaderTest extends TestCase
             $payload[] = ['name' => $name, 'label' => $name, 'type' => 'text', 'value' => $value];
         }
         return ['submission_id' => (string)$id, 'payload_json' => json_encode($payload)];
+    }
+
+    public function testItShowsTheOptionLabelForASuggestAnswerStoredAsAnOptionValue(): void
+    {
+        $fields = [['name' => 'colour', 'type' => 'suggest', 'options' => [['value' => 'red', 'label' => 'Red shade']]]];
+        $this->rows = [$this->row(9, ['colour' => 'red']), $this->row(8, ['colour' => 'Teal'])];
+
+        $result = $this->reader()->read(5, $fields);
+
+        $this->assertSame([['id' => 9, 'text' => 'Red shade'], ['id' => 8, 'text' => 'Teal']], $result['colour']['answers']);
+        $this->assertCount(1, $this->calls);
     }
 
     public function testItListsTheLatestFreeTextAnswersScanningABoundedNumberOfSubmissionsPerPage(): void

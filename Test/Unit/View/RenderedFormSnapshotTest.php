@@ -104,7 +104,7 @@ class RenderedFormSnapshotTest extends TestCase
             $types[strtolower($name)] = new $class();
         }
         $fieldTypes = new Pool($types);
-        $publicSchema = new PublicSchema(new RulePool(['min_length' => new MinLength()]), $fieldTypes, $config);
+        $publicSchema = new PublicSchema(new RulePool(['min_length' => new MinLength()]), $fieldTypes, $config, new \Furan\FormBuilder\Model\Upload\ExtensionList());
 
         $block = new class (
             $context,
@@ -124,7 +124,9 @@ class RenderedFormSnapshotTest extends TestCase
             new MiniMarkdown(),
             new \Furan\FormBuilder\Model\Form\ScheduleGate($this->createStub(\Magento\Framework\Stdlib\DateTime\DateTime::class)),
             $this->createStub(\Furan\FormBuilder\Model\Directory\CountryOptions::class),
-            new \Magento\Framework\Serialize\Serializer\JsonHexTag()
+            new \Magento\Framework\Serialize\Serializer\JsonHexTag(),
+            $this->createStub(\Furan\FormBuilder\Model\Theme\HyvaDetector::class),
+            new \Furan\FormBuilder\Block\ItemContext(new \Furan\FormBuilder\Model\Upload\ExtensionList())
         ) extends TestableForm {
             public function shouldRenderAssets(): bool
             {

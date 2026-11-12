@@ -224,7 +224,11 @@ class AccountStylesTest extends TestCase
         $form = self::declarations($ffb, '.ffb');
         $roots = self::declarations($account, '.ffb-account, .ffb-thread');
 
-        $names = array_filter(array_keys($form), static fn (string $n): bool => str_starts_with($n, '--ffb-'));
+        // The --ffb-fs-* type scale sizes form headings only; account pages keep their own title sizes.
+        $names = array_filter(
+            array_keys($form),
+            static fn (string $n): bool => str_starts_with($n, '--ffb-') && !str_starts_with($n, '--ffb-fs-')
+        );
         $this->assertNotEmpty($names);
         foreach ($names as $name) {
             $this->assertSame($form[$name], $roots[$name] ?? null, $name);
@@ -247,10 +251,10 @@ class AccountStylesTest extends TestCase
     {
         $css = (string)file_get_contents(self::ROOT . '/web/css/ffb.css');
         $this->assertStringContainsString(':not(.ffb-type-newsletter) > .ffb-label', $css);
-        foreach (['.ffb-skin .ffb-type-newsletter {', '.ffb-skin .ffb-type-newsletter > .ffb-label {', '.ffb-skin .ffb-type-newsletter > :not(.ffb-choice):not(.ffb-label) {'] as $selector) {
+        foreach (['.ffb .ffb-type-newsletter {', '.ffb .ffb-type-newsletter > .ffb-label {', '.ffb .ffb-type-newsletter > :not(.ffb-choice):not(.ffb-label) {'] as $selector) {
             $this->assertStringContainsString($selector, $css);
         }
-        $this->assertMatchesRegularExpression('/\.ffb-skin \.ffb-type-toggle,\s*\.ffb-skin \.ffb-type-newsletter \{/', $css);
+        $this->assertMatchesRegularExpression('/\.ffb \.ffb-type-toggle,\s*\.ffb \.ffb-type-newsletter \{/', $css);
     }
 
     public function testItStylesDeleteAllAsADestructiveAction(): void

@@ -42,6 +42,21 @@ class SubmissionGridTest extends TestCase
         return $indexes;
     }
 
+    public function testItListsColumnsWithStatusBesideTheSummaryAndActionsLast(): void
+    {
+        $names = array_map(
+            static fn (\SimpleXMLElement $column): string => (string)$column['name'],
+            $this->listing()->xpath('//columns/*')
+        );
+
+        $this->assertSame(
+            ['ids', 'submission_id', 'reference', 'form_id', 'summary', 'status', 'store_id', 'customer_id', 'is_read', 'created_at', 'actions'],
+            $names
+        );
+        $store = $this->listing()->xpath('//columns/column[@name="store_id"]')[0];
+        $this->assertSame(\Furan\FormBuilder\Ui\Component\Listing\Column\StoreView::class, (string)$store['class']);
+    }
+
     public function testItOffersOnlyIndexBackedFiltersAndSorts(): void
     {
         $this->assertCount(0, $this->listing()->xpath('//columns/column[@name="summary"]/settings/filter'));

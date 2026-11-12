@@ -4,9 +4,10 @@ declare(strict_types=1);
 namespace Furan\FormBuilder\Model\FieldType;
 
 use Furan\FormBuilder\Api\FieldType\AdminViewTypeInterface;
+use Furan\FormBuilder\Api\FieldType\BuilderControlsInterface;
 use Furan\FormBuilder\Model\Validation\Patterns;
 
-class Color extends AbstractPatternType implements AdminViewTypeInterface
+class Color extends AbstractPatternType implements AdminViewTypeInterface, BuilderControlsInterface
 {
     public function getCode(): string
     {
@@ -38,5 +39,15 @@ class Color extends AbstractPatternType implements AdminViewTypeInterface
     public function adminViewKind(array $field): ?string
     {
         return self::KIND_COLOR;
+    }
+
+    public function builderControls(): array
+    {
+        return ['placeholder' => false, 'autocomplete' => false];
+    }
+
+    public function defaultInput(): ?string
+    {
+        return 'color';
     }
 }

@@ -8,6 +8,7 @@ use Furan\FormBuilder\Model\Source\SubmissionStatus;
 use Furan\FormBuilder\Model\Submission\BatchDeleter;
 use Furan\FormBuilder\Model\Submission\EmailHasher;
 use Furan\FormBuilder\Model\Submission\Reference;
+use Furan\FormBuilder\Model\Submission\StoreDisplayContext;
 use Furan\FormBuilder\Model\Submission\ValueFormatter;
 use Furan\FormBuilder\Model\Upload\FileStorage;
 use Magento\Framework\App\Filesystem\DirectoryList;
@@ -31,7 +32,7 @@ class Exporter
         'Submission ID', 'Reference', 'Form', 'Store ID', 'Created At', 'Status', 'Answers', 'Context', 'Messages',
     ];
 
-    public function __construct(private readonly ResourceConnection $resource, private readonly EmailHasher $emailHasher, private readonly Filesystem $filesystem, private readonly FileStorage $fileStorage, private readonly ValueFormatter $formatter, private readonly AccountLookup $accounts, private readonly Pool $fieldTypes, private readonly SubmissionStatus $statuses)
+    public function __construct(private readonly ResourceConnection $resource, private readonly EmailHasher $emailHasher, private readonly Filesystem $filesystem, private readonly FileStorage $fileStorage, private readonly ValueFormatter $formatter, private readonly AccountLookup $accounts, private readonly Pool $fieldTypes, private readonly SubmissionStatus $statuses, private readonly StoreDisplayContext $displayContexts)
     {
     }
 
@@ -210,8 +211,10 @@ class Exporter
     private function csvRow(array $item): array
     {
         $answers = [];
+        // Readable text for the customer; data.json keeps the stored values.
+        $context = $this->displayContexts->forStore($item['store_id']);
         foreach ($item['answers'] as $answer) {
-            $answers[] = $answer['label'] . ': ' . $this->formatter->toText($answer, $answer['value']);
+            $answers[] = $answer['label'] . ': ' . $this->formatter->toText($answer, $answer['value'], $context);
         }
         $messages = array_map(
             static fn (array $m): string => $m['created_at'] . ' ' . $m['author'] . ': ' . $m['body'],

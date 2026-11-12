@@ -3,10 +3,12 @@ declare(strict_types=1);
 
 namespace Furan\FormBuilder\Model\FieldType;
 
+use Furan\FormBuilder\Api\FieldType\DefaultValueInterface;
+use Furan\FormBuilder\Api\FieldType\MaxLengthInterface;
 use Furan\FormBuilder\Api\FieldTypeInterface;
 use Furan\FormBuilder\Model\Validation\Mask;
 
-abstract class AbstractFieldType implements FieldTypeInterface
+abstract class AbstractFieldType implements FieldTypeInterface, MaxLengthInterface, DefaultValueInterface
 {
     protected const MAX_LENGTH = 1000;
 
@@ -59,7 +61,7 @@ abstract class AbstractFieldType implements FieldTypeInterface
         if (!$this->keepsNewlines()) {
             $value = str_replace("\n", ' ', $value);
         }
-        return mb_substr(trim($this->applyMask(trim($this->transform($value)), $field)), 0, $this->getMaxLength());
+        return mb_substr(trim($this->applyMask(trim($this->transform($value)), $field)), 0, $this->maxLength());
     }
 
     public function validateValue(string|array $value, array $field, array $context): ?string
@@ -106,9 +108,24 @@ abstract class AbstractFieldType implements FieldTypeInterface
         return false;
     }
 
-    protected function getMaxLength(): int
+    public function maxLength(): int
     {
         return static::MAX_LENGTH;
+    }
+
+    public function defaultInput(): ?string
+    {
+        return self::INPUT_TEXT;
+    }
+
+    public function defaultChoices(): ?array
+    {
+        return null;
+    }
+
+    public function isValidDefault(string $default, array $field): bool
+    {
+        return $this->validateValue($default, $field, ['values' => [], 'store_id' => 0]) === null;
     }
 
     protected function transform(string $value): string

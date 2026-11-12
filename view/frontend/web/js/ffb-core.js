@@ -198,6 +198,10 @@
     if (field.type === 'matrix') {
       return normalizeMatrix(field, value);
     }
+    // Mirrors Suggest::normalizeValue: the public schema flags fields whose options are suggestions.
+    if (field.suggestions === true && isString(value)) {
+      return suggestionValue(field, value);
+    }
     // Mirrors ItemList::normalizeValue: any non-string item makes the whole answer invalid.
     if (field.type === 'list') {
       var items = [].concat(value);
@@ -210,6 +214,21 @@
       return value.map(function (v) { return normalizeString(field, v); });
     }
     return isString(value) ? normalizeString(field, value) : value;
+  };
+
+  // Mirrors the server: typed text equal (any case) to an option label becomes its value; failing that, to a value.
+  var suggestionValue = function (field, text) {
+    if (!isString(text)) {
+      return text;
+    }
+    var clean = normalizeString(field, text);
+    var key = clean.toLowerCase();
+    var options = (field.options || []).filter(function (o) { return o && typeof o === 'object'; });
+    var same = function (part) {
+      return function (o) { return phpTrim(String(o[part])).toLowerCase() === key; };
+    };
+    var hit = key === '' ? null : (options.filter(same('label'))[0] || options.filter(same('value'))[0]);
+    return hit ? String(hit.value) : clean;
   };
 
   var normalizeValues = function (fields, values) {
@@ -669,9 +688,6 @@
     var settings = field.settings || {};
     var minDays = Math.max(0, Math.min(3660, toInt(settings.min_days)));
     var maxDays = Math.max(0, Math.min(3660, toInt(settings.max_days)));
-    if (minDays > 0 && maxDays > 0 && minDays > maxDays) {
-      maxDays = 0;
-    }
     var minDate = cleanBound(settings.min_date);
     var maxDate = cleanBound(settings.max_date);
     var say = function (key, arg) {
@@ -1121,6 +1137,7 @@
     isEmpty: isEmpty,
     normalizeValue: normalizeValue,
     normalizeValues: normalizeValues,
+    suggestionValue: suggestionValue,
     evaluateCondition: evaluateCondition,
     computeVisibility: computeVisibility,
     computeState: computeState,

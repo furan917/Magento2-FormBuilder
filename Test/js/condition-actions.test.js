@@ -76,7 +76,8 @@ test('it skips to the target page on next', async () => {
   t.type('a', 'skip');
   t.click('[data-ffb-next]');
   assert.deepEqual(t.pageShown(), ['p3']);
-  assert.match(t.q('[data-ffb-status]').textContent, /Step 2 of 2/);
+  assert.match(t.q('[data-ffb-step-status]').textContent, /Step 2 of 2/);
+  assert.equal(t.q('[data-ffb-status]').textContent, '');
 });
 
 test('it returns to the source page when going back from a skip target', async () => {

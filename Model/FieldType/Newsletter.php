@@ -27,7 +27,13 @@ class Newsletter extends Checkbox implements AvailabilityInterface, ConsentTypeI
 
     public function getSettingsSpec(): array
     {
-        return ['email_field' => ['type' => 'string', 'default' => '', 'max_length' => 64]];
+        return ['email_field' => [
+            'type' => 'string',
+            'format' => 'email_field',
+            'default' => '',
+            'max_length' => 64,
+            'hint' => (string)__("Empty = the form's customer email field."),
+        ]];
     }
 
     public function getBuilderDefaults(): array

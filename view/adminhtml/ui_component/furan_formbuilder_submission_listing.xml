@@ -137,7 +137,15 @@
                 <sortable>false</sortable>
             </settings>
         </column>
-        <column name="store_id" class="Magento\Store\Ui\Component\Listing\Column\Store">
+        <column name="status" component="Magento_Ui/js/grid/columns/select">
+            <settings>
+                <options class="Furan\FormBuilder\Model\Source\SubmissionStatus"/>
+                <filter>select</filter>
+                <dataType>select</dataType>
+                <label translate="true">Status</label>
+            </settings>
+        </column>
+        <column name="store_id" class="Furan\FormBuilder\Ui\Component\Listing\Column\StoreView">
             <settings>
                 <label translate="true">Store View</label>
                 <bodyTmpl>ui/grid/cells/html</bodyTmpl>
@@ -166,14 +174,6 @@
                 <dataType>select</dataType>
                 <label translate="true">Read</label>
                 <sortable>false</sortable>
-            </settings>
-        </column>
-        <column name="status" component="Magento_Ui/js/grid/columns/select">
-            <settings>
-                <options class="Furan\FormBuilder\Model\Source\SubmissionStatus"/>
-                <filter>select</filter>
-                <dataType>select</dataType>
-                <label translate="true">Status</label>
             </settings>
         </column>
         <column name="created_at" class="Magento\Ui\Component\Listing\Columns\Date" component="Magento_Ui/js/grid/columns/date">

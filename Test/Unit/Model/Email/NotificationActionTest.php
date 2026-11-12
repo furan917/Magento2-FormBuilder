@@ -17,6 +17,8 @@ use Furan\FormBuilder\Model\Submission\ValueFormatter;
 use Furan\FormBuilder\Model\Email\MailNotSentException;
 use Furan\FormBuilder\Model\Email\SubmissionMailer;
 use Furan\FormBuilder\Model\Thread\ThreadHeaders;
+use Furan\FormBuilder\Model\Submission\StoreDisplayContext;
+use Magento\Framework\App\Config\ScopeConfigInterface;
 use Magento\Framework\Exception\MailException;
 use Magento\Framework\Phrase;
 use Furan\FormBuilder\Test\Unit\Helper\EmailConditionsFactory;
@@ -78,13 +80,23 @@ class NotificationActionTest extends TestCase
             $this->inlineState,
             new SubmissionStore($storeManager),
             $config,
-            new ValuesTable(EscaperFactory::create(), new AnswerView(new ValueFormatter(FieldPools::builtIn()), FieldPools::builtIn())),
+            new ValuesTable(EscaperFactory::create(), new AnswerView(new ValueFormatter(FieldPools::builtIn(), new \Furan\FormBuilder\Model\Submission\AnswerDate()), FieldPools::builtIn())),
             new SubmissionVars(new SubmissionStatus()),
             EmailConditionsFactory::create(),
             $pool ?? FieldPools::builtIn(),
             $this->createStub(LoggerInterface::class),
-            new SubmissionMailer($this->threadHeaders ?? $this->createStub(ThreadHeaders::class))
+            new SubmissionMailer($this->threadHeaders ?? $this->createStub(ThreadHeaders::class)),
+            new StoreDisplayContext($this->locales())
         );
+    }
+
+    private function locales(): ScopeConfigInterface&Stub
+    {
+        $config = $this->createStub(ScopeConfigInterface::class);
+        $config->method('getValue')->willReturnCallback(
+            static fn (string $path, string $scope, mixed $store): string => [6 => 'fr_FR', 4 => 'en_GB'][$store] ?? ''
+        );
+        return $config;
     }
 
     private function form(array $settings, ?array $schema = null): FormInterface
@@ -169,6 +181,29 @@ class NotificationActionTest extends TestCase
         );
 
         $this->assertSame([['chosen_notification_6']], $this->calls($calls, 'setTemplateIdentifier'));
+    }
+
+    public function testItWritesDatesAndCountriesInTheSubmissionsStoreViewLocale(): void
+    {
+        $calls = [];
+        $this->factory->method('create')->willReturn($this->builder($calls));
+        $submission = $this->createStub(SubmissionInterface::class);
+        $submission->method('getStoreId')->willReturn(6);
+        $submission->method('getPayload')->willReturn([
+            ['name' => 'when', 'label' => 'When', 'type' => 'date', 'value' => '2026-10-02'],
+            ['name' => 'from', 'label' => 'From', 'type' => 'country', 'value' => 'GB'],
+        ]);
+
+        $this->action()->execute(
+            $this->form(['notify_enabled' => true, 'notify_recipients' => ['a@example.com']]),
+            $submission,
+            [],
+            new \Furan\FormBuilder\Api\ActionContext()
+        );
+
+        $vars = $this->calls($calls, 'setTemplateVars')[0][0];
+        $this->assertSame([['label' => 'When', 'value' => '2 oct. 2026'], ['label' => 'From', 'value' => 'Royaume-Uni']], $vars['values']);
+        $this->assertStringContainsString('Royaume-Uni', $vars['values_html']);
     }
 
     public function testItSendsAsTheFormsStoreViewWhenTheSubmissionsStoreViewWasDeleted(): void

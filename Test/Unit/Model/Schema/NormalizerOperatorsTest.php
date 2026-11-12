@@ -36,8 +36,10 @@ class NormalizerOperatorsTest extends TestCase
             new \Furan\FormBuilder\Model\Schema\SettingValues(new RedirectValidator($manager)),
             new PersonalData(FieldPools::builtIn()),
             new Sources(),
-            \Furan\FormBuilder\Test\Unit\Helper\ConditionNormalizers::builtIn($operators)
-        );
+            \Furan\FormBuilder\Test\Unit\Helper\ConditionNormalizers::builtIn($operators),
+            \Furan\FormBuilder\Test\Unit\Helper\FieldChecksFactory::create(),
+        new \Furan\FormBuilder\Model\Validation\PresetFit()
+);
     }
 
     private function schema(string $operator, string $sourceType = 'text'): array

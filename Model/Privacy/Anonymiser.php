@@ -118,7 +118,11 @@ class Anonymiser
             $this->table('furan_formbuilder_submission'),
             [
                 'payload_json' => $this->json->serialize($new),
-                'summary' => $this->summaryBuilder->build($fields, array_column($new, 'value', 'name')),
+                'summary' => $this->summaryBuilder->build(
+                    $fields,
+                    array_column($new, 'value', 'name'),
+                    (int)($row['store_id'] ?? 0)
+                ),
                 'remote_ip' => null,
                 'email_hash' => null,
                 'email_hash_version' => null,

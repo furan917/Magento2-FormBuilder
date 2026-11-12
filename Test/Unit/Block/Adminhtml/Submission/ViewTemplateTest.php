@@ -215,17 +215,23 @@ class ViewTemplateTest extends TestCase
         $block->method('getPayload')->willReturn($payload);
         $block->method('getFormTitle')->willReturn($formTitle);
         $pool = FieldPools::adminView($this->extraTypes);
-        $answers = new AnswerView(new ValueFormatter($pool), $pool);
+        $answers = new AnswerView(new ValueFormatter($pool, new \Furan\FormBuilder\Model\Submission\AnswerDate()), $pool);
         $block->method('getAnswerGroups')->willReturn([[
             'title' => '<em>Page</em>',
             'removed' => false,
             'sections' => [['title' => '<s>Sec</s>', 'entries' => array_map(static fn (array $e) => $e + ['field' => null], $payload)]],
         ]]);
-        $block->method('getDisplayValues')->willReturnCallback($answers->values(...));
+        $block->method('getDisplayValues')->willReturnCallback(static fn (array $entry): array => $answers->values($entry, \Furan\FormBuilder\Api\Data\DisplayContext::forAdmin('en_GB')));
         $block->method('getDisplayKind')->willReturnCallback($answers->kind(...));
-        $block->method('getDisplayHtml')->willReturnCallback($answers->html(...));
-        $block->method('isAnswered')->willReturnCallback($answers->isAnswered(...));
+        $block->method('getDisplayHtml')->willReturnCallback(static fn (array $entry, $escaper): ?string => $answers->html($entry, $escaper, \Furan\FormBuilder\Api\Data\DisplayContext::forAdmin('en_GB')));
+        $block->method('isAnswered')->willReturnCallback(static fn (array $entry): bool => $answers->isAnswered($entry, \Furan\FormBuilder\Api\Data\DisplayContext::forAdmin('en_GB')));
         $block->method('isFile')->willReturnCallback($answers->isFile(...));
+        $block->method('isHidden')->willReturnCallback($answers->isServerValue(...));
+        $block->method('isBrowserValue')->willReturnCallback($answers->isBrowserValue(...));
+        $dates = new \Furan\FormBuilder\Model\Submission\AnswerDate();
+        $block->method('getDisplayDate')->willReturnCallback(
+            static fn (array $entry): ?string => $dates->text($answers->kind($entry), $entry['value'] ?? null, 'en_GB')
+        );
         $block->method('getSubmittedAt')->willReturn('1 Jan 2026, 10:00:00');
         $block->method('getStoreName')->willReturn('Default Store View');
         $block->method('formatFileSize')->willReturn('2 KB');
@@ -287,7 +293,10 @@ class ViewTemplateTest extends TestCase
             'scale without stored bounds' => [['type' => 'scale', 'value' => '4', 'field' => ['settings' => []]],
                 '<span class="ffb-sub-score">4</span><span class="ffb-sub-muted">on a 1 to 5 scale</span>'],
             'checkbox yes' => [['type' => 'checkbox', 'value' => 'yes'], '<span class="ffb-sub-yes">Yes</span>'],
-            'toggle no' => [['type' => 'toggle', 'value' => ''], '<span class="ffb-sub-muted">No</span>'],
+            'toggle no' => [['type' => 'toggle', 'value' => ''], '<span class="ffb-sub-no">No</span>'],
+            'checkbox no' => [['type' => 'checkbox', 'value' => ''], '<span class="ffb-sub-no">No</span>'],
+            'newsletter no' => [['type' => 'newsletter', 'value' => ''], '<span class="ffb-sub-no">No</span>'],
+            'toggle yes' => [['type' => 'toggle', 'value' => 'yes'], '<span class="ffb-sub-yes">Yes</span>'],
             'consent yes' => [['type' => 'consent', 'value' => 'yes'], '<span class="ffb-sub-yes">Yes</span>'],
             'newsletter yes' => [['type' => 'newsletter', 'value' => 'yes'], '<span class="ffb-sub-yes">Yes</span>'],
             'color' => [['type' => 'color', 'value' => '#aabbcc'],
@@ -329,5 +338,83 @@ class ViewTemplateTest extends TestCase
     private function squash(string $html): string
     {
         return trim((string)preg_replace('/>\s+</', '><', (string)preg_replace('/\s+/', ' ', $html)));
+    }
+
+    /** @return array<string, array{0: array, 1: string}> */
+    public static function dateCases(): array
+    {
+        return [
+            'date' => [['type' => 'date', 'value' => '2026-10-02'], '2 Oct 2026'],
+            'datetime' => [['type' => 'datetime', 'value' => '2026-10-05T09:15'], '5 Oct 2026, 09:15'],
+            'month' => [['type' => 'month', 'value' => '2026-09'], 'September 2026'],
+            'time' => [['type' => 'time', 'value' => '09:15'], '09:15'],
+            'date range' => [['type' => 'date_range', 'value' => ['start' => '2026-12-20', 'end' => '2026-12-28']], "20 Dec 2026 \u{2013} 28 Dec 2026"],
+        ];
+    }
+
+    #[DataProvider('dateCases')]
+    public function testItShowsDateAnswersInTheAdminLocale(array $entry, string $expected): void
+    {
+        $html = $this->render([['name' => 'x', 'label' => 'X'] + $entry], 'Form', null);
+
+        $this->assertStringContainsString('<dd> ' . $expected . ' </dd>', $this->squash($html));
+        $this->assertStringContainsString('1 of 1 answered', $html);
+    }
+
+    public function testItEscapesAStoredDateThatIsNotAValidDate(): void
+    {
+        $html = $this->render([['name' => 'x', 'label' => 'X', 'type' => 'date', 'value' => '<b>2026</b>']], 'Form', null);
+
+        $this->assertStringContainsString('&lt;b&gt;2026&lt;/b&gt;', $html);
+        $this->assertStringNotContainsString('<b>', $html);
+    }
+
+    public function testItTagsHiddenAnswersAndLeavesThemOutOfTheAnsweredCount(): void
+    {
+        $hidden = static fn (string $name, array $settings, string $value): array => [
+            'name' => $name, 'label' => 'H ' . $name, 'type' => 'hidden', 'value' => $value,
+            'field' => ['type' => 'hidden', 'settings' => $settings],
+        ];
+        $html = $this->squash($this->render([
+            ['name' => 'p', 'label' => 'Phone', 'type' => 'tel', 'value' => '1'],
+            ['name' => 'e', 'label' => 'Email', 'type' => 'email', 'value' => ''],
+            $hidden('src', ['source' => 'query', 'query_param' => 'utm'], '<i>ad</i>'),
+            $hidden('fixed', ['source' => 'static'], 'b2b'),
+        ], 'Form', null));
+
+        $this->assertStringContainsString('1 of 2 answered', $html);
+        $this->assertSame(2, substr_count($html, '<span class="ffb-sub-tag">Hidden</span>'));
+        $this->assertSame(1, substr_count($html, "From the visitor&#039;s browser"));
+        $this->assertStringContainsString('&lt;i&gt;ad&lt;/i&gt;', $html);
+        $this->assertStringNotContainsString('<i>', $html);
+    }
+
+    public function testItCountsOnlyTickedBoxesAsAnswered(): void
+    {
+        $html = $this->render([
+            ['name' => 'a', 'label' => 'A', 'type' => 'checkbox', 'value' => ''],
+            ['name' => 'b', 'label' => 'B', 'type' => 'toggle', 'value' => 'yes'],
+            ['name' => 'c', 'label' => 'C', 'type' => 'newsletter', 'value' => ''],
+        ], 'Form', null);
+
+        $this->assertStringContainsString('1 of 3 answered', $html);
+        $this->assertSame(2, substr_count($html, 'ffb-sub-row is-empty'));
+        $this->assertStringNotContainsString('Not answered', $html);
+    }
+
+    public function testItShowsAnUnchosenColourAsNotAnswered(): void
+    {
+        $html = $this->render([['name' => 'c', 'label' => 'Colour', 'type' => 'color', 'value' => '']], 'Form', null);
+
+        $this->assertStringContainsString('Not answered', $html);
+        $this->assertStringNotContainsString('ffb-sub-swatch', $html);
+        $this->assertStringNotContainsString('#000000', $html);
+    }
+
+    public function testItShowsTheSubmittedDateOnce(): void
+    {
+        $html = $this->render([], 'Form', null);
+
+        $this->assertSame(1, substr_count($html, '1 Jan 2026, 10:00:00'));
     }
 }

@@ -21,6 +21,11 @@
     return type !== null && type.emailAddress === true;
   }
 
+  // As FormSettings::submitterEmailField().
+  function submitterEmailField(settings) {
+    return (settings && (settings[SETTING_CUSTOMER_EMAIL] || settings[SETTING_EMAIL_FIELD])) || '';
+  }
+
   function isPersonal(field, config) {
     if (typeof field.personal === 'boolean') {
       return field.personal;
@@ -916,6 +921,7 @@
           add(node.id, tr('Field "%1" must match a field that appears earlier in the form.', label));
         }
       });
+      validateFieldSettings(node, types[node.type], label, config, add);
       if (isConditionSource(node.type, config)) {
         before.add(node.name);
       }
@@ -923,6 +929,109 @@
     validateSkips(form, config, add);
     validateRoutes(form, add);
     return out;
+  }
+
+  // Mirrors FieldChecks and SettingValues: the same fragments inside 'Field "%1": %2.' and the same order.
+  const RULE_PAIRS = [['min', 'max'], ['min_length', 'max_length'], ['min_date', 'max_date'], ['min_selected', 'max_selected']];
+  const DATE_RE = /^(\d{4})-(\d{2})-(\d{2})$/;
+  const isNumeric = (v) => (typeof v === 'number' && Number.isFinite(v)) || (typeof v === 'string' && /^-?\d+(\.\d+)?$/.test(v.trim()));
+  const isBlank = (v) => v === undefined || v === null || v === '';
+  const isRealDate = (v) => {
+    const m = DATE_RE.exec(String(v));
+    if (!m) {
+      return false;
+    }
+    const d = new Date(0);
+    // setUTCFullYear keeps years 0-99, which Date.UTC would read as 19xx.
+    d.setUTCFullYear(Number(m[1]), Number(m[2]) - 1, Number(m[3]));
+    return d.getUTCFullYear() === Number(m[1]) && d.getUTCMonth() === Number(m[2]) - 1 && d.getUTCDate() === Number(m[3]);
+  };
+
+  function validateFieldSettings(node, type, label, config, add) {
+    const problem = (fragment) => add(node.id, tr('Field "%1": %2.', label, fragment));
+    validateSettingSpec(type ? type.settingsSpec || {} : {}, node.settings || {}, problem);
+    if (type && type.isFile && Array.isArray((node.settings || {}).extensions)) {
+      validateExtensions(node.settings.extensions, config, problem);
+    }
+    validateRuleBounds(node, type, config, problem);
+    if (type && node.required && type.requiredAllowed === false) {
+      add(node.id, type.serverValue
+        ? tr('Field "%1" cannot be required: its value is set by the server, not the visitor.', label)
+        : tr('Field "%1" cannot be required: consent must be freely given.', label));
+    }
+  }
+
+  // The spec keys `format` (date, step), `exclusive_min`, `not_above` and `no_limit`, as SettingValues reads them.
+  function validateSettingSpec(spec, settings, problem) {
+    const name = (key) => (spec[key] && spec[key].label) || key;
+    const keys = Object.keys(spec);
+    keys.forEach((key) => {
+      const value = settings[key];
+      const format = spec[key].format;
+      if (format === 'date' && !isBlank(value) && !isRealDate(value)) {
+        problem(tr('"%1" must be a date such as 2025-01-31', name(key)));
+      }
+      if (format === 'step' && !isBlank(value) && value !== 'any' && !(/^\d+(\.\d+)?$/.test(String(value)) && Number(value) > 0)) {
+        problem(tr('"%1" must be "any" or a number greater than 0', name(key)));
+      }
+      if (spec[key].exclusive_min !== undefined && isNumeric(value) && Number(value) <= spec[key].exclusive_min) {
+        problem(tr('"%1" must be greater than %2', name(key), spec[key].exclusive_min));
+      }
+    });
+    keys.forEach((key) => {
+      const sibling = spec[key].not_above;
+      if (sibling && spec[sibling] && isAbove(settings[key], settings[sibling], spec[sibling])) {
+        problem(tr('"%1" is greater than "%2"', name(key), name(sibling)));
+      }
+    });
+  }
+
+  function isAbove(value, sibling, siblingSpec) {
+    if (siblingSpec.no_limit !== undefined && isNumeric(sibling) && Number(sibling) === siblingSpec.no_limit) {
+      return false;
+    }
+    if (isNumeric(value) && isNumeric(sibling)) {
+      return Number(value) > Number(sibling);
+    }
+    return isRealDate(value) && isRealDate(sibling) && String(value) > String(sibling);
+  }
+
+  function validateRuleBounds(node, type, config, problem) {
+    const values = {};
+    (node.rules || []).forEach((r) => {
+      values[r.rule] = r.value;
+    });
+    const ruleLabel = (code) => {
+      const rule = ((config && config.rules) || []).find((r) => r.code === code);
+      return rule ? rule.label : code;
+    };
+    const comparable = (v) => (isNumeric(v) ? Number(v) : String(v));
+    RULE_PAIRS.forEach(([low, high]) => {
+      if (!isBlank(values[low]) && !isBlank(values[high]) && comparable(values[low]) > comparable(values[high])) {
+        problem(tr('"%1" is greater than "%2"', ruleLabel(low), ruleLabel(high)));
+      }
+    });
+    if (type && Number.isInteger(type.maxLength) && isNumeric(values.max_length) && Number(values.max_length) > type.maxLength) {
+      problem(tr('"%1" can be at most %2', ruleLabel('max_length'), type.maxLength));
+    }
+    const options = (node.options || []).length;
+    if (type && type.hasOptions && isNumeric(values.min_selected) && Number(values.min_selected) > options) {
+      problem(tr('"%1" is more than the number of options (%2)', ruleLabel('min_selected'), options));
+    }
+  }
+
+  function validateExtensions(extensions, config, problem) {
+    const allowed = (config && config.uploads && config.uploads.allowedExtensions) || [];
+    const refused = new Set();
+    extensions.forEach((raw) => {
+      const ext = String(raw).trim().replace(/^\.+/, '').toLowerCase();
+      if (ext !== '' && (!/^[a-z0-9]+$/.test(ext) || allowed.indexOf(ext) < 0)) {
+        refused.add(ext);
+      }
+    });
+    if (refused.size) {
+      problem(tr('these file types are not allowed by the store\'s upload settings: %1', Array.from(refused).sort().join(', ')));
+    }
   }
 
   function validateGroup(form, add) {
@@ -1093,7 +1202,7 @@
   }
 
   const api = {
-    isConditionSource, isPersonal,
+    isConditionSource, isPersonal, submitterEmailField,
     createState, isEmailAddress, uid, slugify, uniqueName, allFields, fieldsBefore,
     newField, newContent, newSection,
     addItem, moveItem, removeItem, duplicateItem, updateItem, extractGroup, insertGroup,

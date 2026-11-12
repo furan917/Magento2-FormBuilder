@@ -229,8 +229,8 @@
         c.value = part && typeof range[part[1]] === 'string' ? range[part[1]] : '';
       });
     },
-    summary: function (field, wrapper, value) {
-      return value.start === '' && value.end === '' ? '' : value.start + ' – ' + value.end;
+    summary: function (field, wrapper, value, optionLabel, formatDay) {
+      return value.start === '' && value.end === '' ? '' : formatDay(value.start) + ' – ' + formatDay(value.end);
     }
   });
 
@@ -286,6 +286,92 @@
     },
     summary: function (field, wrapper, value) {
       return value.map(function (v) { return v.trim(); }).filter(Boolean).join(', ');
+    }
+  });
+
+  // Colour: a hidden input posts the value; the native picker (which cannot be empty) and the hex box only edit it.
+  var COLOUR = /^#[0-9a-f]{6}$/i;
+  var partsOfBox = function (box) {
+    return {
+      box: box,
+      value: box.querySelector('[data-ffb-color-value]'),
+      picker: box.querySelector('[data-ffb-color-picker]'),
+      hex: box.querySelector('[data-ffb-color-hex]'),
+      clear: box.querySelector('[data-ffb-color-clear]')
+    };
+  };
+  var colourParts = function (wrapper) {
+    var box = wrapper.querySelector('[data-ffb-color]');
+    var p = box ? partsOfBox(box) : null;
+    return p && p.value && p.picker && p.hex ? p : null;
+  };
+  // An unfinished code is kept as typed, so the format check reports it instead of it vanishing.
+  var showColour = function (p, value) {
+    p.value.value = value;
+    if (COLOUR.test(value)) { p.picker.value = value; }
+    // The swatch only shows a colour the value really holds; an unfinished code looks unchosen.
+    if (COLOUR.test(value)) { p.box.removeAttribute('data-ffb-empty'); } else { p.box.setAttribute('data-ffb-empty', ''); }
+    if (p.clear) { p.clear.hidden = value === ''; }
+  };
+  var setColour = function (p, value) {
+    var clean = typeof value === 'string' && COLOUR.test(value) ? value.toLowerCase() : '';
+    p.hex.value = clean;
+    showColour(p, clean);
+  };
+  var isLocked = function (box) {
+    var wrapper = box.closest('[data-ffb-item]');
+    return !!wrapper && wrapper.getAttribute('aria-readonly') === 'true';
+  };
+  // Called for every input and change event; returns nothing, it only keeps the parts in step.
+  var colourInput = function (target) {
+    var box = target && target.closest ? target.closest('[data-ffb-color]') : null;
+    var p = box ? partsOfBox(box) : null;
+    if (!p || !p.value || (target !== p.picker && target !== p.hex)) { return; }
+    if (isLocked(box)) {
+      setColour(p, p.value.value);
+      return;
+    }
+    if (target === p.picker) {
+      p.hex.value = p.picker.value.toLowerCase();
+      showColour(p, p.hex.value);
+      return;
+    }
+    var text = p.hex.value.replace(/^\s+|\s+$/g, '');
+    var code = /^#?([0-9a-f]{6})$/i.exec(text);
+    showColour(p, code ? '#' + code[1].toLowerCase() : text);
+  };
+  // Returns the field wrapper that changed, or null.
+  var clearColour = function (button) {
+    var box = button.closest('[data-ffb-color]');
+    var p = box ? partsOfBox(box) : null;
+    if (!p || !p.value || !p.hex || isLocked(box)) { return null; }
+    setColour(p, '');
+    p.hex.focus();
+    return box.closest('[data-ffb-name]');
+  };
+  // A hidden input keeps no default of its own once written, so the box carries it.
+  var resetColours = function (form) {
+    Array.prototype.forEach.call(form.querySelectorAll('[data-ffb-color]'), function (box) {
+      var p = partsOfBox(box);
+      if (p.value && p.picker && p.hex) { setColour(p, box.getAttribute('data-ffb-default') || ''); }
+    });
+  };
+
+  core.registerBuiltinFieldType('color', {
+    // A theme template with a single colour input keeps the plain behaviour.
+    read: function (wrapper) {
+      var p = colourParts(wrapper);
+      var plain = p ? null : wrapper.querySelector('input');
+      return p ? p.value.value : (plain ? plain.value : '');
+    },
+    write: function (wrapper, value) {
+      var p = colourParts(wrapper);
+      var plain = p ? null : wrapper.querySelector('input');
+      if (p) {
+        setColour(p, value);
+      } else if (plain) {
+        plain.value = typeof value === 'string' ? value : '';
+      }
     }
   });
 
@@ -444,16 +530,53 @@
     return opt ? opt.textContent : String(value);
   };
 
-  var genericSummary = function (f, wrapper, value, yesLabel) {
+  // Dates are read and shown in UTC so the visitor's own timezone never shifts the day.
+  var DATE_FORMATS = {
+    date: [/^(\d{4})-(\d{2})-(\d{2})$/, { day: 'numeric', month: 'short', year: 'numeric' }],
+    'datetime-local': [/^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})$/,
+      { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' }],
+    month: [/^(\d{4})-(\d{2})$/, { month: 'long', year: 'numeric' }],
+    time: [/^(\d{2}):(\d{2})$/, { hour: '2-digit', minute: '2-digit' }]
+  };
+  var formatDate = function (kind, value, locale) {
+    var spec = DATE_FORMATS[kind];
+    var m = spec && typeof value === 'string' ? spec[0].exec(value) : null;
+    if (!m) { return value; }
+    var n = m.slice(1).map(Number);
+    var stamp = kind === 'time' ? Date.UTC(1970, 0, 1, n[0], n[1]) : Date.UTC(n[0], n[1] - 1, n[2] || 1, n[3] || 0, n[4] || 0);
+    try {
+      return new Intl.DateTimeFormat(locale || undefined, Object.assign({ timeZone: 'UTC' }, spec[1])).format(stamp);
+    } catch (e) {
+      return value.replace('T', ' ');
+    }
+  };
+  // The input's type attribute, not its property: browsers without a month picker report "text".
+  var controlKind = function (wrapper) {
+    var first = controlsOf(wrapper)[0];
+    return first ? String(first.getAttribute('type') || '').toLowerCase() : '';
+  };
+
+  var genericSummary = function (f, wrapper, value, labels) {
+    var first = controlsOf(wrapper)[0] || {};
+    var template = wrapper.querySelector('[data-ffb-summary-text]');
+    var kind = controlKind(wrapper);
     var text;
     if (f.type === 'file') {
       text = String(value);
     } else if (Array.isArray(value)) {
       text = value.map(function (v) { return optionLabel(f, wrapper, v); }).join(', ');
+    } else if (first.type === 'checkbox' && !/\[\]$/.test(first.name || '')) {
+      text = String(value) === '' ? labels.no : labels.yes;
     } else if (String(value) === '') {
       text = '';
-    } else if ((controlsOf(wrapper)[0] || {}).type === 'checkbox') {
-      text = yesLabel;
+    } else if (template) {
+      text = String(template.getAttribute('data-ffb-summary-text')).replace('%1', function () { return String(value); });
+    } else if (f.suggestions === true) {
+      var matched = core.normalizeValue(f, String(value));
+      var option = (f.options || []).filter(function (o) { return o && String(o.value) === matched; })[0];
+      text = option ? String(option.label) : String(value);
+    } else if (DATE_FORMATS[kind]) {
+      text = formatDate(kind, value, labels.locale);
     } else {
       text = optionLabel(f, wrapper, value);
       var settings = f.settings || {};
@@ -465,19 +588,20 @@
   };
 
   // A third-party hook that throws or returns a non string must not break the review step.
-  var summaryText = function (f, wrapper, yesLabel) {
+  // labels: {yes, no, locale}; built-in hooks also get a date formatter.
+  var summaryText = function (f, wrapper, labels) {
     var value = readValue(wrapper);
     var text;
     var hook = customHook(wrapper, 'summary');
     if (hook) {
       try {
-        text = hook(f, wrapper, value, optionLabel);
+        text = hook(f, wrapper, value, optionLabel, function (v) { return formatDate('date', v, labels.locale); });
       } catch (e) {
         console.warn('Furan_FormBuilder: the summary hook of "' + wrapper.getAttribute('data-ffb-type') + '" failed: ' + e.message);
       }
     }
     if (typeof text !== 'string') {
-      text = genericSummary(f, wrapper, value, yesLabel);
+      text = genericSummary(f, wrapper, value, labels);
     }
     return text === '' ? '—' : text;
   };
@@ -682,6 +806,9 @@
     loadRecaptchaHelper: loadRecaptchaHelper,
     loadMapAssets: loadMapAssets,
     summaryText: summaryText,
+    colourInput: colourInput,
+    clearColour: clearColour,
+    resetColours: resetColours,
     markRequired: markRequired,
     applyHiddenOptions: applyHiddenOptions,
     jsonOf: jsonOf,

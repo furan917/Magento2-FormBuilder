@@ -5,7 +5,8 @@ namespace Furan\FormBuilder\Model\FieldType;
 
 use Furan\FormBuilder\Api\FieldType\AdminViewTypeInterface;
 use Furan\FormBuilder\Api\FieldType\StatsAwareTypeInterface;
-class Multiselect extends AbstractOptionType implements StatsAwareTypeInterface, AdminViewTypeInterface
+use Furan\FormBuilder\Api\FieldType\BuilderControlsInterface;
+class Multiselect extends AbstractOptionType implements StatsAwareTypeInterface, AdminViewTypeInterface, BuilderControlsInterface
 {
     public function getCode(): string
     {
@@ -35,5 +36,10 @@ class Multiselect extends AbstractOptionType implements StatsAwareTypeInterface,
     public function adminViewKind(array $field): ?string
     {
         return self::KIND_CHIPS;
+    }
+
+    public function builderControls(): array
+    {
+        return ['placeholder' => false, 'autocomplete' => false, 'option_description' => false];
     }
 }

@@ -21,14 +21,14 @@ if ($accent !== '') {
     $accentStyle = '--ffb-accent: ' . $accent . '; --ffb-on-accent: ' . $onAccent;
 }
 ?>
-<div class="ffb<?= $skinned ? ' ffb-skin' : '' ?>"<?php if ($accentStyle !== ''): ?> style="<?= $escaper->escapeHtmlAttr($accentStyle) ?>"<?php endif; ?> data-ffb-root data-ffb-config="<?= $escaper->escapeHtmlAttr($form->getConfigJson()) ?>">
+<div class="ffb<?= $skinned ? ' ffb-skin' : '' ?>"<?php if ($accentStyle !== ''): ?> style="<?= $escaper->escapeHtmlAttr($accentStyle) ?>"<?php endif; ?> data-ffb-root data-ffb-locale="<?= $escaper->escapeHtmlAttr($form->getLocale()) ?>" data-ffb-config="<?= $escaper->escapeHtmlAttr($form->getConfigJson()) ?>">
     <form class="ffb-form" method="post" action="<?= $escaper->escapeUrl($config['submitUrl']) ?>" enctype="multipart/form-data" novalidate data-ffb-form>
         <input type="hidden" name="form_id" value="<?= (int)$formId ?>">
         <input type="hidden" name="form_key" value="">
         <input type="hidden" name="ffb_token" value="">
         <div class="ffb-hp" aria-hidden="true"><label><?= $escaper->escapeHtml(__('Website')) ?><input type="text" name="ffb_website" tabindex="-1" autocomplete="off" value=""></label></div>
 <?php if ($showProgress): ?>
-        <ol class="ffb-progress" data-ffb-progress>
+        <ol class="ffb-progress" data-ffb-progress data-ffb-done-label="<?= $escaper->escapeHtmlAttr(__('(completed)')) ?>">
 <?php foreach ($pages as $index => $page): ?>
 <?php $title = trim((string)($page['title'] ?? '')); ?>
             <li class="ffb-progress-step" data-ffb-step="<?= $escaper->escapeHtmlAttr($page['id'] ?? '') ?>"><?= $escaper->escapeHtml($title !== '' ? $title : __('Step %1', $index + 1)) ?></li>
@@ -44,6 +44,7 @@ if ($accent !== '') {
             <button type="submit" class="ffb-btn ffb-btn-primary" data-ffb-submit><?= $escaper->escapeHtml($config['labels']['submit']) ?></button>
         </div>
         <div class="ffb-status" role="status" aria-live="polite" data-ffb-status></div>
+        <p class="ffb-sr-only" role="status" aria-live="polite" data-ffb-step-status></p>
     </form>
     <div class="ffb-success" data-ffb-success hidden tabindex="-1"></div>
     <noscript><p class="ffb-noscript"><?= $escaper->escapeHtml(__('This form needs JavaScript enabled.')) ?></p></noscript>
@@ -61,4 +62,7 @@ if ($accent !== '') {
 <script src="<?= $escaper->escapeUrl($scriptUrl) ?>" defer></script>
 <?php endforeach; ?>
 <script src="<?= $escaper->escapeUrl($form->getViewFileUrl('Furan_FormBuilder::js/ffb-form.js')) ?>" defer></script>
+<?php endif; ?>
+<?php if (!$skinned && $form->shouldRenderHyvaStyles()): ?>
+<link rel="stylesheet" href="<?= $escaper->escapeUrl($form->getViewFileUrl('Furan_FormBuilder::css/ffb-hyva.css')) ?>">
 <?php endif; ?>

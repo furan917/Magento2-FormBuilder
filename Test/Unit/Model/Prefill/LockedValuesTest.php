@@ -8,6 +8,8 @@ use Furan\FormBuilder\Model\Prefill\PrefillService;
 use Furan\FormBuilder\Test\Unit\Helper\ArrayPrefillSource;
 use Furan\FormBuilder\Test\Unit\Helper\FieldPools;
 use Furan\FormBuilder\Test\Unit\Helper\PrefillSourcePools;
+use Furan\FormBuilder\Test\Unit\Helper\StampType;
+use Furan\FormBuilder\Model\FieldType\Pool;
 use PHPUnit\Framework\MockObject\Stub;
 use PHPUnit\Framework\TestCase;
 
@@ -83,11 +85,74 @@ class LockedValuesTest extends TestCase
         $this->assertSame($posted, $this->locked()->apply($fields, $posted, 0, null, 1));
     }
 
-    public function testItLeavesAFixedValueHiddenFieldWithAPrefillSourceToThePrefillRules(): void
+    public function testItStoresTheDefaultOfAPrefilledHiddenFieldForGuestsWhateverWasPosted(): void
     {
-        $fields = [$this->hidden('mail', ['source' => 'static'], '', 'customer.email')];
+        $prefill = $this->prefill = $this->createMock(PrefillService::class);
+        $prefill->expects($this->never())->method('valuesFor');
+        $fields = [
+            $this->hidden('mail', ['source' => 'static'], 'guest-default', 'customer.email'),
+            ['locked' => true] + $this->hidden('first', ['source' => 'static'], '', 'customer.firstname'),
+            $this->hidden('q', ['source' => 'query', 'query_param' => 'q'], 'none', 'customer.lastname'),
+        ];
 
-        $this->assertSame(['mail' => 'guest@example.com'], $this->locked()->apply($fields, ['mail' => 'guest@example.com'], 0, null, 1));
+        $result = $this->locked()->apply($fields, ['mail' => 'victim@example.com', 'first' => 'Evil', 'q' => 'x'], 0, null, 1);
+
+        $this->assertSame(['mail' => 'guest-default', 'first' => '', 'q' => 'none'], $result);
+    }
+
+    public function testItStoresTheAccountValueOfAPrefilledHiddenFieldForCustomersLockedOrNot(): void
+    {
+        $prefill = $this->prefill = $this->createMock(PrefillService::class);
+        $prefill->expects($this->once())->method('valuesFor')
+            ->with(5, ['customer.email', 'customer.firstname'], 2)
+            ->willReturn(['customer.email' => 'ann@example.com', 'customer.firstname' => '']);
+        $fields = [
+            $this->hidden('mail', ['source' => 'query', 'query_param' => 'm'], 'd', 'customer.email'),
+            ['locked' => true] + $this->hidden('first', [], 'd', 'customer.firstname'),
+        ];
+
+        $result = $this->locked()->apply($fields, ['mail' => 'mallory@example.com', 'first' => 'Evil'], 5, null, 2);
+
+        $this->assertSame(['mail' => 'ann@example.com', 'first' => ''], $result);
+    }
+
+    public function testItStoresTheProductValueOfAnUnlockedPrefilledHiddenField(): void
+    {
+        $fields = [$this->hidden('sku', [], 'd', 'product.sku')];
+
+        $this->assertSame(['sku' => 'SKU-9'], $this->locked()->apply($fields, ['sku' => 'Evil'], 0, $this->product(), 2));
+        $this->assertSame(['sku' => ''], $this->locked()->apply($fields, ['sku' => 'Evil'], 0, null, 2));
+    }
+
+    public function testItBlanksAPrefilledHiddenFieldWhoseSourceDoesNotSuitIt(): void
+    {
+        $fields = [$this->hidden('loyal', [], 'd', 'customer.loyalty'), $this->hidden('gone', [], 'd', 'loyalty.removed')];
+
+        $this->assertSame(['loyal' => '', 'gone' => ''], $this->locked()->apply($fields, ['loyal' => 'L', 'gone' => 'G'], 5, null, 2));
+    }
+
+    public function testItBlanksAGuestsPrefilledAnswerToAServerValueTypeWithoutAFixedValue(): void
+    {
+        $pool = FieldPools::builtIn()->all() + [StampType::CODE => new StampType()];
+        $values = new LockedValues($this->prefill, PrefillSourcePools::builtIn([
+            'customer.stamp' => new ArrayPrefillSource('customer.stamp', 'customer', [StampType::CODE], 'S-1'),
+        ]), new Pool($pool));
+        $field = ['kind' => 'field', 'name' => 's', 'type' => StampType::CODE, 'prefill' => 'customer.stamp', 'locked' => false];
+
+        $this->assertSame(['s' => ''], $values->apply([$field], ['s' => 'Evil'], 0, null, 2));
+    }
+
+    public function testItNamesPrefilledHiddenFieldsAsServerOwnedForGuestsAndCustomers(): void
+    {
+        $fields = [
+            $this->hidden('mail', [], '', 'customer.email'),
+            $this->hidden('sku', [], '', 'product.sku'),
+            $this->hidden('plain', [], 'x'),
+            $this->field('typed', 'text', 'customer.email', false),
+        ];
+
+        $this->assertSame(['mail', 'sku'], $this->locked()->serverOwned($fields, 0));
+        $this->assertSame(['mail', 'sku'], $this->locked()->serverOwned($fields, 5));
     }
 
     public function testItIgnoresMalformedHiddenSettingsWithoutWarnings(): void

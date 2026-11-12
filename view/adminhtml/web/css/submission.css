@@ -66,6 +66,13 @@
 .ffb-sub-stars span { color: #d6d6d6; }
 .ffb-sub-score { display: inline-block; min-width: 28px; padding: 0 8px; margin-right: 6px; text-align: center; border-radius: 4px; background: var(--ffb-sub-text); color: #fff; font-weight: 600; }
 .ffb-sub-yes::before { content: "✓"; color: #1a7f37; font-weight: 700; margin-right: 6px; }
+.ffb-sub-row.is-empty > dd .ffb-sub-no { font-style: normal; }
+.ffb-sub-no::before { content: "✕"; color: var(--ffb-sub-muted); font-weight: 700; margin-right: 6px; }
+.ffb-sub-tag {
+  display: inline-block; margin-left: 6px; padding: 0 6px; border-radius: 3px; border: 1px solid var(--ffb-sub-line);
+  background: var(--ffb-sub-tint); font-size: 11px; line-height: 18px; vertical-align: 1px; white-space: nowrap;
+}
+.ffb-sub-note { display: block; font-size: 12px; font-style: normal; color: var(--ffb-sub-muted); }
 .ffb-sub-swatch { display: inline-block; width: 16px; height: 16px; margin-right: 6px; vertical-align: -3px; border-radius: 3px; border: 1px solid rgba(0, 0, 0, .2); }
 .ffb-sub-long { white-space: normal; padding: 8px 12px; background: var(--ffb-sub-tint); border-radius: 4px; }
 .ffb-sub-file { display: inline-flex; flex-wrap: wrap; align-items: center; gap: 4px 10px; padding: 6px 6px 6px 12px; border: 1px solid var(--ffb-sub-line); border-radius: 4px; }

@@ -5,8 +5,9 @@ namespace Furan\FormBuilder\Model\FieldType;
 
 use Furan\FormBuilder\Api\FieldType\StatsAwareTypeInterface;
 use Furan\FormBuilder\Model\Validation\Patterns;
+use Furan\FormBuilder\Api\FieldType\BuilderControlsInterface;
 
-class Range extends AbstractFieldType implements StatsAwareTypeInterface
+class Range extends AbstractFieldType implements StatsAwareTypeInterface, BuilderControlsInterface
 {
     private const EPSILON = 1e-9;
     private const MAX_DISCRETE_STEPS = 21;
@@ -29,9 +30,9 @@ class Range extends AbstractFieldType implements StatsAwareTypeInterface
     public function getSettingsSpec(): array
     {
         return [
-            'min' => ['type' => 'number', 'default' => 0],
+            'min' => ['type' => 'number', 'default' => 0, 'not_above' => 'max'],
             'max' => ['type' => 'number', 'default' => 100],
-            'step' => ['type' => 'number', 'default' => 1, 'min' => 0.0001],
+            'step' => ['type' => 'number', 'default' => 1, 'exclusive_min' => 0],
         ];
     }
 
@@ -53,6 +54,7 @@ class Range extends AbstractFieldType implements StatsAwareTypeInterface
         }
         return null;
     }
+
 
     /**
      * @param array<string, mixed> $field
@@ -82,5 +84,15 @@ class Range extends AbstractFieldType implements StatsAwareTypeInterface
         [$min, $max, $step] = $this->getBounds($field);
         $discrete = $step > 0 && $max >= $min && floor(round(($max - $min) / $step, 9)) + 1 <= self::MAX_DISCRETE_STEPS;
         return $discrete ? self::KIND_DISCRETE : self::KIND_NUMBER;
+    }
+
+    public function builderControls(): array
+    {
+        return ['placeholder' => false, 'autocomplete' => false];
+    }
+
+    public function defaultInput(): ?string
+    {
+        return 'number';
     }
 }

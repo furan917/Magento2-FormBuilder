@@ -19,4 +19,9 @@ class Cards extends Radio
     {
         return [];
     }
+
+    public function builderControls(): array
+    {
+        return ['option_description' => true] + parent::builderControls();
+    }
 }

@@ -5,8 +5,9 @@ namespace Furan\FormBuilder\Model\FieldType;
 
 use Furan\FormBuilder\Api\FieldType\StatsAwareTypeInterface;
 use Furan\FormBuilder\Api\FieldType\PersonalByDefaultInterface;
+use Furan\FormBuilder\Api\FieldType\BuilderControlsInterface;
 
-class File extends AbstractFieldType implements PersonalByDefaultInterface, StatsAwareTypeInterface
+class File extends AbstractFieldType implements PersonalByDefaultInterface, StatsAwareTypeInterface, BuilderControlsInterface
 {
     public function getCode(): string
     {
@@ -49,5 +50,15 @@ class File extends AbstractFieldType implements PersonalByDefaultInterface, Stat
     public function statsKind(array $field): ?int
     {
         return self::KIND_NONE;
+    }
+
+    public function builderControls(): array
+    {
+        return ['placeholder' => false, 'autocomplete' => false];
+    }
+
+    public function defaultInput(): ?string
+    {
+        return null;
     }
 }

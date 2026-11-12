@@ -138,6 +138,17 @@
     box.appendChild(body);
   };
 
+  // The store locale (en_GB) as a BCP 47 tag the browser knows, else the page language.
+  var localeOf = function (rootEl) {
+    var candidates = [String(rootEl.getAttribute('data-ffb-locale') || '').replace(/_/g, '-'), String(doc.documentElement.lang || '')];
+    for (var i = 0; i < candidates.length; i++) {
+      try {
+        if (candidates[i] && Intl.DateTimeFormat.supportedLocalesOf([candidates[i]]).length) { return candidates[i]; }
+      } catch (e) { /* not a locale tag */ }
+    }
+    return '';
+  };
+
   // `inst` carries one form's elements and mutable state (inst.s) to the parts below.
   var createInstance = function (rootEl, form, config) {
     var schema = config.schema || { pages: [] };
@@ -160,6 +171,9 @@
       prevBtn: form.querySelector('[data-ffb-prev]'),
       nextBtn: form.querySelector('[data-ffb-next]'),
       progressEl: form.querySelector('[data-ffb-progress]'),
+      stepStatusEl: form.querySelector('[data-ffb-step-status]'),
+      backBtn: null,
+      locale: localeOf(rootEl),
       s: {
         visibility: {},
         requiredNow: {},
@@ -178,7 +192,8 @@
         visibilityPending: false,
         prefilled: {},
         lockedNames: {},
-        restoredNote: null
+        restoredNote: null,
+        review: null
       }
     };
     (schema.pages || []).forEach(function (page) {
@@ -277,7 +292,11 @@
           return;
         }
         var editLabel = box.getAttribute('data-ffb-edit-label') || 'Edit';
-        var yesLabel = box.getAttribute('data-ffb-yes-label') || 'Yes';
+        var labels = {
+          yes: box.getAttribute('data-ffb-yes-label') || 'Yes',
+          no: box.getAttribute('data-ffb-no-label') || 'No',
+          locale: inst.locale
+        };
         while (list.firstChild) { list.removeChild(list.firstChild); }
         Array.prototype.forEach.call(form.querySelectorAll('[data-ffb-name]'), function (wrapper) {
           var f = inst.fieldByName[wrapper.getAttribute('data-ffb-name')];
@@ -292,7 +311,15 @@
           var dt = doc.createElement('dt');
           dt.textContent = f.label;
           var dd = doc.createElement('dd');
-          dd.textContent = summaryText(f, wrapper, yesLabel);
+          dd.textContent = summaryText(f, wrapper, labels);
+          var colour = wrapper.querySelector('[data-ffb-color]') ? readValue(wrapper) : '';
+          if (/^#[0-9a-f]{6}$/i.test(colour)) {
+            var swatch = doc.createElement('span');
+            swatch.className = 'ffb-summary-swatch';
+            swatch.setAttribute('aria-hidden', 'true');
+            swatch.style.backgroundColor = colour;
+            dd.insertBefore(swatch, dd.firstChild);
+          }
           var action = doc.createElement('dd');
           action.className = 'ffb-summary-action';
           var edit = doc.createElement('button');
@@ -300,8 +327,11 @@
           edit.className = 'ffb-summary-edit';
           edit.textContent = editLabel;
           edit.setAttribute('aria-label', editLabel + ': ' + f.label);
+          edit.setAttribute('data-ffb-edit-for', f.name);
           edit.addEventListener('click', function () {
+            s.review = { page: s.current, name: f.name, label: box.getAttribute('data-ffb-back-label') || 'Back to review' };
             inst.goTo(inst.pageOf[f.name]);
+            inst.offerReview();
             inst.focusField(f.name);
             inst.announceStep();
           });
@@ -312,6 +342,21 @@
           list.appendChild(row);
         });
       });
+    };
+
+    var markStepDone = function (step, done) {
+      step.toggleAttribute('data-ffb-done', done);
+      var label = inst.progressEl && inst.progressEl.getAttribute('data-ffb-done-label');
+      var note = step.querySelector('[data-ffb-step-done]');
+      if (!label || (!note && !done)) { return; }
+      if (!note) {
+        note = doc.createElement('span');
+        note.className = 'ffb-sr-only';
+        note.setAttribute('data-ffb-step-done', '');
+        note.textContent = ' ' + label;
+        step.appendChild(note);
+      }
+      note.hidden = !done;
     };
 
     var renderPages = function () {
@@ -333,6 +378,7 @@
           } else {
             step.removeAttribute('aria-current');
           }
+          markStepDone(step, visiblePages.indexOf(id) !== -1 && visiblePages.indexOf(id) < pos);
         }
       });
       if (inst.progressEl && messages.stepOf) {
@@ -342,6 +388,11 @@
       if (inst.prevBtn) { inst.prevBtn.hidden = pos <= 0; }
       if (inst.nextBtn) { inst.nextBtn.hidden = pos >= visiblePages.length - 1; }
       if (inst.submitBtn) { inst.submitBtn.hidden = pos < visiblePages.length - 1; }
+      if (inst.backBtn) {
+        inst.backBtn.hidden = !s.review || s.review.page === s.current || !pageVisible(s.review.page);
+        // Back to review leads while it shows; Next steps back to secondary.
+        if (inst.nextBtn && !inst.nextSecondary) { inst.nextBtn.classList.toggle('ffb-btn-secondary', !inst.backBtn.hidden); }
+      }
       fillSummaries();
       // Leaflet renders grey tiles if its container was hidden while it measured itself.
       Array.prototype.forEach.call(form.querySelectorAll('[data-ffb-type="map"]'), function (w) {
@@ -366,7 +417,7 @@
         var before = jsonOf(w);
         var after = before;
         if (f.overwritable) {
-          if (s.actionsOpen && state.values[f.name] !== undefined && JSON.stringify(state.values[f.name]) !== before) {
+          if (s.actionsOpen && state.values[f.name] !== undefined && JSON.stringify(state.values[f.name]) !== JSON.stringify(core.normalizeValue(f, readValue(w)))) {
             writeValue(w, state.values[f.name]);
             if (s.lockedNames[f.name]) { lockControls(w); }
             after = jsonOf(w);
@@ -397,9 +448,11 @@
 
     var applyVisibility = function () {
       var consent = consentNames();
+      // The server sets these answers, so nothing may require them of the visitor.
+      var exempt = consent.concat(fields.filter(function (f) { return f.server_value === true; }).map(function (f) { return f.name; }));
       // Each pass can write an answer that later conditions read; a form cannot need more passes than fields.
       for (var pass = 0; pass <= fields.length; pass++) {
-        if (!applyState(core.computeState(inst.schema, collectValues(), s.today, consent), consent)) { break; }
+        if (!applyState(core.computeState(inst.schema, core.normalizeValues(fields, collectValues()), s.today, exempt), consent)) { break; }
       }
       Array.prototype.forEach.call(form.querySelectorAll('[data-ffb-item]'), function (el) {
         var id = el.getAttribute('data-ffb-item');
@@ -471,10 +524,22 @@
       if (!message) { inst.clearFixStatus(); }
     };
 
+    // Skips controls that are not shown (a map's search box before the map loads); the wrapper is the last resort.
     var focusField = function (name) {
       var w = wrapperOf(name);
-      var target = w && (controlsOf(w).filter(function (c) { return c.type !== 'hidden'; })[0]);
-      if (target) { target.focus(); }
+      if (!w) { return; }
+      var shown = controlsOf(w).filter(function (c) {
+        var hiddenBox = c.closest('[hidden]');
+        return c.type !== 'hidden' && !c.disabled && c.getAttribute('tabindex') !== '-1' && !(hiddenBox && w.contains(hiddenBox));
+      });
+      // Layout-free engines report no boxes at all, so boxes only decide when some control has one.
+      var laidOut = shown.filter(function (c) { return c.getClientRects().length > 0; });
+      var target = (laidOut.length ? laidOut : shown)[0];
+      if (!target) {
+        target = w;
+        w.setAttribute('tabindex', '-1');
+      }
+      target.focus();
     };
 
     // Loaded region lists join the directory; a country whose list is still loading is not held to its region rule.
@@ -497,15 +562,17 @@
     };
 
     // The schema item is the baseline for every pass, so a require action is applied to a copy.
-    // A locked answer comes from the server, so it is never required of the visitor.
+    // A locked or server value answer comes from the server, so it is never required of the visitor.
     var withRequired = function (f) {
-      var now = s.lockedNames[f.name] ? false : s.requiredNow[f.id];
+      var now = s.lockedNames[f.name] || f.server_value === true ? false : s.requiredNow[f.id];
       return now === undefined || now === !!f.required ? f : Object.assign({}, f, { required: now });
     };
 
     var validate = function (scope) {
       var values = inst.visibleValues();
-      var active = scope.filter(function (f) { return Object.prototype.hasOwnProperty.call(values, f.name); }).map(withRequired);
+      var active = scope.filter(function (f) {
+        return f.server_value !== true && Object.prototype.hasOwnProperty.call(values, f.name);
+      }).map(withRequired);
       var errors = core.validateFields(active, values, directoryNow());
       active.forEach(function (f) {
         if (f.type === 'file' && !errors[f.name]) {
@@ -765,10 +832,11 @@
       announceStep();
     };
 
+    // Screen readers only: the progress bar and the page heading already show where the visitor is.
     var announceStep = function () {
       var list = inst.visiblePageIds();
-      if (messages.stepOf) {
-        setStatus(String(messages.stepOf).replace('%1', String(list.indexOf(s.current) + 1)).replace('%2', String(list.length)));
+      if (messages.stepOf && inst.stepStatusEl) {
+        inst.stepStatusEl.textContent = String(messages.stepOf).replace('%1', String(list.indexOf(s.current) + 1)).replace('%2', String(list.length));
       }
     };
 
@@ -786,8 +854,10 @@
       fillHidden(fields, wrapperOf);
       inst.sub.applySecrets();
       syncOutputs(form);
+      types.resetColours(form);
       s.touched = {};
       s.filledByAction = {};
+      s.review = null;
       s.blurred = [];
       s.visibilityPending = false;
       Array.prototype.forEach.call(form.querySelectorAll('[data-ffb-error]'), function (e) { e.textContent = ''; e.hidden = true; });
@@ -816,7 +886,7 @@
     inst.announceStep = announceStep;
     inst.showFieldErrors = showFieldErrors;
 
-    inst.goNext = function () {
+    var pageValid = function () {
       inst.flushDeferred();
       var scope = pageFields(s.current);
       var errors = inst.validate(scope);
@@ -824,9 +894,17 @@
       if (first) {
         inst.emit('invalid', { fields: Object.keys(errors) });
         inst.focusField(first.name);
-        return;
+        return false;
       }
       setStatus('');
+      return true;
+    };
+
+    inst.goNext = function () {
+      if (!pageValid()) {
+        return;
+      }
+      s.review = null;
       var list = inst.visiblePageIds();
       var idx = list.indexOf(s.current);
       if (idx < list.length - 1) {
@@ -837,12 +915,48 @@
 
     inst.goPrev = function () {
       inst.flushDeferred();
+      s.review = null;
       var list = inst.visiblePageIds();
       var idx = list.indexOf(s.current);
       if (idx > 0) {
         goTo(list[idx - 1]);
         focusPage();
       }
+    };
+
+    inst.backToReview = function () {
+      var review = s.review;
+      if (!review || !pageValid()) {
+        return;
+      }
+      s.review = null;
+      goTo(review.page);
+      var page = form.querySelector('[data-ffb-page="' + review.page + '"]');
+      var target = page && (page.querySelector('[data-ffb-edit-for="' + review.name + '"]') || page.querySelector('.ffb-summary-title'));
+      if (target) {
+        if (!target.matches('button')) { target.setAttribute('tabindex', '-1'); }
+        target.focus();
+        announceStep();
+      } else {
+        focusPage();
+      }
+    };
+
+    // After a summary Edit, a "Back to review" button sits next to Next until the visitor navigates another way.
+    inst.offerReview = function () {
+      if (!s.review || !inst.nextBtn) {
+        return;
+      }
+      if (!inst.backBtn) {
+        inst.backBtn = doc.createElement('button');
+        inst.backBtn.type = 'button';
+        inst.backBtn.className = 'ffb-btn ffb-btn-primary ffb-summary-back';
+        inst.nextSecondary = inst.nextBtn.classList.contains('ffb-btn-secondary');
+        inst.backBtn.addEventListener('click', inst.backToReview);
+        inst.nextBtn.parentNode.insertBefore(inst.backBtn, inst.nextBtn.nextSibling);
+      }
+      inst.backBtn.textContent = s.review.label;
+      inst.renderPages();
     };
 
     inst.isLastPage = function () {
@@ -1044,6 +1158,7 @@
   var bindEvents = function (inst) {
     var s = inst.s;
     var form = inst.form;
+    var edited;
 
     var enter = function () {
       if (inst.isLastPage()) {
@@ -1091,6 +1206,7 @@
 
     form.addEventListener('input', function (event) {
       var t = event.target;
+      types.colourInput(t);
       if (t && t.type === 'range') {
         t.removeAttribute('data-ffb-unset');
         showRange(t);
@@ -1105,8 +1221,12 @@
 
     form.addEventListener('click', function (event) {
       var mapButton = event.target.closest && event.target.closest('[data-ffb-map-load]');
+      var colourClear = event.target.closest && event.target.closest('[data-ffb-color-clear]');
       if (mapButton) {
         inst.loadMap(mapButton);
+      } else if (colourClear) {
+        var cleared = types.clearColour(colourClear);
+        if (cleared) { edited(cleared, true); }
       } else {
         handleListClick(event, form);
       }
@@ -1143,16 +1263,21 @@
       root.setTimeout(inst.flushDeferred, 0);
     };
 
-    form.addEventListener('change', function (event) {
-      var changed = wrapperFromEvent(event);
+    // An answer the visitor changed: a change event, or a control's own action such as a colour's Clear.
+    edited = function (changed, onlyIfInvalid) {
       if (changed) { s.touched[changed.getAttribute('data-ffb-name')] = s.dirty[changed.getAttribute('data-ffb-name')] = true; }
       if (pointerDown) {
         s.visibilityPending = true;
       } else {
         inst.applyVisibility();
       }
-      if (changed) { deferRevalidate(changed, !!changed.ffbAddress); }
+      if (changed) { deferRevalidate(changed, onlyIfInvalid || !!changed.ffbAddress); }
       inst.draft.save();
+    };
+
+    form.addEventListener('change', function (event) {
+      types.colourInput(event.target);
+      edited(wrapperFromEvent(event), false);
     });
 
     doc.addEventListener('pointerdown', function () { pointerDown = true; }, true);
@@ -1267,7 +1392,7 @@
     if (!inst.context.eager && !inst.editToken) { inst.openActions(); }
     inst.fields.forEach(function (f) {
       var w = inst.wrapperOf(f.name);
-      if (w && f.locked && typeof f.prefill === 'string' && f.prefill.indexOf('product.') === 0) {
+      if (w && (f.locked || f.server_value === true) && typeof f.prefill === 'string' && f.prefill.indexOf('product.') === 0) {
         s.lockedNames[f.name] = true;
         lockServerOwned(w);
       }

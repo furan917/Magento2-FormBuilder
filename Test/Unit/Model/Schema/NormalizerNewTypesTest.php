@@ -47,8 +47,10 @@ class NormalizerNewTypesTest extends TestCase
             new \Furan\FormBuilder\Model\Schema\SettingValues(new RedirectValidator($manager)),
             new PersonalData(\Furan\FormBuilder\Test\Unit\Helper\FieldPools::builtIn()),
             new Sources(),
-            \Furan\FormBuilder\Test\Unit\Helper\ConditionNormalizers::builtIn()
-        );
+            \Furan\FormBuilder\Test\Unit\Helper\ConditionNormalizers::builtIn(),
+            \Furan\FormBuilder\Test\Unit\Helper\FieldChecksFactory::create(),
+        new \Furan\FormBuilder\Model\Validation\PresetFit()
+);
     }
 
     private function field(array $over = []): array
@@ -91,7 +93,7 @@ class NormalizerNewTypesTest extends TestCase
             ]]));
             $this->assertSame($url, $out[0]['settings']['privacy_url']);
             $this->assertSame(1000, mb_strlen($out[0]['settings']['details']));
-            $this->assertSame('Privacy policy', $out[0]['settings']['privacy_label']);
+            $this->assertSame('', $out[0]['settings']['privacy_label']);
         }
     }
 

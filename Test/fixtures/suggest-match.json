@@ -1,0 +1,16 @@
+{"cases": [
+ {"name": "exact label", "options": [{"label": "Leather boots", "value": "boots"}], "raw": "Leather boots", "expected": "boots"},
+ {"name": "label ignores case and outer spaces", "options": [{"label": "Dark Blue", "value": "navy"}], "raw": "  dark BLUE ", "expected": "navy"},
+ {"name": "option label with outer spaces", "options": [{"label": " Dark Blue ", "value": "navy"}], "raw": "dark blue", "expected": "navy"},
+ {"name": "inner spaces must match", "options": [{"label": "Dark Blue", "value": "navy"}], "raw": "dark  blue", "expected": "dark  blue"},
+ {"name": "value match", "options": [{"label": "Dark Blue", "value": "navy"}], "raw": "NAVY", "expected": "navy"},
+ {"name": "no match keeps the typed text", "options": [{"label": "Dark Blue", "value": "navy"}], "raw": " Teal ", "expected": "Teal"},
+ {"name": "empty stays empty", "options": [{"label": "Dark Blue", "value": "navy"}], "raw": "", "expected": ""},
+ {"name": "spaces only is empty", "options": [{"label": "Dark Blue", "value": "navy"}], "raw": "   ", "expected": ""},
+ {"name": "a label match wins over another option's value", "options": [{"label": "Red", "value": "blue"}, {"label": "Blue", "value": "b"}], "raw": "blue", "expected": "b"},
+ {"name": "the first of two equal labels wins", "options": [{"label": "Same", "value": "one"}, {"label": "same", "value": "two"}], "raw": "SAME", "expected": "one"},
+ {"name": "non-ASCII case", "options": [{"label": "école", "value": "school"}], "raw": "ÉCOLE", "expected": "school"},
+ {"name": "German sharp s is not expanded", "options": [{"label": "Straße", "value": "street"}], "raw": "STRASSE", "expected": "STRASSE"},
+ {"name": "partial text is free text", "options": [{"label": "Leather boots", "value": "boots"}], "raw": "Leather", "expected": "Leather"},
+ {"name": "no options", "options": [], "raw": "Anything", "expected": "Anything"}
+]}

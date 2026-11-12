@@ -74,6 +74,20 @@ class RuleLibraryTest extends TestCase
         $this->assertArrayHasKey('uk_postcode', $rules);
     }
 
+    public function testItKeysLibraryGroupsByStableCodesApartFromTheirLabels(): void
+    {
+        $library = $this->library([['code' => 'ref_no', 'label' => 'Reference', 'pattern' => '[A-Z]+', 'message' => 'x', 'example' => '']]);
+        $this->assertSame(['postcode', 'Postcodes'], [$library->find('uk_postcode')['group_code'], $library->find('uk_postcode')['group']]);
+        $this->assertSame('phone', $library->find('uk_phone')['group_code']);
+        $this->assertSame('content', $library->find('no_links')['group_code']);
+        $this->assertSame('', $library->find('saved:ref_no')['group_code']);
+        foreach ((new BuiltInRules())->all() as $code => $rule) {
+            $this->assertMatchesRegularExpression('/^[a-z_]+$/', $rule['group_code'], $code);
+        }
+        $extra = (new BuiltInRules(['ref' => ['label' => 'Ref', 'pattern' => '[A-Z]{3}', 'message' => 'Bad ref']]))->all();
+        $this->assertSame('', $extra['ref']['group_code']);
+    }
+
     public function testItResolvesBuiltInAndSavedReferences(): void
     {
         $library = $this->library([
@@ -127,7 +141,7 @@ class RuleLibraryTest extends TestCase
     public function testThePublicSchemaSendsFormatsToTheBrowserAsPlainPatterns(): void
     {
         $preset = new Preset($this->library(), new PatternMatcher(new RepeatAnalyzer()));
-        $public = new PublicSchema(new RulePool(['preset' => $preset]), new Pool(['text' => new Text()]), $this->createStub(Config::class));
+        $public = new PublicSchema(new RulePool(['preset' => $preset]), new Pool(['text' => new Text()]), $this->createStub(Config::class), new \Furan\FormBuilder\Model\Upload\ExtensionList());
         $field = $this->schemaWith([
             ['rule' => 'preset', 'value' => 'uk_postcode', 'message' => ''],
             ['rule' => 'preset', 'value' => 'saved:gone', 'message' => ''],
@@ -152,14 +166,30 @@ class RuleLibraryTest extends TestCase
         $manager = $this->createStub(StoreManagerInterface::class);
         $manager->method('getStores')->willReturn([]);
         return new Normalizer(
-            new Pool(['text' => new Text()]),
+            new Pool(['text' => new Text(), 'email' => new \Furan\FormBuilder\Model\FieldType\Email(), 'tel' => new \Furan\FormBuilder\Model\FieldType\Tel()]),
             new RulePool(['preset' => new Preset($this->library(), new PatternMatcher(new RepeatAnalyzer()))]),
             new PatternMatcher(new RepeatAnalyzer()),
             new \Furan\FormBuilder\Model\Schema\SettingValues(new RedirectValidator($manager)),
             new PersonalData(\Furan\FormBuilder\Test\Unit\Helper\FieldPools::builtIn()),
             new Sources(),
-            \Furan\FormBuilder\Test\Unit\Helper\ConditionNormalizers::builtIn()
-        );
+            \Furan\FormBuilder\Test\Unit\Helper\ConditionNormalizers::builtIn(),
+            \Furan\FormBuilder\Test\Unit\Helper\FieldChecksFactory::create(),
+        new \Furan\FormBuilder\Model\Validation\PresetFit()
+);
+    }
+
+    public function testTheNormalizerRefusesALibraryFormatOutsideTheTypesGroups(): void
+    {
+        $field = static fn (string $type, string $ref): array => ['kind' => 'field', 'type' => $type, 'name' => $type . '_f',
+            'label' => 'Answer', 'rules' => [['rule' => 'preset', 'value' => $ref]]];
+        try {
+            $this->normalizer()->normalize(['pages' => [['items' => [$field('email', 'uk_postcode')]]]]);
+            $this->fail('Expected InvalidSchemaException');
+        } catch (\Furan\FormBuilder\Api\Exception\InvalidSchemaException $e) {
+            $this->assertSame(['Field "Answer": the format "UK postcode" does not apply to this field type.'], $e->getErrors());
+        }
+        $items = $this->normalizer()->normalize(['pages' => [['items' => [$field('tel', 'uk_phone'), $field('text', 'uk_postcode')]]]])['pages'][0]['items'];
+        $this->assertSame(['uk_phone', 'uk_postcode'], [$items[0]['rules'][0]['value'], $items[1]['rules'][0]['value']]);
     }
 
     public function testAFormatMessageReplacesTheGenericTypeMessageInPhpAndTheBrowser(): void
@@ -183,7 +213,7 @@ class RuleLibraryTest extends TestCase
         $this->assertSame($expected, $validator->validate($schema, ['phone' => '12'], [])->getErrors()['phone']);
         $this->assertSame($expected, $validator->validate($schema, ['phone' => '123456789'], [])->getErrors()['phone']);
 
-        $public = new PublicSchema($rules, new Pool(['tel' => new \Furan\FormBuilder\Model\FieldType\Tel()]), $this->createStub(Config::class));
+        $public = new PublicSchema($rules, new Pool(['tel' => new \Furan\FormBuilder\Model\FieldType\Tel()]), $this->createStub(Config::class), new \Furan\FormBuilder\Model\Upload\ExtensionList());
         $built = $public->build($schema)['pages'][0]['items'][0];
         $this->assertSame(['pattern' => (new BuiltInRules())->all()['uk_phone']['pattern'], 'message' => $expected], $built['format']);
         $this->assertSame('Please enter a valid phone number.', $built['type_message']);

@@ -3,14 +3,14 @@ declare(strict_types=1);
 
 namespace Furan\FormBuilder\Model\Email;
 
-use Furan\FormBuilder\Api\FieldType\AdminViewTypeInterface;
+use Furan\FormBuilder\Api\Data\DisplayContext;
 use Furan\FormBuilder\Model\Schema\SchemaFields;
 use Furan\FormBuilder\Model\Submission\AnswerView;
 use Furan\FormBuilder\Model\Submission\ValueFormatter;
 use Furan\FormBuilder\Model\Thread\MessageRenderer;
 use Magento\Framework\Escaper;
 
-/** Answers as the admin view shows them, with option labels from the (store-localised) schema passed in. */
+/** Answers as the admin view shows them, with option labels from the (store-localised) schema and dates and countries for $context. */
 class ValuesTable
 {
     public function __construct(private readonly Escaper $escaper, private readonly AnswerView $answerView)
@@ -21,7 +21,7 @@ class ValuesTable
      * @param array<int, array{name: string, label: string, type: string, value: mixed}> $payload
      * @param array<string, mixed> $schema
      */
-    public function toHtml(array $payload, array $schema): string
+    public function toHtml(array $payload, array $schema, DisplayContext $context): string
     {
         $fields = SchemaFields::byName($schema);
         $rows = '';
@@ -29,7 +29,7 @@ class ValuesTable
             $rows .= '<tr><th align="left" valign="top" style="padding:4px 12px 4px 0">'
                 . $this->encode((string)($entry['label'] ?? ''))
                 . '</th><td valign="top" style="padding:4px 0">'
-                . str_replace(["\r\n", "\r", "\n"], '<br />', $this->encode($this->stringify($entry, $fields)))
+                . str_replace(["\r\n", "\r", "\n"], '<br />', $this->encode($this->stringify($entry, $fields, $context)))
                 . '</td></tr>';
         }
 
@@ -73,14 +73,14 @@ class ValuesTable
      * @param array<string, mixed> $schema
      * @return array<int, array{label: string, value: string}>
      */
-    public function toList(array $payload, array $schema): array
+    public function toList(array $payload, array $schema, DisplayContext $context): array
     {
         $fields = SchemaFields::byName($schema);
         $list = [];
         foreach ($payload as $entry) {
             $list[] = [
                 'label' => MessageRenderer::braces((string)($entry['label'] ?? '')),
-                'value' => MessageRenderer::braces($this->stringify($entry, $fields)),
+                'value' => MessageRenderer::braces($this->stringify($entry, $fields, $context)),
             ];
         }
 
@@ -96,18 +96,13 @@ class ValuesTable
      * @param array<string, mixed> $entry
      * @param array<string, array<string, mixed>> $fields
      */
-    private function stringify(array $entry, array $fields): string
+    private function stringify(array $entry, array $fields, DisplayContext $context): string
     {
         $value = $entry['value'] ?? '';
         if (is_array($value) && isset($value['name'], $value['size'])) {
             return (string)$value['name'] . ' (' . ValueFormatter::fileSize((int)$value['size']) . ')';
         }
         $entry['field'] = $fields[(string)($entry['name'] ?? '')] ?? null;
-        $values = $this->answerView->values($entry);
-        if ($this->answerView->kind($entry) === AdminViewTypeInterface::KIND_BOOLEAN) {
-            return (string)($values === ['Yes'] ? __('Yes') : __('No'));
-        }
-
-        return implode(', ', $values);
+        return implode(', ', $this->answerView->values($entry, $context));
     }
 }

@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace Furan\FormBuilder\Test\Unit\Model\FieldType;
 
 use Furan\FormBuilder\Block\ItemContext;
+use Furan\FormBuilder\Model\Upload\ExtensionList;
 use Furan\FormBuilder\Model\Directory\AddressRules;
 use Furan\FormBuilder\Model\FieldType\Address;
 use Furan\FormBuilder\Model\FieldType\Rating;
@@ -21,10 +22,10 @@ class RenderHintsTest extends TestCase
 
         $this->assertSame(['layout' => 'inline'], (new Rating())->renderHints($field, 1));
         $this->assertSame(['layout' => 'inline'], (new Scale())->renderHints($field, 1));
-        $this->assertSame('inline', ItemContext::build($field + ['render' => ['layout' => 'inline']], 7, 1, $escaper)['layout']);
-        $this->assertSame('stacked', ItemContext::build($field, 7, 1, $escaper)['layout']);
+        $this->assertSame('inline', (new ItemContext(new ExtensionList()))->build($field + ['render' => ['layout' => 'inline']], 7, 1, $escaper)['layout']);
+        $this->assertSame('stacked', (new ItemContext(new ExtensionList()))->build($field, 7, 1, $escaper)['layout']);
         $inline = ['settings' => ['layout' => 'inline']] + $field;
-        $this->assertSame('inline', ItemContext::build($inline, 7, 1, $escaper)['layout']);
+        $this->assertSame('inline', (new ItemContext(new ExtensionList()))->build($inline, 7, 1, $escaper)['layout']);
     }
 
     public function testItReadsTheAddressDirectoryOncePerStoreForHintsAndConfig(): void

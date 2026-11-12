@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace Furan\FormBuilder\Test\Unit\Model\Upload;
 
 use Furan\FormBuilder\Model\Config;
+use Furan\FormBuilder\Model\Upload\ExtensionList;
 use Furan\FormBuilder\Model\Upload\FileValidator;
 use Furan\FormBuilder\Model\Upload\PhpCodeDetector;
 use PHPUnit\Framework\TestCase;
@@ -39,7 +40,7 @@ class FileValidatorTest extends TestCase
         $config->method('getMaxUploadMb')->willReturn($maxMb);
         $config->method('getAllowedExtensions')->willReturn($extensions);
 
-        return new class ($config, new PhpCodeDetector()) extends FileValidator {
+        return new class ($config, new PhpCodeDetector(), new ExtensionList()) extends FileValidator {
             protected function isUploadedFile(string $path): bool
             {
                 return true;
@@ -91,6 +92,44 @@ class FileValidatorTest extends TestCase
         self::assertSame($msg, $php->validate($this->upload('a.php', 'hello'), []));
     }
 
+    public function testItMatchesFieldExtensionsWrittenWithDotsCapitalsOrSpaces(): void
+    {
+        $v = $this->validator();
+        $pdf = "%PDF-1.4\n1 0 obj<<>>endobj\n";
+
+        self::assertNull($v->validate($this->upload('a.pdf', $pdf), ['settings' => ['extensions' => ['.pdf']]]));
+        self::assertNull($v->validate($this->upload('a.pdf', $pdf), ['settings' => ['extensions' => [' .PDF ']]]));
+        self::assertNull($v->validate($this->upload('a.txt', 'hello'), ['settings' => ['extensions' => ['Txt', '.png']]]));
+    }
+
+    public function testItNeverWidensTheStoreAllowlistWithFieldExtensions(): void
+    {
+        $v = $this->validator(5, ['pdf', 'txt']);
+        $png = (string)base64_decode(self::PNG);
+
+        self::assertSame(
+            'This file type is not allowed.',
+            $v->validate($this->upload('a.png', $png), ['settings' => ['extensions' => ['.png', 'pdf']]])
+        );
+    }
+
+    public function testItRefusesEveryFileWhenTheFieldAndStoreListsShareNoExtension(): void
+    {
+        $v = $this->validator(5, ['pdf', 'txt']);
+
+        self::assertSame(
+            'This file type is not allowed.',
+            $v->validate($this->upload('a.txt', 'hello'), ['settings' => ['extensions' => ['.png', 'JPG']]])
+        );
+    }
+
+    public function testItUsesTheStoreAllowlistWhenTheFieldListHasOnlyBlankEntries(): void
+    {
+        $v = $this->validator();
+
+        self::assertNull($v->validate($this->upload('a.txt', 'hello'), ['settings' => ['extensions' => [' ', '.', ['x']]]]));
+    }
+
     public function testItRejectsFilesOverTheSizeLimit(): void
     {
         $v = $this->validator(1);
@@ -137,7 +176,7 @@ class FileValidatorTest extends TestCase
         $config = $this->createStub(Config::class);
         $config->method('getMaxUploadMb')->willReturn(5);
         $config->method('getAllowedExtensions')->willReturn(['txt']);
-        $v = new FileValidator($config, new PhpCodeDetector());
+        $v = new FileValidator($config, new PhpCodeDetector(), new ExtensionList());
         self::assertSame('The file could not be uploaded.', $v->validate($this->upload('a.txt', 'hi'), []));
     }
 

@@ -48,7 +48,7 @@ function boot(opts) {
     (pages.length > 1 ? '<ol data-ffb-progress>' + pages.map((p) => '<li data-ffb-step="' + p.id + '">' + p.id + '</li>').join('') + '</ol>' : '') +
     pages.map((p) => '<section data-ffb-page="' + p.id + '" data-ffb-item="' + p.id + '">' + p.items.map(itemMarkup).join('') + '</section>').join('') +
     '<div class="ffb-nav"><button type="button" data-ffb-prev>Back</button><button type="button" data-ffb-next>Next</button>' +
-    '<button type="submit" data-ffb-submit>Go</button></div><div data-ffb-status role="status"></div></form><div data-ffb-success hidden></div></div>';
+    '<button type="submit" data-ffb-submit>Go</button></div><div data-ffb-status role="status"></div><p class="ffb-sr-only" role="status" data-ffb-step-status></p></form><div data-ffb-success hidden></div></div>';
   const dom = new JSDOM(html, { runScripts: 'outside-only', url: 'https://shop.test/forms/x' });
   const w = dom.window;
   const doc = w.document;

@@ -13,13 +13,19 @@ Forms live under **Content → Form Builder → Forms**. Each active form is ser
 - **Advanced**: map pin, file upload.
 - **Presets**: full name, email with confirmation, phone, address, yes/no, date of birth, NPS and terms consent.
 - **Layout**: pages with a progress indicator, sections, headings, paragraphs, rich text, notices, a review step, dividers and spacers on a 6-column grid.
+- **Rich text**: `**bold**`, `*italic*`, `[text](url)`, `- ` bullets, `1. ` numbered lists, `#` to `###` (h3) and `####` (h4) headings. External links open in a new tab.
+- **Review step**: dates and times show in the store locale. After **Edit**, **Back to review** returns to the review step.
+- **Default value**: must suit the field: an option value for choice fields, a valid colour, date, time, month or number, within the field's rules and length. Checkbox, toggle, consent, newsletter, file, list, matrix, map, address and date range fields have no Default value.
+- **Colour**: a picker plus a hex text box (`#000000` for black). Empty means not chosen and submits nothing; without a Default value the field starts empty. **Clear** empties it.
+- **Text with suggestions**: an answer equal to an option's label in the store view's language, or its value, ignoring case, is stored as that option's value. Other answers are stored as typed. Validation rules apply to the stored value.
+- **Saving** is refused when a minimum is above its maximum (value, length, date, number of choices, range, days of a date range), when the minimum number of choices is above the number of options, or when a file type is not in the store's upload allowlist.
 
 Hidden fields take their value from one source:
 
 - **Fixed value**: the field's Default value. The server stores the Default value whatever the browser sends.
 - **Query parameter**, **Page URL**, **Referrer**: read in the browser when the form loads. When the source is empty, the field keeps its Default value. Visitors can change these values, so never use them to grant access or trust.
 
-A hidden field with a prefill source takes the prefill value when there is one.
+A hidden field with a prefill source stores the server value: the product value, the account value for signed-in customers, the Default value for guests on customer sources. The posted value is never used. Hidden fields cannot be required.
 
 Drafts survive a page refresh (session storage by default, local storage or off per form). With local storage, logged-in customers' drafts follow them between devices. A draft is dropped when the form's draftable fields change; a label change keeps it.
 
@@ -31,7 +37,7 @@ Add a condition to a page, section, field or content block, or a **Skip ahead** 
 
 - A condition matches all or any of its rules, with nested groups up to 3 levels and 25 rules and groups in total.
 - A rule compares an earlier field with a typed value, another earlier field, or a number of days from today (date fields, -3650 to 3650). For a choice field the value is picked from its options, and `is one of` ticks several; other fields take `is one of` entries one per line.
-- Actions: show, hide, require, set value and hide options. Set value fills the field in the browser; on the server it only overwrites locked and hidden fields.
+- Actions: show, hide, require, set value and hide options. Set value fills the field in the browser; on the server it only overwrites locked and hidden fields. Options of a text with suggestions field cannot be hidden.
 - **Skip ahead** jumps to a later page. Fields on skipped pages are empty and not required.
 - Today is the store view's date. The browser and the server evaluate the same rules, and the server checks again on submit.
 
@@ -76,7 +82,7 @@ Every submission gets a UUIDv7 reference, shown under the success message with a
 
 Available only while `Magento_Newsletter` is enabled, and hidden in store views where newsletters are off. It is never required, never pre-ticked and never kept in a draft.
 
-A ticked box subscribes a logged-in customer's account, or a guest's email (named by the field's **Email field** setting) when guest subscriptions are allowed in that store. Nothing is subscribed on edits or under Login as Customer.
+A ticked box subscribes a logged-in customer's account, or a guest's email (named by the field's **Email field** setting, else the form's customer or autoresponder email field) when guest subscriptions are allowed in that store. The builder shows a hint when neither is set. Nothing is subscribed on edits or under Login as Customer.
 
 ## Translations
 
@@ -92,7 +98,7 @@ Per store view: page title, meta description, a canonical link that ignores trac
 
 ## Appearance
 
-The stylesheet is scoped to `.ffb` and inherits the theme font. Per form, choose **Form builder styles** or **Theme styles only** (native controls for the theme to style), and an accent colour.
+The stylesheet is scoped to `.ffb` and inherits the theme font. Per form, choose **Form builder styles** or **Theme styles only** (native controls for the theme to style), and an accent colour. On Hyvä-based themes, **Theme styles only** forms also load `css/ffb-hyva.css`, which restores heading and text spacing (Tailwind 3 and 4).
 
 Themes can override the `--ffb-*` custom properties on `.ffb` (see `css/ffb.css`). My submissions and the reply pages use `.ffb-account` with the same properties.
 

@@ -521,43 +521,138 @@
     return wrapper;
   }
 
-  function prefillControls(doc, field, config, commit) {
+  const hint = (doc, text, key) => el(doc, 'p', Object.assign({ class: 'ffb-admin-hint', text }, key ? { 'data-ffb-hint': key } : {}));
+
+  // Required, Save in draft and Default follow the server facts; the rest are the type's display choices.
+  const SERVER_FACTS = { required: 'requiredAllowed', draft: 'draftAllowed', default: 'defaultAllowed' };
+
+  // An unused control stays shown while `current` holds a value the server rejects, so it can be cleared.
+  function shows(type, key, current) {
+    const offered = SERVER_FACTS[key]
+      ? !type || type[SERVER_FACTS[key]] !== false
+      : ((type && type.controls) || {})[key] !== false;
+    return offered || (current !== undefined && current !== null && current !== '' && current !== false);
+  }
+
+  function prefillControls(doc, field, type, config, commit) {
     const box = el(doc, 'div');
     const sources = (config.prefillSources || []).filter((s) => (s.types || []).indexOf(field.type) >= 0);
+    const current = field.prefill || '';
+    if (!sources.length && current === '') {
+      return box;
+    }
     const choices = [{ value: '', label: tr('(none)') }].concat(sources.map((s) => ({ value: s.code, label: s.label })));
-    box.appendChild(selectControl(doc, tr('Prefill from'), 'prefill', choices, field.prefill || '', (v) => commit({ prefill: v })));
-    const isProduct = String(field.prefill || '').indexOf('product.') === 0;
+    if (current !== '' && !sources.some((s) => s.code === current)) {
+      choices.push({ value: current, label: current });
+    }
+    box.appendChild(selectControl(doc, tr('Prefill from'), 'prefill', choices, current, (v) => commit({ prefill: v })));
+    if (current === '') {
+      return box;
+    }
+    const isProduct = current.indexOf('product.') === 0;
+    if (type && type.serverValue) {
+      if (!isProduct) {
+        box.appendChild(hint(doc, tr('Signed-in customers get their account value. Guests get the Default value.'), 'prefill-guests'));
+      }
+      return box;
+    }
     const locked = checkControl(doc, tr('Locked (filled by the server)'), 'locked', isProduct || field.locked === true,
       (v) => commit({ locked: v }));
     if (isProduct) {
       locked.querySelector('input').disabled = true;
     }
     box.appendChild(locked);
+    if (!isProduct && field.locked === true) {
+      box.appendChild(hint(doc, tr('Signed-in customers get their account value. Guests type their own.'), 'prefill-guests'));
+    }
     return box;
   }
 
-  function generalPanel(doc, field, config, commit) {
+  // A colour input always shows some colour, so without a default it is only added once the admin asks for one.
+  function colorDefault(doc, field, commit) {
+    const box = el(doc, 'div');
+    const value = field.default || '';
+    const picker = () => {
+      const input = el(doc, 'input', { type: 'color' });
+      input.addEventListener('change', () => commit({ default: input.value }));
+      return input;
+    };
+    if (value === '') {
+      box.appendChild(hint(doc, tr('No default: the colour starts as not chosen.'), 'default-none'));
+      const choose = button(doc, tr('Choose a default colour'), 'default-choose', () => {
+        const input = picker();
+        box.replaceChild(wrap(doc, tr('Default value'), input, 'default'), choose);
+        input.focus();
+        if (typeof input.showPicker === 'function') {
+          try {
+            input.showPicker();
+          } catch (e) {
+            // the picker opens on the next click instead
+          }
+        }
+      });
+      box.appendChild(choose);
+      return box;
+    }
+    const input = picker();
+    input.value = value;
+    box.appendChild(wrap(doc, tr('Default value'), input, 'default'));
+    box.appendChild(button(doc, tr('Clear default'), 'default-clear', () => commit({ default: '' })));
+    return box;
+  }
+
+  function defaultControl(doc, field, type, commit) {
+    const kind = ((type && type.controls) || {}).default;
+    const set = (v) => commit({ default: v });
+    if (kind === 'option') {
+      const value = field.default === undefined || field.default === null ? '' : String(field.default);
+      // `defaultChoices` ({value, label} list) stands in for options the field does not store, such as countries.
+      const options = Array.isArray(type.defaultChoices) ? type.defaultChoices : field.options || [];
+      const choices = [{ value: '', label: tr('No default') }].concat(choicesWithStored(options, [value]));
+      return selectControl(doc, tr('Default value'), 'default', choices, value, set);
+    }
+    if (kind === 'color') {
+      return colorDefault(doc, field, commit);
+    }
+    const inputType = ['number', 'date', 'datetime-local', 'month', 'time'].indexOf(kind) >= 0 ? kind : 'text';
+    return textControl(doc, tr('Default value'), 'default', field.default, set, { type: inputType });
+  }
+
+  function autocompleteControl(doc, field, config, commit) {
+    const labels = config.autocompleteLabels || {};
+    const choices = (config.autocomplete || ['']).map((a) => ({ value: a, label: a === '' ? tr('(none)') : labels[a] || a }));
+    return selectControl(doc, tr('Autocomplete'), 'autocomplete', choices, field.autocomplete || '', (v) => commit({ autocomplete: v }));
+  }
+
+  function generalPanel(doc, field, type, config, commit) {
     const p = el(doc, 'div');
+    const add = (key, control, rejected) => {
+      if (shows(type, key, rejected ? field[key] : undefined)) {
+        p.appendChild(control());
+      }
+    };
     p.appendChild(textControl(doc, tr('Label'), 'label', field.label, (v) => commit({ label: v })));
     p.appendChild(textControl(doc, tr('Name'), 'name', field.name, (v) => commit({ name: v })));
-    p.appendChild(textControl(doc, tr('Placeholder'), 'placeholder', field.placeholder, (v) => commit({ placeholder: v })));
-    p.appendChild(textControl(doc, tr('Help text'), 'help', field.help, (v) => commit({ help: v })));
-    p.appendChild(textControl(doc, tr('Default value'), 'default', field.default, (v) => commit({ default: v })));
-    p.appendChild(selectControl(doc, tr('Width'), 'width',
+    add('placeholder', () => textControl(doc, tr('Placeholder'), 'placeholder', field.placeholder, (v) => commit({ placeholder: v })));
+    add('help', () => textControl(doc, tr('Help text'), 'help', field.help, (v) => commit({ help: v })));
+    add('default', () => defaultControl(doc, field, type, commit), true);
+    add('width', () => selectControl(doc, tr('Width'), 'width',
       (config.widths || []).map((w) => ({ value: w.value, label: w.label })), field.width, (v) => commit({ width: v })));
-    p.appendChild(checkControl(doc, tr('Required'), 'required', field.required, (v) => commit({ required: v })));
-    p.appendChild(checkControl(doc, tr('Save in draft'), 'draft', field.draft !== false, (v) => commit({ draft: v })));
+    add('required', () => checkControl(doc, tr('Required'), 'required', field.required, (v) => commit({ required: v })), true);
+    if (shows(type, 'draft')) {
+      p.appendChild(checkControl(doc, tr('Save in draft'), 'draft', field.draft !== false, (v) => commit({ draft: v })));
+    }
     p.appendChild(checkControl(doc, tr('Contains personal data'), 'personal', model().isPersonal(field, config),
       (v) => commit({ personal: v })));
-    p.appendChild(prefillControls(doc, field, config, commit));
-    p.appendChild(selectControl(doc, tr('Autocomplete'), 'autocomplete',
-      (config.autocomplete || ['']).map((a) => ({ value: a, label: a === '' ? tr('(none)') : a })), field.autocomplete || '',
-      (v) => commit({ autocomplete: v })));
-    p.appendChild(textControl(doc, tr('CSS class'), 'css_class', field.css_class, (v) => commit({ css_class: v })));
+    p.appendChild(hint(doc, tr('Blanked when submissions are anonymised. Left out of analytics, and out of webhooks unless they include personal data.'), 'personal'));
+    p.appendChild(prefillControls(doc, field, type, config, commit));
+    add('autocomplete', () => autocompleteControl(doc, field, config, commit));
+    add('css_class', () => textControl(doc, tr('CSS class'), 'css_class', field.css_class, (v) => commit({ css_class: v })));
     return p;
   }
 
-  function optionsPanel(doc, field, commit) {
+  function optionsPanel(doc, field, type, commit) {
+    const addLabel = (type && type.controls && type.controls.option_add_label) || tr('Add option');
     const p = el(doc, 'div');
     const options = field.options || [];
     const update = (mutate) => {
@@ -571,8 +666,10 @@
         (v) => update((o) => { o[i].label = v; })));
       block.appendChild(textControl(doc, tr('Option value'), 'option-' + i + '-value', opt.value,
         (v) => update((o) => { o[i].value = v; })));
-      block.appendChild(textControl(doc, tr('Option description'), 'option-' + i + '-description', opt.description,
-        (v) => update((o) => { o[i].description = v; }), { maxlength: 255 }));
+      if (shows(type, 'option_description')) {
+        block.appendChild(textControl(doc, tr('Option description'), 'option-' + i + '-description', opt.description,
+          (v) => update((o) => { o[i].description = v; }), { maxlength: 255 }));
+      }
       const tools = el(doc, 'div', { class: 'ffb-admin-option-tools' });
       const up = button(doc, tr('Up'), 'option-' + i + '-up', () => update((o) => {
         o.splice(i - 1, 0, o.splice(i, 1)[0]);
@@ -588,7 +685,7 @@
       block.appendChild(tools);
       p.appendChild(block);
     });
-    const add = el(doc, 'button', { type: 'button', class: 'ffb-admin-add-field', text: '+ ' + tr('Add option'), 'data-ffb-input': 'option-add' });
+    const add = el(doc, 'button', { type: 'button', class: 'ffb-admin-add-field', text: '+ ' + addLabel, 'data-ffb-input': 'option-add' });
     add.addEventListener('click', () => update((o) => { o.push({ label: '', value: '' }); }));
     p.appendChild(add);
     return p;
@@ -676,8 +773,9 @@
     if (!rules.length) {
       p.appendChild(el(doc, 'p', { class: 'ffb-admin-empty-note', 'data-ffb-hint': 'no-rules',
         text: allowed.length
-          ? tr('No rules yet. Add one to check the format of answers, such as a postcode or phone number.')
-          : tr('This field type has no extra rules. Use Required on the General tab to make it mandatory.') }));
+          ? tr('No rules yet. Choose one under Add rule.')
+          : (shows(type, 'required') ? tr('This field type has no extra rules. Use Required on the General tab to make it mandatory.')
+            : tr('This field type has no extra rules.')) }));
     }
     rules.forEach((rule, i) => {
       const remove = button(doc, tr('Remove'), 'rule-' + i + '-remove', () => update((r) => { r.splice(i, 1); }));
@@ -711,7 +809,9 @@
       select.appendChild(checks);
       if (allowed.indexOf('preset') >= 0) {
         const groups = {};
-        (config.ruleLibrary || []).forEach((entry) => {
+        // `presets` lists the library formats the server accepts for the type; without it every format is offered.
+        const fits = (entry) => !type || !Array.isArray(type.presets) || type.presets.indexOf(entry.ref) >= 0;
+        (config.ruleLibrary || []).filter(fits).forEach((entry) => {
           if (!groups[entry.group]) {
             groups[entry.group] = el(doc, 'optgroup', { label: entry.group });
           }
@@ -784,6 +884,16 @@
   }
 
   // opts.label / opts.key override the display text and input key (form settings contributors).
+  function emailFieldControl(doc, label, key, value, set, emailFields, formEmail) {
+    const text = value === undefined || value === null ? '' : String(value);
+    const fallback = emailFields.find((f) => f.value === formEmail);
+    const choices = [{ value: '', label: fallback ? tr('Form\'s email field (%1)', fallback.label) : tr('None') }].concat(emailFields);
+    if (text !== '' && !emailFields.some((f) => f.value === text)) {
+      choices.push({ value: text, label: tr('%1 (field no longer exists)', text) });
+    }
+    return selectControl(doc, label, key, choices, text, set);
+  }
+
   function settingControl(doc, name, spec, current, commit, opts) {
     const o = opts || {};
     const key = o.key || 'setting-' + name;
@@ -804,9 +914,18 @@
     if (spec.format === 'mask') {
       return maskControl(doc, label, key, spec, value, set, o.masks || [], o.maskHints || {});
     }
+    if (spec.format === 'date') {
+      return textControl(doc, label, key, value, set, { type: 'date' });
+    }
+    if (spec.format === 'email_field' && o.emailFields) {
+      return emailFieldControl(doc, label, key, value, set, o.emailFields, o.formEmail);
+    }
     switch (spec.type) {
       case 'int':
       case 'number':
+        if (Array.isArray(spec.values) && spec.values.length) {
+          return selectControl(doc, label, key, enumOptions(spec), value, (v) => set(Number(v)));
+        }
         return textControl(doc, label, key, value, (v) => set(toNumber(v)), { type: 'number', min: spec.min, max: spec.max });
       case 'bool':
         return checkControl(doc, label, key, value, set);
@@ -832,24 +951,42 @@
     return { maxLength: limits.length ? Math.min(...limits) : 0, library: config.ruleLibrary || [] };
   }
 
-  function settingsPanel(doc, field, type, commit, config) {
+  function settingsPanel(doc, field, type, commit, config, state) {
     const p = el(doc, 'div');
     const spec = (type && type.settingsSpec) || {};
     const settings = field.settings || {};
-    const current = (name) => (settings[name] === undefined ? (spec[name] || {}).default : settings[name]);
+    // An `@` key reads the field itself (`@prefill`), where a missing value counts as empty.
+    const current = (name) => {
+      if (name.charAt(0) === '@') {
+        const own = field[name.slice(1)];
+        return own === undefined || own === null ? '' : own;
+      }
+      return settings[name] === undefined ? (spec[name] || {}).default : settings[name];
+    };
     // `visible_when` maps another setting to the values that show this one.
-    const visible = (when) => !when || Object.keys(when).every((key) => [].concat(when[key]).indexOf(current(key)) !== -1);
+    const visible = (when) => !when || Object.keys(when).every((key) => [].concat(when[key]).map(String).indexOf(String(current(key))) !== -1);
+    const emailFields = model().allFields(state).filter((f) => model().isEmailAddress(f.type, config))
+      .map((f) => ({ value: f.name, label: f.label || f.name }));
+    const formEmail = model().submitterEmailField(state.form.settings || {});
     Object.keys(spec).forEach((name) => {
       if (!visible(spec[name].visible_when)) {
         return;
       }
       p.appendChild(settingControl(doc, name, spec[name], settings[name], (n, v) => {
         commit({ settings: Object.assign({}, settings, { [n]: v }) });
-      }, { masks: config.masks || [], maskHints: maskHints(field, config) }));
-      if (typeof spec[name].hint === 'string' && spec[name].hint !== '') {
+      }, { masks: config.masks || [], maskHints: maskHints(field, config), emailFields, formEmail }));
+      // Signed-in customers are subscribed through their account; guests need an email answer to subscribe.
+      const guestsMissed = spec[name].format === 'email_field' && !current(name) && !formEmail && !config.group;
+      if (guestsMissed) {
+        p.appendChild(hint(doc, tr('Guests won\'t be subscribed: choose an email field.'), 'email-field-guests'));
+      } else if (typeof spec[name].hint === 'string' && spec[name].hint !== '') {
         p.appendChild(el(doc, 'p', { class: 'ffb-admin-hint', text: spec[name].hint }));
       }
     });
+    if (type && type.isFile && config.uploads) {
+      p.appendChild(hint(doc, tr('Leave empty for the store\'s types (%1). 0 = store limit (%2 MB).',
+        (config.uploads.allowedExtensions || []).join(', '), config.uploads.maxMb), 'uploads'));
+    }
     return p;
   }
 
@@ -879,15 +1016,17 @@
     const type = (config.fieldTypes || []).find((t) => t.code === field.type);
     const commit = (patch) => actions.apply('updateItem', field.id, patch);
     const panels = [
-      { name: 'general', title: tr('General'), panel: generalPanel(doc, field, config, commit) },
+      { name: 'general', title: tr('General'), panel: generalPanel(doc, field, type, config, commit) },
     ];
     if (type && type.hasOptions) {
-      panels.push({ name: 'options', title: tr('Options'), panel: optionsPanel(doc, field, commit) });
+      const title = (type.controls && type.controls.options_title) || tr('Options');
+      panels.push({ name: 'options', title, panel: optionsPanel(doc, field, type, commit) });
     }
     panels.push({ name: 'validation', title: tr('Validation'), panel: validationPanel(doc, field, type, state, config, commit) });
     panels.push({ name: 'conditions', title: tr('Conditions'), panel: conditionEditor(doc, field, state, config, commit) });
-    if (type && Object.keys(type.settingsSpec || {}).length) {
-      panels.push({ name: 'settings', title: tr('Settings'), panel: settingsPanel(doc, field, type, commit, config) });
+    const settings = type ? settingsPanel(doc, field, type, commit, config, state) : null;
+    if (settings && settings.childNodes.length) {
+      panels.push({ name: 'settings', title: tr('Settings'), panel: settings });
     }
     tabs(doc, container, panels);
   }
@@ -901,9 +1040,12 @@
         [2, 3, 4].map((n) => ({ value: n, label: 'H' + n })), item.level, (v) => commit({ level: Number(v) })));
     } else if (item.type === 'paragraph' || item.type === 'rich_text') {
       p.appendChild(textControl(doc, tr('Text'), 'text', item.text, (v) => commit({ text: v }), { multiline: true }));
+      p.appendChild(hint(doc, item.type === 'paragraph' ? tr('Line breaks are kept.')
+        : tr('**bold**, *italic*, [text](https://...), "- " bullets, "1. " numbers, "#" headings. A blank line starts a new paragraph.'), 'text-syntax'));
     } else if (item.type === 'notice') {
       p.appendChild(textControl(doc, tr('Title'), 'title', item.title, (v) => commit({ title: v })));
       p.appendChild(textControl(doc, tr('Text'), 'text', item.text, (v) => commit({ text: v }), { multiline: true }));
+      p.appendChild(hint(doc, tr('Plain text.'), 'text-syntax'));
       p.appendChild(selectControl(doc, tr('Style'), 'style',
         [['info', phrase('Info')], ['success', phrase('Success')], ['warning', phrase('Warning')]].map(([value, label]) => ({ value, label: tr(label) })),
         item.style, (v) => commit({ style: v })));
@@ -1405,6 +1547,20 @@
     }
   }
 
+  function selectionTitle(target, config) {
+    const node = target.node;
+    if (target.kind === 'field') {
+      const type = (config.fieldTypes || []).find((t) => t.code === node.type);
+      const name = type ? type.label : humanise(node.type);
+      return node.label && node.label !== name ? tr('%1: %2', name, node.label) : name;
+    }
+    if (target.kind === 'content') {
+      const type = (config.contentTypes || []).find((t) => t.code === node.type);
+      return type ? type.label : humanise(node.type);
+    }
+    return target.kind === 'section' ? tr('Section') : tr('Page');
+  }
+
   function render(container, state, config, actions, translation) {
     const doc = container.ownerDocument;
     while (container.firstChild) {
@@ -1425,6 +1581,8 @@
     }
     const builders = { field: fieldInspector, content: contentInspector, section: sectionInspector, page: pageInspector };
     builders[target.kind](doc, container, target.node, state, config, actions);
+    container.insertBefore(el(doc, 'h2', { class: 'ffb-admin-panel-title', 'data-ffb-inspector-title': '', text: selectionTitle(target, config) }),
+      container.firstChild);
     if (target.kind !== 'page') {
       itemActions(doc, container, target.node.id, actions);
     } else {

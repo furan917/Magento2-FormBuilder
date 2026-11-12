@@ -28,8 +28,8 @@ class CapabilityInterfacesTest extends TestCase
                 'csvPlainColumns' => [['array'], 'array'],
             ]],
             'displayable' => [DisplayableTypeInterface::class, [
-                'toText' => [['array', 'mixed'], 'string'],
-                'toHtml' => [['array', 'mixed', \Magento\Framework\Escaper::class], 'string'],
+                'toText' => [['array', 'mixed', \Furan\FormBuilder\Api\Data\DisplayContext::class], 'string'],
+                'toHtml' => [['array', 'mixed', \Magento\Framework\Escaper::class, \Furan\FormBuilder\Api\Data\DisplayContext::class], 'string'],
             ]],
             'client messages' => [ClientMessagesInterface::class, ['getClientMessages' => [['array'], 'array']]],
             'stats' => [StatsAwareTypeInterface::class, ['statsKind' => [['array'], '?int']]],

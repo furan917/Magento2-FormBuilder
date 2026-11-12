@@ -1,0 +1,81 @@
+/*
+ * Hyvä only (hyva_default.xml), "Theme styles only" forms: Tailwind preflight flattens headings, legends
+ * and text spacing. Class specificity wins over preflight in Tailwind 3 and 4; Luma never loads this file.
+ * Sizes come from the --ffb-fs-* scale on .ffb (ffb.css).
+ */
+.ffb:not(.ffb-skin) .ffb-page-title,
+.ffb:not(.ffb-skin) .ffb-heading,
+.ffb:not(.ffb-skin) .ffb-section-title,
+.ffb:not(.ffb-skin) .ffb-summary-title,
+.ffb:not(.ffb-skin) .ffb-rich h3,
+.ffb:not(.ffb-skin) .ffb-rich h4 {
+    margin: 0;
+    font-weight: 600;
+    line-height: 1.3;
+}
+
+.ffb:not(.ffb-skin) .ffb-page-title {
+    margin-bottom: 1em;
+    font-size: var(--ffb-fs-page);
+}
+
+.ffb:not(.ffb-skin) h2.ffb-heading {
+    font-size: var(--ffb-fs-h2);
+}
+
+.ffb:not(.ffb-skin) .ffb-section-title {
+    margin-bottom: 0.5em;
+    font-size: var(--ffb-fs-legend);
+}
+
+.ffb:not(.ffb-skin) h3.ffb-heading,
+.ffb:not(.ffb-skin) .ffb-rich h3,
+.ffb:not(.ffb-skin) .ffb-summary-title {
+    font-size: var(--ffb-fs-h3);
+}
+
+.ffb:not(.ffb-skin) h4.ffb-heading,
+.ffb:not(.ffb-skin) .ffb-rich h4 {
+    font-size: var(--ffb-fs-h4);
+}
+
+.ffb:not(.ffb-skin) .ffb-summary-title {
+    margin-bottom: 0.5em;
+}
+
+/* Group legends read like the field labels beside them (Hyvä's label colour token). */
+.ffb:not(.ffb-skin) legend.ffb-label {
+    margin: 0 0 0.5em;
+    padding: 0;
+    color: var(--color-fg-secondary, inherit);
+    font-size: inherit;
+    font-weight: inherit;
+    line-height: inherit;
+}
+
+.ffb:not(.ffb-skin) .ffb-rich p,
+.ffb:not(.ffb-skin) .ffb-rich ul,
+.ffb:not(.ffb-skin) .ffb-rich ol,
+.ffb:not(.ffb-skin) .ffb-paragraph,
+.ffb:not(.ffb-skin) .ffb-section-description {
+    margin: 0 0 0.75em;
+}
+
+.ffb:not(.ffb-skin) .ffb-rich h3,
+.ffb:not(.ffb-skin) .ffb-rich h4 {
+    margin-bottom: 0.4em;
+}
+
+.ffb:not(.ffb-skin) .ffb-rich * + h3,
+.ffb:not(.ffb-skin) .ffb-rich * + h4 {
+    margin-top: 1em;
+}
+
+.ffb:not(.ffb-skin) .ffb-rich > :last-child,
+.ffb:not(.ffb-skin) .ffb-paragraph:last-child {
+    margin-bottom: 0;
+}
+
+.ffb:not(.ffb-skin) .ffb-help {
+    color: var(--color-fg-secondary, inherit);
+}

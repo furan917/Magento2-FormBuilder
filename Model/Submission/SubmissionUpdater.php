@@ -102,7 +102,8 @@ class SubmissionUpdater
                     ->setCreatedAt((string)$row['created_at'])
                     ->setPayload($old);
                 $this->journal->replace($stored, $merged);
-                $stored->setPayload($merged)->setSummary($this->summaryBuilder->build($fields, $values));
+                $stored->setPayload($merged)
+                    ->setSummary($this->summaryBuilder->build($fields, $values, (int)($row['store_id'] ?? 0)));
                 // Only these columns: a model save would write back status and claim fields read earlier.
                 $this->resource->getConnection()->update(
                     $this->table(),

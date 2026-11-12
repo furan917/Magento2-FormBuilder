@@ -22,6 +22,13 @@
     --ffb-gap: 1.25em;
     --ffb-ring: rgba(29, 95, 209, 0.25);
     --ffb-tint: #eef3fc;
+    /* Type scale shared by the skin and the Hyvä theme-mode sheet (ffb-hyva.css). */
+    --ffb-fs-page: 1.75em;
+    --ffb-fs-h2: 1.5em;
+    --ffb-fs-legend: 1.3125em;
+    --ffb-fs-h3: 1.1875em;
+    --ffb-fs-h4: 1.0625em;
+    --ffb-fs-label: 0.9375em;
     max-width: 100%;
 }
 
@@ -53,6 +60,19 @@
 
 .ffb .ffb-type-hidden {
     display: none;
+}
+
+.ffb .ffb-sr-only {
+    position: absolute !important;
+    width: 1px !important;
+    height: 1px !important;
+    margin: -1px !important;
+    padding: 0 !important;
+    overflow: hidden !important;
+    clip: rect(0, 0, 0, 0) !important;
+    clip-path: inset(50%) !important;
+    white-space: nowrap !important;
+    border: 0 !important;
 }
 
 .ffb .ffb-noscript {
@@ -163,7 +183,7 @@
 
 .ffb .ffb-cards {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(11em, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(max(min(100%, 11em), calc((100% - 1.5em) / 3)), 1fr));
     gap: 0.75em;
 }
 
@@ -202,6 +222,7 @@
     display: inline-flex;
     align-items: center;
     padding: 0 0.5em;
+    white-space: nowrap;
 }
 
 .ffb .ffb-help,
@@ -212,8 +233,313 @@
 .ffb .ffb-nav {
     display: flex;
     flex-wrap: wrap;
+    align-items: center;
+    justify-content: flex-end;
     gap: 0.5em;
     margin-top: 1em;
+}
+
+.ffb .ffb-nav [data-ffb-prev] {
+    margin-right: auto;
+}
+
+.ffb .ffb-help {
+    font-size: 0.875em;
+}
+
+.ffb .ffb-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5em;
+}
+
+/* Single checkbox, consent, toggle, newsletter: control beside its label, everything else under the label. */
+.ffb .ffb-type-checkbox,
+.ffb .ffb-type-consent,
+.ffb .ffb-type-toggle,
+.ffb .ffb-type-newsletter {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    column-gap: 0.65em;
+    align-items: start;
+}
+
+.ffb .ffb-type-checkbox > .ffb-label,
+.ffb .ffb-type-consent > .ffb-label,
+.ffb .ffb-type-toggle > .ffb-label,
+.ffb .ffb-type-newsletter > .ffb-label {
+    margin: 0;
+}
+
+.ffb .ffb-type-checkbox > :not(.ffb-choice):not(.ffb-label),
+.ffb .ffb-type-consent > :not(.ffb-choice):not(.ffb-label),
+.ffb .ffb-type-toggle > :not(.ffb-choice):not(.ffb-label),
+.ffb .ffb-type-newsletter > :not(.ffb-choice):not(.ffb-label) {
+    grid-column: 2;
+}
+
+.ffb .ffb-consent-details {
+    display: block;
+}
+
+.ffb .ffb-consent-link {
+    justify-self: start;
+}
+
+.ffb .ffb-type-range {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+    column-gap: 1em;
+}
+
+.ffb .ffb-type-range > :not(.ffb-input):not(.ffb-range-value) {
+    grid-column: 1 / -1;
+}
+
+.ffb .ffb-card-body {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25em;
+}
+
+.ffb .ffb-color-clear,
+.ffb .ffb-list-remove {
+    flex: none;
+}
+
+/* Review summary: label, value, Edit per row; values keep their line breaks. */
+.ffb .ffb-summary-list {
+    margin: 0;
+    padding: 0;
+}
+
+.ffb .ffb-summary-row {
+    display: grid;
+    grid-template-columns: minmax(8em, 35%) minmax(0, 1fr) auto;
+    gap: 0.25em 1em;
+}
+
+.ffb .ffb-summary-row dt,
+.ffb .ffb-summary-row dd {
+    margin: 0;
+}
+
+.ffb .ffb-summary-row dd {
+    overflow-wrap: anywhere;
+    white-space: pre-line;
+}
+
+/* Beats the skin's shared link-button reset, which sets display: inline. */
+.ffb .ffb-summary-row .ffb-summary-edit {
+    display: inline-flex;
+    align-items: center;
+    min-width: 24px;
+    min-height: 24px;
+    padding: 0 0.25em;
+}
+
+.ffb .ffb-success {
+    white-space: pre-line;
+}
+
+.ffb .ffb-success-body {
+    display: grid;
+    gap: 0.6em;
+}
+
+.ffb .ffb-reference {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.35em 0.6em;
+    margin: 0;
+    white-space: normal;
+}
+
+.ffb .ffb-reference code {
+    overflow-wrap: anywhere;
+}
+
+@media (max-width: 479px) {
+    .ffb .ffb-nav > .ffb-btn {
+        flex: 1 1 auto;
+    }
+
+    .ffb .ffb-summary-row {
+        grid-template-columns: minmax(0, 1fr) auto;
+    }
+
+    .ffb .ffb-summary-row dt,
+    .ffb .ffb-summary-row dd:not(.ffb-summary-action) {
+        grid-column: 1;
+    }
+
+    .ffb .ffb-summary-row .ffb-summary-action {
+        grid-column: 2;
+        grid-row: 1 / span 2;
+    }
+}
+
+/* Progress: completed steps get a check mark and a thicker bar, so colour is never the only cue. */
+.ffb .ffb-progress {
+    display: flex;
+    gap: 0.5em;
+    margin: 0 0 1.5em;
+    padding: 0;
+    list-style: none;
+    counter-reset: ffb-step;
+}
+
+.ffb .ffb-progress-step {
+    counter-increment: ffb-step;
+    flex: 1 1 0;
+    min-width: 0;
+    margin: 2px 0 0;
+    padding: 0.6em 0 0;
+    border-top: 2px solid #8c959f;
+    border-top-color: color-mix(in srgb, currentColor 60%, transparent);
+    font-size: 0.875em;
+    line-height: 1.3;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.ffb .ffb-progress-step::before {
+    content: counter(ffb-step) ". ";
+    font-variant-numeric: tabular-nums;
+}
+
+.ffb .ffb-progress-step[aria-current="step"] {
+    margin-top: 0;
+    border-top: 4px solid currentColor;
+    font-weight: 600;
+}
+
+.ffb .ffb-progress-step[data-ffb-done] {
+    margin-top: 0;
+    border-top: 4px solid currentColor;
+}
+
+.ffb .ffb-progress-step[data-ffb-done]::before {
+    content: "\2713\00a0";
+    content: "\2713\00a0" / "";
+}
+
+/*
+ * Narrow: short bars, then the current step's label on its own line (order 3). The list's ::before (order 1)
+ * is its bar between earlier (0) and later (2) steps, twice as long so current differs from completed.
+ */
+@media (max-width: 479px) {
+    .ffb .ffb-progress {
+        flex-wrap: wrap;
+        align-items: flex-start;
+        gap: 0 0.35em;
+    }
+
+    .ffb .ffb-progress-step:not([aria-current="step"]) {
+        flex: 0 0 1.25em;
+        height: 0;
+        padding: 0;
+    }
+
+    .ffb .ffb-progress-step[aria-current="step"] ~ .ffb-progress-step {
+        order: 2;
+    }
+
+    .ffb.ffb-js .ffb-progress::before {
+        content: "";
+        order: 1;
+        flex: 0 0 2.5em;
+        height: 0;
+        border-top: 4px solid currentColor;
+    }
+
+    .ffb .ffb-progress-step[aria-current="step"] {
+        order: 3;
+        flex: 1 0 100%;
+        margin: 0;
+        padding-top: 0.5em;
+        border-top: 0;
+        overflow: visible;
+        white-space: normal;
+    }
+}
+
+/* Theme styles only: one class beats reset element rules (Tailwind preflight) and loses to theme classes. */
+:where(.ffb:not(.ffb-skin)) .ffb-btn,
+:where(.ffb:not(.ffb-skin)) .ffb-list-add,
+:where(.ffb:not(.ffb-skin)) .ffb-list-remove,
+:where(.ffb:not(.ffb-skin)) .ffb-reference-copy {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 2.5em;
+    padding: 0.4em 1.25em;
+    border: 1px solid currentColor;
+    border-radius: 0.25em;
+    cursor: pointer;
+}
+
+/* Primary is every button that is not secondary (Next carries no modifier). */
+:where(.ffb:not(.ffb-skin)) .ffb-btn:where(:not(.ffb-btn-secondary)) {
+    border-width: 2px;
+    font-weight: 700;
+}
+
+:where(.ffb:not(.ffb-skin)) .ffb-btn-secondary {
+    font-weight: 400;
+}
+
+:where(.ffb:not(.ffb-skin)) .ffb-notice {
+    padding: 0.75em 1em;
+    border-left: 4px solid currentColor;
+}
+
+:where(.ffb:not(.ffb-skin)) .ffb-notice-title {
+    margin: 0 0 0.25em;
+    font-weight: 600;
+}
+
+:where(.ffb:not(.ffb-skin)) .ffb-notice-text {
+    margin: 0;
+}
+
+:where(.ffb:not(.ffb-skin)) .ffb-summary-row {
+    padding: 0.5em 0;
+}
+
+:where(.ffb:not(.ffb-skin)) .ffb-summary-row + .ffb-summary-row {
+    border-top: 1px solid #8c959f;
+    border-top-color: color-mix(in srgb, currentColor 25%, transparent);
+}
+
+:where(.ffb:not(.ffb-skin)) .ffb-rich a,
+:where(.ffb:not(.ffb-skin)) .ffb-consent-link,
+:where(.ffb:not(.ffb-skin)) .ffb-btn-link,
+:where(.ffb:not(.ffb-skin)) .ffb-summary-edit,
+:where(.ffb:not(.ffb-skin)) .ffb-color-clear {
+    text-decoration: underline;
+    cursor: pointer;
+}
+
+:where(.ffb:not(.ffb-skin)) .ffb-rich ul {
+    padding-left: 1.25em;
+    list-style: disc;
+}
+
+:where(.ffb:not(.ffb-skin)) .ffb-rich ol {
+    padding-left: 1.5em;
+    list-style: decimal;
+}
+
+:where(.ffb:not(.ffb-skin)) .ffb-section {
+    padding: 1em;
+    border: 1px solid #8c959f;
+    border-color: color-mix(in srgb, currentColor 35%, transparent);
+    border-radius: 0.25em;
 }
 
 /* Skin (off with "Theme styles only") */
@@ -246,50 +572,33 @@
 .ffb-skin .ffb-page-title {
     margin: 0 0 1em;
     padding: 0;
-    font-size: 1.5em;
+    font-size: var(--ffb-fs-page);
     font-weight: 600;
-    line-height: 1.3;
+    line-height: 1.25;
     color: var(--ffb-text);
 }
 
-/* Progress */
+/* Progress (layout and step markers are structural, above) */
 .ffb-skin .ffb-progress {
-    display: flex;
-    gap: 0.5em;
-    list-style: none;
-    margin: 0 0 1.75em;
-    padding: 0;
-    counter-reset: ffb-step;
+    margin-bottom: 1.75em;
 }
 
 .ffb-skin .ffb-progress-step {
-    counter-increment: ffb-step;
-    flex: 1 1 0;
-    min-width: 0;
-    margin: 0;
-    padding: 0.6em 0 0;
-    border-top: 3px solid var(--ffb-border);
+    border-top-color: var(--ffb-border-strong);
     color: var(--ffb-muted);
-    font-size: 0.875em;
-    line-height: 1.3;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-}
-
-.ffb-skin .ffb-progress-step::before {
-    content: counter(ffb-step) ". ";
-    font-variant-numeric: tabular-nums;
-}
-
-.ffb-skin .ffb-progress-step:has(~ [aria-current="step"]) {
-    border-top-color: var(--ffb-accent);
 }
 
 .ffb-skin .ffb-progress-step[aria-current="step"] {
     border-top-color: var(--ffb-accent);
     color: var(--ffb-text);
-    font-weight: 600;
+}
+
+.ffb-skin .ffb-progress-step[data-ffb-done] {
+    border-top-color: var(--ffb-accent);
+}
+
+.ffb-skin.ffb-js .ffb-progress::before {
+    border-top-color: var(--ffb-accent);
 }
 
 /* Sections */
@@ -306,9 +615,9 @@
     margin: 0 0 0.25em;
     padding: 0;
     border: 0;
-    font-size: 1.0625em;
+    font-size: var(--ffb-fs-legend);
     font-weight: 600;
-    line-height: 1.4;
+    line-height: 1.35;
     color: var(--ffb-text);
 }
 
@@ -332,7 +641,7 @@
     margin: 0 0 0.4em;
     padding: 0;
     border: 0;
-    font-size: 0.9375em;
+    font-size: var(--ffb-fs-label);
     font-weight: 600;
     line-height: 1.4;
     color: var(--ffb-text);
@@ -430,6 +739,11 @@
     box-shadow: 0 0 0 3px rgba(198, 40, 40, 0.2);
 }
 
+/* The error border is the cue; drops theme outlines (Hyvä) that stack on it. Focus rings are box-shadows. */
+.ffb-skin :is(.ffb-input, input.ffb-choice):is([aria-invalid="true"], :user-invalid) {
+    outline: none;
+}
+
 .ffb-skin textarea.ffb-input {
     min-height: 7em;
     resize: vertical;
@@ -453,23 +767,109 @@
     padding: 0.35em;
 }
 
+/* Colour: a fixed square picker (mouse/touch only), the hex box (the labelled control) and Clear. */
+.ffb .ffb-color {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5em;
+}
+
 /* Chrome sizes the swatch from the input's height; auto collapses it. */
-.ffb-skin .ffb-input[type="color"] {
-    height: var(--ffb-control-h);
-    width: 4.5em;
-    padding: 0.3em;
+.ffb .ffb-color-picker {
+    flex: none;
+    width: 2.75em;
+    height: 2.75em;
+    margin: 0;
+    padding: 0.2em;
     cursor: pointer;
+}
+
+.ffb .ffb-color-hex {
+    flex: 0 1 calc(9ch + 2em);
+    min-width: 0;
+    font-variant-numeric: tabular-nums;
+}
+
+.ffb-skin .ffb-color-picker {
+    width: var(--ffb-control-h);
+    height: var(--ffb-control-h);
+    border: 1px solid var(--ffb-border-strong);
+    border-radius: var(--ffb-radius);
+    background: var(--ffb-surface);
+}
+
+.ffb-skin .ffb-color-picker::-webkit-color-swatch-wrapper {
+    padding: 0;
+}
+
+.ffb-skin .ffb-color-picker::-webkit-color-swatch {
+    border: 0;
+    border-radius: calc(var(--ffb-radius) - 3px);
+}
+
+.ffb-skin .ffb-color-picker::-moz-color-swatch {
+    border: 0;
+    border-radius: calc(var(--ffb-radius) - 3px);
+}
+
+/* Not chosen: hatched swatch instead of the browser's black. */
+.ffb .ffb-color[data-ffb-empty] .ffb-color-picker::-webkit-color-swatch {
+    background: repeating-linear-gradient(45deg, #fff 0 6px, #d0d7de 6px 12px) !important;
+}
+
+.ffb .ffb-color[data-ffb-empty] .ffb-color-picker::-moz-color-swatch {
+    background: repeating-linear-gradient(45deg, #fff 0 6px, #d0d7de 6px 12px) !important;
+}
+
+.ffb .ffb-summary-swatch {
+    display: inline-block;
+    width: 1em;
+    height: 1em;
+    margin-right: 0.4em;
+    vertical-align: -0.15em;
+    border: 1px solid #8c959f;
+    border-radius: 3px;
+}
+
+.ffb-skin .ffb-color-clear {
+    min-width: 24px;
+    min-height: 24px;
+    margin: 0;
+    padding: 0.2em 0.35em;
+    border: 0;
+    background: none;
+    box-shadow: none;
+    color: var(--ffb-accent);
+    font: inherit;
+    font-size: max(13px, 0.875em);
+    font-weight: 600;
+    text-decoration: underline;
+    text-underline-offset: 2px;
+    cursor: pointer;
+}
+
+.ffb-skin .ffb-color-clear:hover,
+.ffb-skin .ffb-color-clear:focus {
+    border: 0;
+    background: none;
+    box-shadow: none;
+    color: var(--ffb-accent);
+    text-decoration-thickness: 2px;
+}
+
+.ffb-skin .ffb-color-clear:focus-visible {
+    outline: 2px solid var(--ffb-accent);
+    outline-offset: 2px;
+    border-radius: 2px;
 }
 
 /* Prefix / suffix */
 .ffb-skin .ffb-affix {
-    display: inline-flex;
-    align-items: center;
     padding: 0 0.85em;
     border: 1px solid var(--ffb-border-strong);
     background: var(--ffb-surface-alt);
     color: var(--ffb-muted);
-    white-space: nowrap;
 }
 
 .ffb-skin .ffb-prefix {
@@ -515,17 +915,6 @@
 }
 
 /* Range */
-.ffb-skin .ffb-type-range {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) auto;
-    align-items: center;
-    column-gap: 1em;
-}
-
-.ffb-skin .ffb-type-range > :not(.ffb-input):not(.ffb-range-value) {
-    grid-column: 1 / -1;
-}
-
 .ffb-skin .ffb-input[type="range"] {
     appearance: none;
     -webkit-appearance: none;
@@ -683,43 +1072,26 @@
 }
 
 /* Single checkbox, consent, toggle */
-.ffb-skin .ffb-type-checkbox,
-.ffb-skin .ffb-type-consent,
-.ffb-skin .ffb-type-toggle,
-.ffb-skin .ffb-type-newsletter {
-    display: grid;
-    grid-template-columns: auto minmax(0, 1fr);
-    column-gap: 0.65em;
-    align-items: start;
-}
-
 .ffb-skin .ffb-type-checkbox > .ffb-label,
 .ffb-skin .ffb-type-consent > .ffb-label,
 .ffb-skin .ffb-type-toggle > .ffb-label,
 .ffb-skin .ffb-type-newsletter > .ffb-label {
-    margin: 0;
     font-size: 1em;
     font-weight: 400;
     line-height: 1.45;
     cursor: pointer;
 }
 
-.ffb-skin .ffb-type-checkbox > :not(.ffb-choice):not(.ffb-label),
-.ffb-skin .ffb-type-consent > :not(.ffb-choice):not(.ffb-label),
-.ffb-skin .ffb-type-toggle > :not(.ffb-choice):not(.ffb-label),
-.ffb-skin .ffb-type-newsletter > :not(.ffb-choice):not(.ffb-label) {
-    grid-column: 2;
-}
-
+/* Reaches into the gutter (under half the column gap) so the checkbox lines up with a plain checkbox. */
 .ffb-skin .ffb-type-consent {
-    padding: 1em;
+    margin: 0 calc(-0.4em - 1px);
+    padding: 0.6em 0.4em;
     border: 1px solid var(--ffb-border);
     border-radius: var(--ffb-radius);
     background: var(--ffb-surface-alt);
 }
 
 .ffb-skin .ffb-consent-details {
-    display: block;
     margin-top: 0.35em;
     font-size: max(13px, 0.8125em);
     line-height: 1.5;
@@ -727,7 +1099,6 @@
 }
 
 .ffb-skin .ffb-consent-link {
-    justify-self: start;
     margin-top: 0.35em;
     font-size: max(13px, 0.8125em);
     color: var(--ffb-accent);
@@ -889,12 +1260,6 @@
     box-shadow: 0 0 0 3px var(--ffb-ring);
 }
 
-.ffb-skin .ffb-card-body {
-    display: flex;
-    flex-direction: column;
-    gap: 0.25em;
-}
-
 .ffb-skin .ffb-card-title {
     font-weight: 600;
 }
@@ -975,8 +1340,10 @@
     }
 }
 
-/* Content */
-.ffb-skin .ffb-heading {
+/* Content (sizes: the --ffb-fs-* scale on .ffb) */
+.ffb-skin .ffb-heading,
+.ffb-skin .ffb-rich h3,
+.ffb-skin .ffb-rich h4 {
     margin: 0;
     padding: 0;
     font-weight: 600;
@@ -984,9 +1351,12 @@
     color: var(--ffb-text);
 }
 
-.ffb-skin h2.ffb-heading { font-size: 1.125em; }
-.ffb-skin h3.ffb-heading { font-size: 1em; }
-.ffb-skin h4.ffb-heading { font-size: 0.9375em; }
+.ffb-skin h2.ffb-heading { font-size: var(--ffb-fs-h2); }
+.ffb-skin h3.ffb-heading,
+.ffb-skin .ffb-rich h3,
+.ffb-skin .ffb-summary-title { font-size: var(--ffb-fs-h3); }
+.ffb-skin h4.ffb-heading,
+.ffb-skin .ffb-rich h4 { font-size: var(--ffb-fs-h4); }
 
 .ffb-skin .ffb-paragraph {
     margin: 0 0 0.6em;
@@ -1009,13 +1379,29 @@
 }
 
 .ffb-skin .ffb-rich p,
-.ffb-skin .ffb-rich ul {
+.ffb-skin .ffb-rich ul,
+.ffb-skin .ffb-rich ol {
     margin: 0 0 0.75em;
+}
+
+.ffb-skin .ffb-rich h3,
+.ffb-skin .ffb-rich h4 {
+    margin: 0 0 0.4em;
+}
+
+.ffb-skin .ffb-rich * + h3,
+.ffb-skin .ffb-rich * + h4 {
+    margin-top: 1em;
 }
 
 .ffb-skin .ffb-rich ul {
     padding-left: 1.25em;
     list-style: disc;
+}
+
+.ffb-skin .ffb-rich ol {
+    padding-left: 1.5em;
+    list-style: decimal;
 }
 
 .ffb-skin .ffb-rich li {
@@ -1073,19 +1459,11 @@
     padding: 0.85em 1.1em;
     border-bottom: 1px solid var(--ffb-border);
     background: var(--ffb-surface-alt);
-    font-size: 1em;
     font-weight: 600;
-}
-
-.ffb-skin .ffb-summary-list {
-    margin: 0;
-    padding: 0;
+    line-height: 1.35;
 }
 
 .ffb-skin .ffb-summary-row {
-    display: grid;
-    grid-template-columns: minmax(8em, 35%) minmax(0, 1fr) auto;
-    gap: 0.25em 1em;
     padding: 0.7em 1.1em;
     border-top: 1px solid var(--ffb-border);
     font-size: 0.9375em;
@@ -1096,48 +1474,19 @@
 }
 
 .ffb-skin .ffb-summary-row dt {
-    margin: 0;
     font-weight: 600;
     color: var(--ffb-muted);
 }
 
-.ffb-skin .ffb-summary-row dd {
-    margin: 0;
-    overflow-wrap: anywhere;
-    white-space: pre-line;
-}
-
-@media (max-width: 479px) {
-    .ffb-skin .ffb-summary-row {
-        grid-template-columns: minmax(0, 1fr) auto;
-    }
-
-    .ffb-skin .ffb-summary-row dd {
-        grid-column: 1;
-    }
-}
-
 /* Buttons and navigation */
 .ffb-skin .ffb-nav {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    justify-content: flex-end;
     gap: 0.75em;
     margin-top: 1.75em;
     padding-top: 1.25em;
     border-top: 1px solid var(--ffb-border);
 }
 
-.ffb-skin .ffb-nav [data-ffb-prev] {
-    margin-right: auto;
-}
-
 .ffb-skin .ffb-btn {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.5em;
     min-height: var(--ffb-control-h);
     margin: 0;
     padding: 0 1.5em;
@@ -1256,7 +1605,6 @@
     border-color: var(--ffb-success);
     background: #f3faf5;
     font-size: 1.0625em;
-    white-space: pre-line;
 }
 
 .ffb-skin .ffb-success::before {
@@ -1274,8 +1622,6 @@
 }
 
 .ffb-skin .ffb-success-body {
-    display: grid;
-    gap: 0.6em;
     min-width: 0;
 }
 
@@ -1284,13 +1630,7 @@
 }
 
 .ffb-skin .ffb-reference {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: 0.35em 0.6em;
-    margin: 0;
     font-size: 0.875em;
-    white-space: normal;
 }
 
 .ffb-skin .ffb-reference-label {
@@ -1303,7 +1643,6 @@
     border-radius: 4px;
     background: var(--ffb-surface);
     font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-    overflow-wrap: anywhere;
     user-select: all;
 }
 
@@ -1378,7 +1717,6 @@
 }
 
 .ffb-skin .ffb-list-remove {
-    flex: none;
     width: var(--ffb-control-h);
     height: var(--ffb-control-h);
     margin: 0;
@@ -1453,11 +1791,27 @@
     font-size: 0.9em;
 }
 
-/* Address */
+/* Address: fixed column count, since auto-fit tracks never collapse while items span 1 / -1. */
+.ffb .ffb-type-address {
+    container: ffb-address / inline-size;
+}
+
 .ffb .ffb-address {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(12em, 1fr));
+    grid-template-columns: repeat(3, minmax(0, 1fr));
     gap: 0.75em;
+}
+
+@container ffb-address (max-width: 32em) {
+    .ffb .ffb-address {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@container ffb-address (max-width: 20em) {
+    .ffb .ffb-address {
+        grid-template-columns: minmax(0, 1fr);
+    }
 }
 
 .ffb .ffb-address-country,

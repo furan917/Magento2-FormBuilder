@@ -42,8 +42,10 @@ class NormalizerTest extends TestCase
             new \Furan\FormBuilder\Model\Schema\SettingValues($this->redirectValidator()),
             new PersonalData(\Furan\FormBuilder\Test\Unit\Helper\FieldPools::builtIn()),
             \Furan\FormBuilder\Test\Unit\Helper\PrefillSourcePools::builtIn(),
-            \Furan\FormBuilder\Test\Unit\Helper\ConditionNormalizers::builtIn()
-        );
+            \Furan\FormBuilder\Test\Unit\Helper\ConditionNormalizers::builtIn(),
+            \Furan\FormBuilder\Test\Unit\Helper\FieldChecksFactory::create(),
+        new \Furan\FormBuilder\Model\Validation\PresetFit()
+);
     }
 
     private function redirectValidator(): RedirectValidator

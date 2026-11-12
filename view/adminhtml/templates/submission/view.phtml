@@ -39,8 +39,9 @@ $product = $block->getProductContext();
             $total = 0;
             $answered = 0;
             foreach ($group['sections'] as $section) {
-                $total += count($section['entries']);
-                $answered += count(array_filter($section['entries'], [$block, 'isAnswered']));
+                $asked = array_filter($section['entries'], static fn (array $entry): bool => !$block->isHidden($entry));
+                $total += count($asked);
+                $answered += count(array_filter($asked, [$block, 'isAnswered']));
             }
             ?>
             <section class="ffb-sub-page">
@@ -64,11 +65,23 @@ $product = $block->getProductContext();
                             $isAnswered = $block->isAnswered($entry);
                             $values = $block->getDisplayValues($entry);
                             $settings = (array)($entry['field']['settings'] ?? []);
+                            $isHidden = $block->isHidden($entry);
                             ?>
                             <div class="ffb-sub-row<?= $isAnswered ? '' : ' is-empty' ?>">
-                                <dt><?= $escaper->escapeHtml((string)($entry['label'] ?? '')) ?></dt>
+                                <dt>
+                                    <?= $escaper->escapeHtml((string)($entry['label'] ?? '')) ?>
+                                    <?php if ($isHidden): ?>
+                                        <span class="ffb-sub-tag"><?= $escaper->escapeHtml(__('Hidden')) ?></span>
+                                    <?php endif; ?>
+                                </dt>
                                 <dd>
-                                <?php if (!$isAnswered): ?>
+                                <?php if ($kind === Kind::KIND_BOOLEAN): ?>
+                                    <?php if ($isAnswered): ?>
+                                        <span class="ffb-sub-yes"><?= $escaper->escapeHtml(__('Yes')) ?></span>
+                                    <?php else: ?>
+                                        <span class="ffb-sub-no"><?= $escaper->escapeHtml(__('No')) ?></span>
+                                    <?php endif; ?>
+                                <?php elseif (!$isAnswered): ?>
                                     <span class="ffb-sub-muted"><?= $escaper->escapeHtml(__('Not answered')) ?></span>
                                 <?php elseif ($block->isFile($entry)): ?>
                                     <span class="ffb-sub-file">
@@ -79,6 +92,8 @@ $product = $block->getProductContext();
                                             <a class="ffb-sub-download" href="<?= $escaper->escapeUrl($downloadUrl) ?>"><?= $escaper->escapeHtml(__('Download')) ?></a>
                                         <?php endif; ?>
                                     </span>
+                                <?php elseif (($dateText = $block->getDisplayDate($entry)) !== null): ?>
+                                    <?= $escaper->escapeHtml($dateText) ?>
                                 <?php elseif (($typeHtml = $block->getDisplayHtml($entry, $escaper)) !== null): ?>
                                     <?php // phpcs:ignore Magento2.Security.LanguageConstruct -- the field type escapes its own markup ?>
                                     <?= /* @noEscape */ $typeHtml ?>
@@ -108,12 +123,6 @@ $product = $block->getProductContext();
                                 <?php elseif ($kind === Kind::KIND_SCALE): ?>
                                     <span class="ffb-sub-score"><?= $escaper->escapeHtml($values[0]) ?></span>
                                     <span class="ffb-sub-muted"><?= $escaper->escapeHtml(__('on a %1 to %2 scale', (int)($settings['min'] ?? Scale::DEFAULT_MIN), (int)($settings['max'] ?? Scale::DEFAULT_MAX))) ?></span>
-                                <?php elseif ($kind === Kind::KIND_BOOLEAN): ?>
-                                    <?php if ($values[0] === 'Yes'): ?>
-                                        <span class="ffb-sub-yes"><?= $escaper->escapeHtml(__('Yes')) ?></span>
-                                    <?php else: ?>
-                                        <span class="ffb-sub-muted"><?= $escaper->escapeHtml(__('No')) ?></span>
-                                    <?php endif; ?>
                                 <?php elseif ($kind === Kind::KIND_COLOR && preg_match('/^#[0-9a-f]{6}$/iD', $values[0])): ?>
                                     <span class="ffb-sub-swatch" style="background:<?= $escaper->escapeHtmlAttr($values[0]) ?>"></span>
                                     <?= $escaper->escapeHtml($values[0]) ?>
@@ -122,6 +131,9 @@ $product = $block->getProductContext();
                                     <div class="ffb-sub-long"><?= /* @noEscape */ nl2br($escaper->escapeHtml(implode(', ', $values))) ?></div>
                                 <?php else: ?>
                                     <?= $escaper->escapeHtml(implode(', ', $values)) ?>
+                                <?php endif; ?>
+                                <?php if ($isHidden && $isAnswered && $block->isBrowserValue($entry)): ?>
+                                    <span class="ffb-sub-note"><?= $escaper->escapeHtml(__("From the visitor's browser")) ?></span>
                                 <?php endif; ?>
                                 </dd>
                             </div>
@@ -231,7 +243,6 @@ $product = $block->getProductContext();
                     <?php endif; ?>
                 </dd>
             </div>
-            <div><dt><?= $escaper->escapeHtml(__('Submitted')) ?></dt><dd><?= $escaper->escapeHtml($block->getSubmittedAt()) ?></dd></div>
             <div><dt><?= $escaper->escapeHtml(__('Store view')) ?></dt><dd><?= $escaper->escapeHtml($block->getStoreName()) ?></dd></div>
             <?php if (!$card): ?>
                 <div>

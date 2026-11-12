@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace Furan\FormBuilder\Test\Unit\Model\Content;
 
 use Furan\FormBuilder\Model\Content\MiniMarkdown;
+use Furan\FormBuilder\Test\Unit\Helper\Translated;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 
@@ -63,7 +64,8 @@ class MiniMarkdownTest extends TestCase
     public function testItRendersHttpsLinksWithNoopenerAndBlankTarget(): void
     {
         $this->assertSame(
-            '<p><a href="https://example.com/a?x=1&amp;y=2" rel="noopener noreferrer" target="_blank">go</a></p>',
+            '<p><a href="https://example.com/a?x=1&amp;y=2" rel="noopener noreferrer" target="_blank">go'
+            . '<span class="ffb-sr-only"> (opens in a new tab)</span></a></p>',
             $this->render('[go](https://example.com/a?x=1&y=2)')
         );
     }
@@ -180,9 +182,33 @@ class MiniMarkdownTest extends TestCase
         }
     }
 
-    public function testItLeavesRichTextRenderingUnchanged(): void
+    #[DataProvider('richTextFixtures')]
+    public function testItRendersRichTextLikeTheSharedFixtures(string $text, string $html): void
     {
-        $this->assertSame('<p><a href="/privacy">p</a></p>', $this->render('[p](/privacy)'));
-        $this->assertSame('<p>1. one</p>', $this->render('1. one'));
+        $this->assertSame($html, $this->render($text));
+    }
+
+    /** @return array<string, array{0: string, 1: string}> */
+    public static function richTextFixtures(): array
+    {
+        $cases = [];
+        foreach (json_decode((string)file_get_contents(__DIR__ . '/../../../fixtures/rich-text.json'), true) as $case) {
+            $cases[$case['name']] = [$case['text'], $case['html']];
+        }
+        return $cases;
+    }
+
+    public function testItTranslatesTheNewTabCue(): void
+    {
+        $html = Translated::with('fr:', fn (): string => $this->render('[a](https://e.com)'));
+        $this->assertStringContainsString('<span class="ffb-sr-only"> fr:(opens in a new tab)</span>', $html);
+    }
+
+    public function testItKeepsMessagesFreeOfHeadingsAndTheNewTabCue(): void
+    {
+        $this->assertSame(
+            "<p>## a</p>\n" . '<p><a href="https://e.com" rel="noopener noreferrer nofollow" target="_blank">x</a></p>',
+            $this->markdown->renderMessage("## a\n\n[x](https://e.com)")
+        );
     }
 }

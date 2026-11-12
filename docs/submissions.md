@@ -8,7 +8,8 @@
 - The grid shows the newest 10,000 matches; use filters or Export for older ones. Select-all actions work through every match in batches.
 - Mass actions: Delete and Change status.
 - **Export** writes a CSV: Submission ID, Created At, Store ID, Customer ID, Reference, Status, one or more columns per field, then product columns when a submission has product context.
-- Choice answers show their option labels in the grid summary, the detail view, My submissions, emails and the CSV.
+- Choice and text with suggestions answers show their option labels in the grid summary, the detail view, My submissions, emails, the CSV and analytics.
+- Dates, times, months and country names show in the admin locale in the detail view, and in the submission's store view locale in emails and My submissions. Yes and No are translated. The CSV keeps ISO dates and webhooks send the stored values. Hidden fields carry a **Hidden** tag and are left out of the answered count, and their values taken from the visitor's browser are marked. Unticked boxes show No and count as unanswered.
 - A retention period (Privacy settings) deletes old submissions hourly.
 
 Permissions are split: viewing, replying and changing status, downloading files, exporting, deleting, analytics and privacy requests each have their own ACL resource.
@@ -39,7 +40,7 @@ Guests reply through a signed link in the reply email, without an account.
 Per form, under **Form settings**:
 
 - **Customer email field**: the answer that identifies a guest for claim links, dedupe, GDPR lookups and replies.
-- **Prefill** from the customer account (name, email, phone, company, date of birth, gender, tax/VAT, addresses) or the product page. Prefill arrives with the form token. Locked fields are overwritten by the server on submit.
+- **Prefill** from the customer account (name, email, phone, company, date of birth, gender, tax/VAT, addresses) or the product page. Prefill arrives with the form token. Locked fields and prefilled hidden fields are overwritten by the server on submit. Guests fill locked customer fields themselves.
 - **Access**: require login or limit to customer groups.
 - **Survey mode**: `once` allows one answer per customer, `edit` also lets them change it while it is new or in progress. Optional guest dedupe by email is a soft limit: a repeat gets the normal thank-you but nothing is stored.
 

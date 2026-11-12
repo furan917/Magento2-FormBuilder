@@ -54,7 +54,7 @@ async function page(opts = {}) {
     draft: { mode: 'session', key: 'ffb-test', ttlHours: 1 },
     submitUrl: '/submit', tokenUrl: '/token', messages: {},
   };
-  const html = `<div data-ffb-root data-ffb-config='${JSON.stringify(config)}'><form data-ffb-form>
+  const html = `<div data-ffb-root data-ffb-locale="en_GB" data-ffb-config='${JSON.stringify(config)}'><form data-ffb-form>
     <div data-ffb-page="p_1"><fieldset data-ffb-item="f_range1" data-ffb-name="stay" data-ffb-type="date_range">
       <input type="date" id="ffb-1-stay" name="fields[stay][start]"><input type="date" name="fields[stay][end]">
       <p data-ffb-error hidden></p></fieldset>
@@ -82,7 +82,7 @@ test('it reads and writes the range for drafts and the summary', async () => {
   t.type(t.inputs()[1], '2026-01-09');
   const saved = JSON.parse(t.w.sessionStorage.getItem('ffb-test'));
   assert.deepEqual(saved.values.stay, { start: '2026-01-02', end: '2026-01-09' });
-  assert.equal(t.doc.querySelector('.ffb-summary-row dd').textContent, '2026-01-02 – 2026-01-09');
+  assert.equal(t.doc.querySelector('.ffb-summary-row dd').textContent, '2 Jan 2026 – 9 Jan 2026');
 
   const r = await page({ storage: JSON.stringify(saved) });
   assert.deepEqual(r.inputs().map((i) => i.value), ['2026-01-02', '2026-01-09']);

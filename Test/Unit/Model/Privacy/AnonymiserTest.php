@@ -113,7 +113,7 @@ class AnonymiserTest extends TestCase
         $factory = $this->createStub(SubmissionInterfaceFactory::class);
         $factory->method('create')->willReturnCallback(static fn () => new SubmissionStub());
         (new Anonymiser(
-            $resource, $this->json, $this->journal, $this->files, new SummaryBuilder(FieldPools::withFiles(), new \Furan\FormBuilder\Model\Submission\ValueFormatter(FieldPools::withFiles())), new PersonalData(\Furan\FormBuilder\Test\Unit\Helper\FieldPools::builtIn()),
+            $resource, $this->json, $this->journal, $this->files, new SummaryBuilder(FieldPools::withFiles(), new \Furan\FormBuilder\Model\Submission\ValueFormatter(FieldPools::withFiles(), new \Furan\FormBuilder\Model\Submission\AnswerDate()), new \Furan\FormBuilder\Model\Submission\StoreDisplayContext($this->createStub(\Magento\Framework\App\Config\ScopeConfigInterface::class))), new PersonalData(\Furan\FormBuilder\Test\Unit\Helper\FieldPools::builtIn()),
             $factory, $this->registry, $this->migrator, $this->logger
         ))->anonymise($ids ?? array_column($rows, 'submission_id'));
     }

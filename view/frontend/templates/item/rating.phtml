@@ -7,7 +7,7 @@ $max = min(10, max(3, (int)($settings['max'] ?? 5)));
 $default = (string)($item['default'] ?? '');
 ?>
 <?= /* @noEscape */ $form->renderPartial($block, 'item/_open.phtml', ['group' => true]) ?>
-    <div class="ffb-rating" role="radiogroup">
+    <div class="ffb-rating" role="radiogroup" data-ffb-summary-text="<?= $escaper->escapeHtmlAttr(__('%1 of %2', '%1', $max)) ?>">
 <?php for ($i = 1; $i <= $max; $i++): ?>
         <label class="ffb-option"><input<?= /* @noEscape */ $attrs([
             'class' => 'ffb-choice',

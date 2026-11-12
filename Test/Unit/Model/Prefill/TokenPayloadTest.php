@@ -5,7 +5,9 @@ namespace Furan\FormBuilder\Test\Unit\Model\Prefill;
 
 use Furan\FormBuilder\Api\Data\FormInterface;
 use Furan\FormBuilder\Model\Access\FormAccess;
+use Furan\FormBuilder\Model\Prefill\LockedValues;
 use Furan\FormBuilder\Model\Prefill\PrefillService;
+use Furan\FormBuilder\Test\Unit\Helper\FieldPools;
 use Furan\FormBuilder\Model\Prefill\PreviousAnswers;
 use Furan\FormBuilder\Test\Unit\Helper\ArrayPrefillSource;
 use Furan\FormBuilder\Test\Unit\Helper\PrefillSourcePools;
@@ -40,18 +42,20 @@ class TokenPayloadTest extends TestCase
         $this->editToken = $editToken ?? $this->createStub(EditToken::class);
         $url = $this->createMock(UrlInterface::class);
         $url->method('getUrl')->with('furanform/account/login', ['_scope_to_url' => true])->willReturn('https://shop.test/furanform/account/login');
+        $sources = PrefillSourcePools::builtIn([
+            'customer.loyalty' => new ArrayPrefillSource('customer.loyalty', 'customer', ['text'], 'L-1'),
+            'product.stock' => new ArrayPrefillSource('product.stock', 'product', ['text'], '42'),
+        ]);
         $this->payload = new TokenPayload(
             $this->session,
             new FormAccess(),
             $this->prefill,
             $this->respondents,
-            PrefillSourcePools::builtIn([
-                'customer.loyalty' => new ArrayPrefillSource('customer.loyalty', 'customer', ['text'], 'L-1'),
-                'product.stock' => new ArrayPrefillSource('product.stock', 'product', ['text'], '42'),
-            ]),
+            $sources,
             $this->previous,
             $this->editToken,
-            $url
+            $url,
+            new LockedValues($this->prefill, $sources, FieldPools::builtIn())
         );
     }
 
@@ -235,6 +239,23 @@ class TokenPayloadTest extends TestCase
 
         $this->assertSame(['first', 'tax'], $result['locked']);
         $this->assertSame(['first' => 'Ann', 'last' => 'Ann'], $result['prefill']);
+    }
+
+    public function testItListsAPrefilledServerValueFieldAsLockedForCustomersEvenWhenUnlockedOrEmpty(): void
+    {
+        $this->login();
+        $this->prefill->method('valuesFor')->willReturn(['customer.email' => 'ann@example.com', 'customer.taxvat' => '']);
+        $form = $this->form([
+            'mail' => ['type' => 'hidden', 'prefill' => 'customer.email'],
+            'tax' => ['type' => 'hidden', 'prefill' => 'customer.taxvat'],
+            'plain' => ['type' => 'hidden', 'default' => 'x'],
+            'typed' => ['prefill' => 'customer.email'],
+        ]);
+
+        $result = $this->payload->build($form, 3, 0);
+
+        $this->assertSame(['mail', 'tax'], $result['locked']);
+        $this->assertSame(['mail' => 'ann@example.com', 'typed' => 'ann@example.com'], $result['prefill']);
     }
 
     public function testItReturnsThePreviousAnswersToTheOwner(): void

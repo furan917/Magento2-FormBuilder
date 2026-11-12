@@ -26,7 +26,8 @@ class TokenPayload
         private readonly Sources $sources,
         private readonly PreviousAnswers $previousAnswers,
         private readonly EditToken $editToken,
-        private readonly UrlInterface $url
+        private readonly UrlInterface $url,
+        private readonly LockedValues $lockedValues
     ) {
     }
 
@@ -145,7 +146,7 @@ class TokenPayload
     }
 
     /**
-     * @param array<string, array{prefill: string, locked: bool, type: string}> $fields
+     * @param array<string, array{prefill: string, owned: bool, type: string}> $fields
      * @return array{0: array<string, mixed>, 1: string[]}
      */
     private function customerPrefill(array $fields, int $customerId, int $storeId): array
@@ -171,7 +172,7 @@ class TokenPayload
                 $prefill[$name] = $value;
             }
             // Locked even when empty: the server stores the account's value, blank included.
-            if ($field['locked']) {
+            if ($field['owned']) {
                 $locked[] = $name;
             }
         }
@@ -180,7 +181,7 @@ class TokenPayload
 
     /**
      * @param array<string, mixed> $schema
-     * @return array<string, array{prefill: string, locked: bool, type: string}> field name => prefill spec
+     * @return array<string, array{prefill: string, owned: bool, type: string}> field name => prefill spec
      */
     private function prefilledFields(array $schema): array
     {
@@ -189,7 +190,7 @@ class TokenPayload
             if (($item['prefill'] ?? '') !== '' && isset($item['name'])) {
                 $fields[(string)$item['name']] = [
                     'prefill' => (string)$item['prefill'],
-                    'locked' => !empty($item['locked']),
+                    'owned' => $this->lockedValues->ownsPrefill($item),
                     'type' => (string)($item['type'] ?? ''),
                 ];
             }

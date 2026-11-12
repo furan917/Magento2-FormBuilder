@@ -2,6 +2,37 @@
 /** @var \Magento\Framework\View\Element\Template $block */
 /** @var \Magento\Framework\Escaper $escaper */
 $form = $block->getData('parent_block');
-$inputType = 'color';
+extract($form->getItemContext((array)$block->getData('item'), $escaper), EXTR_SKIP);
+$default = strtolower((string)($item['default'] ?? ''));
+$default = preg_match('/^#[0-9a-f]{6}$/D', $default) === 1 ? $default : '';
+// The hidden input posts the answer; the picker and the hex box are unnamed editors of it.
 ?>
-<?= /* @noEscape */ $form->renderPartial($block, 'item/_input.phtml', ['inputType' => $inputType]) ?>
+<?= /* @noEscape */ $form->renderPartial($block, 'item/_open.phtml', ['group' => false]) ?>
+    <div<?= /* @noEscape */ $attrs([
+        'class' => 'ffb-color',
+        'data-ffb-color' => true,
+        'data-ffb-default' => $default,
+        'data-ffb-empty' => $default === '',
+    ]) ?>>
+        <input type="hidden" name="<?= $escaper->escapeHtmlAttr($base['name']) ?>" value="<?= $escaper->escapeHtmlAttr($default) ?>" data-ffb-color-value>
+        <input<?= /* @noEscape */ $attrs([
+            'type' => 'color',
+            'class' => 'ffb-color-picker',
+            'tabindex' => '-1',
+            'aria-hidden' => 'true',
+            'value' => $default !== '' ? $default : '#000000',
+            'data-ffb-color-picker' => true,
+        ]) ?>>
+        <input<?= /* @noEscape */ $attrs(array_replace($base, ['name' => null, 'class' => 'ffb-input ffb-color-hex']) + [
+            'type' => 'text',
+            'maxlength' => '7',
+            'placeholder' => '#rrggbb',
+            'autocomplete' => 'off',
+            'spellcheck' => 'false',
+            'value' => $default,
+            'data-ffb-color-hex' => true,
+            'data-ffb-required-part' => true,
+        ]) ?>>
+        <button type="button" class="ffb-color-clear" data-ffb-color-clear aria-label="<?= $escaper->escapeHtmlAttr(__('Clear colour')) ?>"<?= $default === '' ? ' hidden' : '' ?>><?= $escaper->escapeHtml(__('Clear')) ?></button>
+    </div>
+<?= /* @noEscape */ $form->renderPartial($block, 'item/_close.phtml', ['group' => false]) ?>

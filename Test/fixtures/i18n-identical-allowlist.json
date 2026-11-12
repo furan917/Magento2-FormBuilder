@@ -36,7 +36,8 @@
     "Website",
     "Newsletter",
     "Webhooks",
-    "Websites"
+    "Websites",
+    "%1: %2"
   ],
   "fr_FR": [
     "Action",
@@ -79,7 +80,8 @@
     "page",
     "Newsletter",
     "Action %1",
-    "Webhooks"
+    "Webhooks",
+    "Page"
   ],
   "es_ES": [
     "BCC",
@@ -101,7 +103,8 @@
     "URL",
     "Webhooks",
     "Error",
-    "Endpoint"
+    "Endpoint",
+    "%1: %2"
   ],
   "it_IT": [
     "BCC",
@@ -125,7 +128,8 @@
     "SKU",
     "URL",
     "Newsletter",
-    "Endpoint"
+    "Endpoint",
+    "%1: %2"
   ],
   "nl_NL": [
     "BCC",
@@ -161,7 +165,8 @@
     "URL",
     "Website",
     "Webhooks",
-    "Websites"
+    "Websites",
+    "%1: %2"
   ],
   "pt_BR": [
     "Admin",
@@ -188,7 +193,8 @@
     "Newsletter",
     "Webhooks",
     "Websites",
-    "Endpoint"
+    "Endpoint",
+    "%1: %2"
   ],
   "pl_PL": [
     "Form Builder",
@@ -207,7 +213,8 @@
     "SKU",
     "Status",
     "URL",
-    "Newsletter"
+    "Newsletter",
+    "%1: %2"
   ],
   "sv_SE": [
     "Admin",
@@ -236,7 +243,8 @@
     "Support",
     "Text",
     "URL",
-    "Webhooks"
+    "Webhooks",
+    "%1: %2"
   ],
   "da_DK": [
     "Admin",
@@ -266,6 +274,7 @@
     "Styling",
     "Support",
     "URL",
-    "Webhooks"
+    "Webhooks",
+    "%1: %2"
   ]
 }

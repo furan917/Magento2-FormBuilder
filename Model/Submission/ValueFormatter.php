@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace Furan\FormBuilder\Model\Submission;
 
+use Furan\FormBuilder\Api\Data\DisplayContext;
 use Furan\FormBuilder\Api\FieldType\AdminViewTypeInterface;
 use Furan\FormBuilder\Api\FieldType\DisplayableTypeInterface;
 use Furan\FormBuilder\Api\FieldType\ExportableTypeInterface;
@@ -14,22 +15,24 @@ use Magento\Framework\Escaper;
  * Flattens stored answers to plain text (callers escape) and CSV cells. Types that implement the
  * capability interfaces format their own values; everything else gets the generic scalar/list fallback.
  * $field is the current schema field, or ['name', 'label', 'type'] from the payload entry.
+ * $context is the reader: the submission's store view for customers and emails, the admin for the admin view.
  */
 class ValueFormatter
 {
     public const COORDINATE = '/^-?\d{1,3}\.\d{6}$/D';
 
-    public function __construct(private readonly Pool $fieldTypes)
+    public function __construct(private readonly Pool $fieldTypes, private readonly AnswerDate $answerDate)
     {
     }
 
     /**
      * @param array<string, mixed> $field
      */
-    public function toText(array $field, mixed $value): string
+    public function toText(array $field, mixed $value, DisplayContext $context): string
     {
-        $type = $this->displayable($field);
-        return $type?->toText($field, $value) ?? self::flatten(self::withLabels($this->optionLabels($field), $value));
+        return $this->localText($field, $value, $context)
+            ?? $this->displayable($field)?->toText($field, $value, $context)
+            ?? self::flatten(self::withLabels($this->optionLabels($field), $value));
     }
 
     /**
@@ -37,9 +40,9 @@ class ValueFormatter
      *
      * @param array<string, mixed> $field
      */
-    public function toHtml(array $field, mixed $value, Escaper $escaper): string
+    public function toHtml(array $field, mixed $value, Escaper $escaper, DisplayContext $context): string
     {
-        return $this->customHtml($field, $value, $escaper) ?? $escaper->escapeHtml(self::flatten($value));
+        return $this->customHtml($field, $value, $escaper, $context) ?? $escaper->escapeHtml(self::flatten($value));
     }
 
     /**
@@ -47,9 +50,24 @@ class ValueFormatter
      *
      * @param array<string, mixed> $field
      */
-    public function customHtml(array $field, mixed $value, Escaper $escaper): ?string
+    public function customHtml(array $field, mixed $value, Escaper $escaper, DisplayContext $context): ?string
     {
-        return $this->displayable($field)?->toHtml($field, $value, $escaper);
+        return $this->displayable($field)?->toHtml($field, $value, $escaper, $context);
+    }
+
+    /**
+     * A date, time, month, date range or country answer in the reader's locale; null for other types and invalid stored values.
+     *
+     * @param array<string, mixed> $field
+     */
+    public function localText(array $field, mixed $value, DisplayContext $context): ?string
+    {
+        $type = $this->typeOf($field);
+        $kind = $type instanceof AdminViewTypeInterface ? $type->adminViewKind($field) : null;
+        if ($kind === AdminViewTypeInterface::KIND_COUNTRY) {
+            return is_string($value) && $value !== '' ? CountryName::of($value, $context->locale) : null;
+        }
+        return $kind === null ? null : $this->answerDate->text($kind, $value, $context->locale);
     }
 
     /**
@@ -135,11 +153,6 @@ class ValueFormatter
         return max(1, (int)round($bytes / 1024)) . ' KB';
     }
 
-    public function countryName(string $code): string
-    {
-        return CountryName::of($code);
-    }
-
     /**
      * @param array<string, mixed> $value
      */
@@ -152,9 +165,9 @@ class ValueFormatter
     public static function flatten(mixed $value): string
     {
         if (is_array($value)) {
-            return implode(', ', array_map(
-                static fn($item): string => is_scalar($item) ? (string)$item : '',
-                $value
+            return implode(', ', array_filter(
+                array_map(static fn($item): string => is_scalar($item) ? trim((string)$item) : '', $value),
+                static fn(string $item): bool => $item !== ''
             ));
         }
         return is_scalar($value) ? (string)$value : '';
